@@ -84,18 +84,11 @@ export interface paths {
   "/intervals": {
     /** Returns list of intervals */
     get: {
-      parameters: {
-        query: {
-          workDate: string;
-        };
-      };
+      parameters: {};
       responses: {
         200: {
           schema: {
             id: string;
-            createdAt: string;
-            updatedAt: string;
-            workdayId: string;
             interval: {
               beginning: string;
               end: string;
@@ -122,7 +115,7 @@ export interface paths {
             id: string;
             createdAt: string;
             updatedAt: string;
-            workdayId: string;
+            account: string;
             interval: {
               beginning: string;
               end: string;
@@ -155,7 +148,7 @@ export interface paths {
             id: string;
             createdAt: string;
             updatedAt: string;
-            workdayId: string;
+            account: string;
             interval: {
               beginning: string;
               end: string;
@@ -182,7 +175,7 @@ export interface paths {
             id: string;
             createdAt: string;
             updatedAt: string;
-            workdayId: string;
+            account: string;
             interval: {
               beginning: string;
               end: string;

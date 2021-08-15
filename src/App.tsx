@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, Suspense } from 'react'
 import logo from './logo.svg'
 import { useAuth0 } from '@auth0/auth0-react';
 import {

@@ -13,16 +13,11 @@ interface ActiveIntervalResponseOK {
 }
 
 interface ActiveIntervalResponseNotFound {
-  status: 400;
+  status: 404;
   body: ActiveIntervalNotFound;
 }
 
-interface ResponseError {
-  status: number;
-  body: any;
-}
-
-type ActiveIntervalResponse = ActiveIntervalResponseOK | ActiveIntervalResponseNotFound | ResponseError;
+type ActiveIntervalResponse = ActiveIntervalResponseOK | ActiveIntervalResponseNotFound;
 
 export const useActiveInterval = (auth0: Auth0ContextInterface<User>) => {
   const {
@@ -42,8 +37,14 @@ export const useActiveInterval = (auth0: Auth0ContextInterface<User>) => {
       headers: { authorization: `Bearer ${accessToken}`},
     });
 
+    if(res.status === 200 || res.status === 404) {
+      return {status: res.status, body: await res.json()};
+    }
 
-    return {status: res.status, body: await res.json()};
+    throw Error("Failed to get active interval");
+  },
+  {
+    suspense: true
   });
   
 }
@@ -57,7 +58,7 @@ interface StartIntervalResponseOK {
 }
 
 
-type StartIntervalResponse = StartIntervalResponseOK | ResponseError;
+type StartIntervalResponse = StartIntervalResponseOK;
 
 export const startInterval = async (auth0: Auth0ContextInterface<User>): Promise<StartIntervalResponse> => {
   
@@ -78,8 +79,10 @@ export const startInterval = async (auth0: Auth0ContextInterface<User>): Promise
     headers: { authorization: `Bearer ${accessToken}`},
   });
 
-
-  return {status: res.status, body: await res.json()};
+  if( res.status === 200) {
+    return {status: res.status, body: await res.json()};
+  }
+  throw Error("Failed to start response");
 }
 
 
@@ -91,7 +94,7 @@ interface StopIntervalResponseOK {
   body: StartInterval;
 }
 
-type StopIntervalResponse = StopIntervalResponseOK | ResponseError;
+type StopIntervalResponse = StopIntervalResponseOK;
 
 export const stopInterval = async (auth0: Auth0ContextInterface<User>): Promise<StopIntervalResponse> => {
   
@@ -112,6 +115,12 @@ export const stopInterval = async (auth0: Auth0ContextInterface<User>): Promise<
     headers: { authorization: `Bearer ${accessToken}`},
   });
 
+  if(res.status === 200) {
+    return {status: res.status, body: await res.json()};
+  }
 
-  return {status: res.status, body: await res.json()};
+  throw Error("Failed to stop interval");
+
 }
+
+
