@@ -11,7 +11,7 @@ const Header = () => {
     loginWithPopup
   } = useAuth0();
 
-  return <header className="relative w-full">
+  return <header pos="absolute top-0" bg="dark:dark-700" shadow="dark-50" className="w-full">
     <div className="max-w-7xl mx-auto px-4 sm:px-6">
       <div className="flex justify-between items-center py-6 md:justify-start md:space-x-10">
         <div className="flex justify-start lg:w-0 lg:flex-1">

@@ -13,7 +13,15 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
     }
   }, [hasFocus])
 
-  return <button {...props} ref={buttonRef} className="border border-1 dark:border-green-300 dark:text-green-300 border-green-600 text-green-600 rounded min-w-0 p-2 hover:animate-pulse outline-none focus:ring focus:ring-1 focus:ring-green-600 focus:animate-pulse" />;
+  return <button
+    {...props}
+    ref={buttonRef}
+    p="2"
+    animate="hover:pulse focus:pulse"
+    border="transparent 1 hover:green-300 focus:green-300 rounded"
+    outline="none"
+    bg="dark-200"
+    text="gray-200" />;
 }
 
 type IconButton = Button & {
@@ -30,8 +38,21 @@ export const IconButton = ({hasFocus = false, icon, ariaLabel, children, ...prop
     }
   }, [hasFocus])
 
-  return <button {...props} ref={buttonRef} aria-label={ariaLabel} title={ariaLabel} className="flex flex-row justify-center items-center border border-2 dark:border-green-300 dark:text-green-300 border-green-600 text-green-600 rounded min-w-0 p-2 hover:animate-pulse outline-none focus:ring focus:ring-1 focus:ring-green-600 focus:animate-pulse">
-      <span className={`${icon} mr-2`}></span>
+  return <button
+    {...props}
+    ref={buttonRef}
+    display="flex"
+    flex="row"
+    justify="content-center"
+    align="items-center"
+    p="2"
+    animate="hover:pulse focus:pulse"
+    border="transparent 1 hover:green-300 focus:green-300 rounded"
+    outline="none"
+    bg="dark-200"
+    text="gray-200"
+    >
+      <span className={icon} m="r-1 -l-1"></span>
       {children}
     </button>;
 };

@@ -23,7 +23,7 @@ function App() {
 
 
   return (
-    <div className="bg-gray-100 dark:bg-gray-800 min-h-screen">
+    <div className="bg-light-200 dark:bg-dark-800 min-h-screen" w="max-screen">
       <Switch>
         <Route exact path="/">
           <Dashboard />
