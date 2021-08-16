@@ -20,7 +20,7 @@ ReactDOM.render(
       audience={import.meta.env.VITE_AUTH0_AUDIENCE}
     >
       <Router>
-        <div className="dark">
+        <div className="dark" w="max-screen">
         <App />
         </div>
       </Router>

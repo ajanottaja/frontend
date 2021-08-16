@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, LegacyRef } from 'react';
-import {Button} from './button';
+import { Button } from './button';
 
 interface DurationInput {
   value?: number;
@@ -21,7 +21,10 @@ const DigitInput = ({ name, value, setValue, pasteValue, isEditing, onFocus }: D
   return (<input
     type="number"
     onFocus={onFocus}
-    className="dark:bg-gray-700 text-2xl dark:text-green-300 dark:placeholder-gray-500 mx-1 py-1 w-1em text-center rounded outline-none focus:ring focus:ring-1 focus:ring-green-300 focus:animate-pulse caret-transparent"
+    bg="dark:dark-200"
+    text="5xl dark:green-300 dark:placeholder-gray-500"
+    font="mono"
+    className="mx-1 py-1 w-1em text-center rounded outline-none focus:ring focus:ring-1 focus:ring-green-300 focus:animate-pulse caret-transparent"
     name={name}
     ref={inputRef}
     min={0}
@@ -66,19 +69,17 @@ const DurationForm = () => {
   console.log("Position", position);
 
   return <form
-    display="flex"
-    flex="col"
-    justify="center"
+    display="grid" grid="cols-1 gap-y-8" justify="self-center"
     onSubmit={() => {
       const duration = ""
     }}
   >
+    <h2 text="4xl dark:gray-300">Todays target</h2>
     <div
       display="flex"
       flex="row"
       justify="center"
-      align="items-center"
-      m="b-8">
+      align="items-center">
       {inputFields.slice(0, 2)}
       <span className="text-green-300 text-2xl">:</span>
       {inputFields.slice(-2, inputFields.length)}
