@@ -4,7 +4,150 @@
  */
 
 export interface paths {
-  "/swagger.json": {
+  "/targets": {
+    /** Returns list of targets */
+    get: {
+      parameters: {};
+      responses: {
+        200: {
+          schema: {
+            id: string;
+            createdAt: string;
+            updatedAt: string;
+            date: string;
+            account: string;
+            duration: string;
+          }[];
+        };
+      };
+    };
+    /** Upserts a target */
+    post: {
+      parameters: {
+        body: {
+          body: {
+            date: string;
+            duration: string;
+          };
+        };
+      };
+      responses: {
+        200: {
+          schema: {
+            id: string;
+            createdAt: string;
+            updatedAt: string;
+            date: string;
+            account: string;
+            duration: string;
+          };
+        };
+      };
+    };
+    /** Endpoints for creating, updating, listing, and deleting targets. */
+    options: {
+      parameters: {};
+      responses: {
+        default: unknown;
+      };
+    };
+  };
+  "/targets/active": {
+    /** Returns target of current date if it exists */
+    get: {
+      parameters: {};
+      responses: {
+        200: {
+          schema: {
+            id: string;
+            createdAt: string;
+            updatedAt: string;
+            date: string;
+            account: string;
+            duration: string;
+          };
+        };
+      };
+    };
+    /** Endpoints for creating, updating, listing, and deleting targets. */
+    options: {
+      parameters: {};
+      responses: {
+        default: unknown;
+      };
+    };
+  };
+  "/intervals/stop": {
+    /** Stop any active work interval, returns latest interval */
+    post: {
+      parameters: {};
+      responses: {
+        200: {
+          schema: {
+            id: string;
+            createdAt: string;
+            updatedAt: string;
+            account: string;
+            interval: {
+              beginning: string;
+              end: string;
+            };
+          };
+        };
+      };
+    };
+    /** Endpoints for registeirng work days and intervals. */
+    options: {
+      parameters: {};
+      responses: {
+        default: unknown;
+      };
+    };
+  };
+  "/intervals/start": {
+    /** Upsert workday with workday duration and adds new work interval for the provided workday. */
+    post: {
+      parameters: {};
+      responses: {
+        200: {
+          schema: {
+            id: string;
+            createdAt: string;
+            updatedAt: string;
+            account: string;
+            interval: {
+              beginning: string;
+              end: string;
+            };
+          };
+        };
+      };
+    };
+    /** Endpoints for registeirng work days and intervals. */
+    options: {
+      parameters: {};
+      responses: {
+        default: unknown;
+      };
+    };
+  };
+  "/auth-zero/get-account/{auth-zero-id}": {
+    /** Give auth0 acccess to ajanottaja id to use in custom claim in jwt during login workflow. */
+    get: {
+      parameters: {
+        path: {
+          authZeroId: string;
+        };
+      };
+      responses: {
+        200: {
+          schema: {
+            id: string;
+          };
+        };
+      };
+    };
+    /** Endpoints for Auth0 register and login workflows */
     options: {
       parameters: {};
       responses: {
@@ -57,54 +200,6 @@ export interface paths {
       };
     };
   };
-  "/auth-zero/get-account/{auth-zero-id}": {
-    /** Give auth0 acccess to ajanottaja id to use in custom claim in jwt during login workflow. */
-    get: {
-      parameters: {
-        path: {
-          authZeroId: string;
-        };
-      };
-      responses: {
-        200: {
-          schema: {
-            id: string;
-          };
-        };
-      };
-    };
-    /** Endpoints for Auth0 register and login workflows */
-    options: {
-      parameters: {};
-      responses: {
-        default: unknown;
-      };
-    };
-  };
-  "/intervals": {
-    /** Returns list of intervals */
-    get: {
-      parameters: {};
-      responses: {
-        200: {
-          schema: {
-            id: string;
-            interval: {
-              beginning: string;
-              end: string;
-            };
-          }[];
-        };
-      };
-    };
-    /** Endpoints for registeirng work days and intervals. */
-    options: {
-      parameters: {};
-      responses: {
-        default: unknown;
-      };
-    };
-  };
   "/intervals/active": {
     /** Return the active work interval if any exists. */
     get: {
@@ -138,26 +233,7 @@ export interface paths {
       };
     };
   };
-  "/intervals/start": {
-    /** Upsert workday with workday duration and adds new work interval for the provided workday. */
-    post: {
-      parameters: {};
-      responses: {
-        200: {
-          schema: {
-            id: string;
-            createdAt: string;
-            updatedAt: string;
-            account: string;
-            interval: {
-              beginning: string;
-              end: string;
-            };
-          };
-        };
-      };
-    };
-    /** Endpoints for registeirng work days and intervals. */
+  "/swagger.json": {
     options: {
       parameters: {};
       responses: {
@@ -165,22 +241,19 @@ export interface paths {
       };
     };
   };
-  "/intervals/stop": {
-    /** Stop any active work interval, returns latest interval */
-    post: {
+  "/intervals": {
+    /** Returns list of intervals */
+    get: {
       parameters: {};
       responses: {
         200: {
           schema: {
             id: string;
-            createdAt: string;
-            updatedAt: string;
-            account: string;
             interval: {
               beginning: string;
               end: string;
             };
-          };
+          }[];
         };
       };
     };

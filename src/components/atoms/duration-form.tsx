@@ -1,3 +1,4 @@
+import { Duration } from 'luxon';
 import React, { useState, useRef, useEffect, LegacyRef } from 'react';
 import { Button } from './button';
 
@@ -37,8 +38,12 @@ const DigitInput = ({ name, value, setValue, pasteValue, isEditing, onFocus }: D
   />)
 }
 
+interface DurationForm {
+  activeTarget: Duration;
+  setActiveTarget: (duration: Duration) => void
+}
 
-const DurationForm = () => {
+const DurationForm = ({activeTarget, setActiveTarget}: DurationForm) => {
   const [position, setPosition] = useState(0);
   const [duration, setDuration] = useState<number[]>([]);
 
@@ -69,7 +74,7 @@ const DurationForm = () => {
   console.log("Position", position);
 
   return <form
-    display="grid" grid="cols-1 gap-y-8" justify="self-center"
+    display="grid" grid="cols-1 gap-y-8" justify="self-center" text="center"
     onSubmit={() => {
       const duration = ""
     }}
