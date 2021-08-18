@@ -10,10 +10,11 @@
   "dependencies": {
     "@auth0/auth0-react": "^1.6.0",
     "@windicss/plugin-icons": "^1.0.2",
-    "date-fns": "^2.23.0",
+    "luxon": "^2.0.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router-dom": "^5.2.0",
+    "superstruct": "^0.15.2",
     "swr": "^0.5.6"
   },
   "devDependencies": {
