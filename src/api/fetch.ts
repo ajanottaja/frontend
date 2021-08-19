@@ -1,20 +1,25 @@
-import { Auth0ContextInterface, User } from "@auth0/auth0-react";
-import useSWR from "swr";
+import { Auth0ContextInterface, GetTokenSilentlyOptions, User } from "@auth0/auth0-react";
+import { Struct } from "superstruct";
+import useSWR, { SWRResponse } from "swr";
 
-interface OkResult<Response> {
+type GetAccessTokenSilently = (opts?: GetTokenSilentlyOptions) => Promise<string>;
+
+export interface ApiResponse {
   status: number;
-  body: Response;
+  body: any;
 }
 
-interface FetchJson {
+
+interface FetchJsonArgs {
+  getAccessTokenSilently: GetAccessTokenSilently;
+  opts: RequestInit;
+  schema: Struct<any>
+}
+
+export const fetchJson = ({getAccessTokenSilently, opts, schema}: FetchJsonArgs) => async <T>(
   url: string,
-  opts: RequestInit,
-  getAccessTokenSilently: () => Promise<string>
-}
-
-export const fetchJson = async <Response>({url, opts, getAccessTokenSilently}: FetchJson): Promise<OkResult<Response>>  => {
+): Promise<T> => {
   try {
-    
     const token = await getAccessTokenSilently();
 
     const response = await fetch(url, {
@@ -25,38 +30,36 @@ export const fetchJson = async <Response>({url, opts, getAccessTokenSilently}: F
 
     const body = await response.json();
 
-    return { status: response.status, body };
+
+
+    return { status: response.status, body } as unknown as T;
 
   } catch (error) {
     throw error;
   }
 }
 
-export const useSwrWithAuth0 = (url: string, opts: RequestInit, auth0: Auth0ContextInterface<User>) => {
+interface useSwrWithAuth0Args {
+  url: string;
+  opts: RequestInit;
+  auth0: Auth0ContextInterface<User>;
+  schema: Struct<any>
+}
+
+export const useSwrWithAuth0 = <T>({url, opts = {}, auth0, schema}: useSwrWithAuth0Args): SWRResponse<T, Error> => {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = auth0;
-  
+   
   // If Auth0 is still loading or user is not authenticated we make the operation no-op via null url
-  const maybeUrl = isLoading || !isAuthenticated ? null : url;
+  const shouldFetch = !isLoading && isAuthenticated;
 
-  return useSWR(
-    [url],
-    async (url) => {
-      const accessToken = await getAccessTokenSilently({
-        audience: "https://api.ajanottaja.app",
-      });
-
-      const res = await fetch(url, {
-        headers: { authorization: `Bearer ${accessToken}` },
-      });
-
-      if (res.status === 200 || res.status === 404) {
-        return { status: res.status, body: await res.json() };
-      }
-
-      throw Error("Failed to get active interval");
-    },
+  return useSWR<T, Error>(
+    shouldFetch ? [url] : null,
+    fetchJson({getAccessTokenSilently, opts, schema}),
     {
       suspense: true,
+      errorRetryCount: 3,
+      shouldRetryOnError: false,
+
     }
   );
 

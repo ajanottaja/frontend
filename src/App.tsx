@@ -1,10 +1,14 @@
-import { useAuth0 } from '@auth0/auth0-react';
-import React from 'react'
+import { withAuthenticationRequired } from '@auth0/auth0-react';
+import React, { ReactNode } from 'react'
 import {
   Switch,
   Route,
 } from "react-router-dom";
 import Dashboard from './components/pages/dashboard';
+
+const ProtectedRoute = ({ component, ...args }: {component: React.ComponentType<any>, path: string}) => (
+  <Route component={withAuthenticationRequired(component)} {...args} />
+);
 
 function App() {
 
@@ -14,9 +18,7 @@ function App() {
         <Route exact path="/">
           <Dashboard />
         </Route>
-        <Route path="/dashboard">
-          <Dashboard />
-        </Route>
+        <ProtectedRoute path="/dashboard" component={Dashboard} />
         <Route path="/hello">
           <h1>Hello!</h1>
         </Route>

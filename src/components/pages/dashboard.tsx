@@ -8,13 +8,18 @@ import {
 } from "@auth0/auth0-react";
 import useSWR, { mutate } from "swr";
 import Header from "../layout/header";
-import { startInterval, stopInterval, useActiveInterval } from "../../api";
+import { startInterval, stopInterval } from "../../api";
 import DurationInput from "../atoms/duration-form";
 import Timer from "../atoms/timer";
+import { Duration } from "luxon";
+import { useActiveInterval } from "../../api/interval";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  const { data, error, mutate } = {};
-  return <DurationInput />;
+  
+  return <DurationInput
+    activeTarget={Duration.fromObject({seconds: 1000})}
+    setActiveTarget={() => {}}
+  />;
 };
 
 const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
@@ -23,6 +28,7 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     error: activeError,
     mutate: activeMutate,
   } = useActiveInterval(auth0);
+
   if (activeData) {
     return (
       <Timer
@@ -131,6 +137,4 @@ const Dashboard = () => {
   );
 };
 
-export default withAuthenticationRequired(Dashboard, {
-  returnTo: window.origin,
-});
+export default Dashboard;
