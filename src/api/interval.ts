@@ -1,29 +1,33 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
-import { Describe, object, string, date, Infer } from "superstruct";
+import { Describe, type, string, date, Infer, number, union } from "superstruct";
 import { apiHost } from "../config";
 import { paths } from "../schema";
 import { ApiResponse, useSwrWithAuth0 } from "./fetch";
-import { IsoDateTime } from "./schema";
+import { LuxonDateTime } from "./schema";
 
-type ActiveInterval =
-  paths["/intervals/active"]["get"]["responses"]["200"]["schema"];
-type ActiveIntervalNotFound =
-  paths["/intervals/active"]["get"]["responses"]["404"]["schema"];
-
-const Interval = object({
-  beginning: IsoDateTime,
-  end: IsoDateTime,
+const IntervalSchema = type({
+  beginning: LuxonDateTime,
+  end: LuxonDateTime,
 });
 
-const ActiveInterval = object({
+const ActiveIntervalSchema = type({
   id: string(),
   account: string(),
-  createdAt: IsoDateTime,
-  updatedAt: IsoDateTime,
-  interval: Interval
+  createdAt: LuxonDateTime,
+  updatedAt: LuxonDateTime,
+  interval: IntervalSchema
 });
 
-type MyActiveInterval = Infer<typeof ActiveInterval>;
+const NotFoundSchema = type({
+  status: number(),
+  message: string(),
+});
+
+const ResponsesSchema = union([ActiveIntervalSchema, NotFoundSchema]);
+const ResponseSchema = type({status: number(), body: ResponsesSchema});
+
+type ActiveInterval = Infer<typeof ActiveIntervalSchema>;
+type NotFound = Infer<typeof NotFoundSchema>;
 
 interface ActiveIntervalResponseOK  {
   status: 200;
@@ -32,13 +36,15 @@ interface ActiveIntervalResponseOK  {
 
 interface ActiveIntervalResponseNotFound {
   status: 404;
-  body: ActiveIntervalNotFound;
+  body: NotFound;
 }
 
 type ActiveIntervalResponse =
   | ActiveIntervalResponseOK
   | ActiveIntervalResponseNotFound;
 
+
 export const useActiveInterval = (auth0: Auth0ContextInterface<User>) => {
-  return useSwrWithAuth0<ActiveIntervalResponse>(`${apiHost}/intervals/active`, {}, auth0);
+  console.log("Api host", apiHost);
+  return useSwrWithAuth0<undefined, ActiveIntervalResponse>({ url: `${apiHost}/intervals/active`, opts: {}, auth0, responseSchema: ResponseSchema });
 }
