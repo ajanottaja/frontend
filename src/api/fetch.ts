@@ -1,66 +1,139 @@
-import { Auth0ContextInterface, GetTokenSilentlyOptions, User } from "@auth0/auth0-react";
-import { Struct } from "superstruct";
+import {
+  Auth0ContextInterface,
+  GetTokenSilentlyOptions,
+  User,
+} from "@auth0/auth0-react";
+import { create, Struct } from "superstruct";
 import useSWR, { SWRResponse } from "swr";
 
-type GetAccessTokenSilently = (opts?: GetTokenSilentlyOptions) => Promise<string>;
+type GetAccessTokenSilently = (
+  opts?: GetTokenSilentlyOptions
+) => Promise<string>;
 
 export interface ApiResponse {
   status: number;
   body: any;
 }
 
-
-interface FetchJsonArgs {
+interface HttpPostArgs<Req, Res> {
+  url: string;
   getAccessTokenSilently: GetAccessTokenSilently;
-  opts: RequestInit;
-  schema: Struct<any>
+  params: Req;
+  requestSchema?: Struct<Req>;
+  responseSchema: Struct<Res>;
 }
 
-export const fetchJson = ({getAccessTokenSilently, opts, schema}: FetchJsonArgs) => async <T>(
-  url: string,
-): Promise<T> => {
+export const httpPost = async <Req, Res>({
+  url,
+  getAccessTokenSilently,
+  params,
+  requestSchema,
+  responseSchema,
+}: HttpPostArgs<Req, Res>) => {
   try {
     const token = await getAccessTokenSilently();
+    const opts: RequestInit = {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "post",
+    };
 
-    const response = await fetch(url, {
-      ...opts,
-      headers: { "Accept": "application/json", "Authorization": `Bearer ${token}`, ...opts.headers?? {} },
-      method: opts.method ?? "get"
-    });
+    if (requestSchema && params) {
+      opts.body = JSON.stringify(create(params, requestSchema));
+    }
 
-    const body = await response.json();
+    const response = await fetch(url, opts);
+    let body = await response.json();
 
+    if (responseSchema) {
+      body = create(body, responseSchema);
+    }
 
-
-    return { status: response.status, body } as unknown as T;
-
+    return { status: response.status, body } as unknown as Res;
   } catch (error) {
     throw error;
   }
-}
+};
 
-interface useSwrWithAuth0Args {
+interface HttpGetArgs<Req, Res> {
   url: string;
-  opts: RequestInit;
-  auth0: Auth0ContextInterface<User>;
-  schema: Struct<any>
+  getAccessTokenSilently: GetAccessTokenSilently;
+  params: Req;
+  requestSchema?: Struct<Req>;
+  responseSchema?: Struct<Res>;
 }
 
-export const useSwrWithAuth0 = <T>({url, opts = {}, auth0, schema}: useSwrWithAuth0Args): SWRResponse<T, Error> => {
+export const httpGet = async <Req, Res>({
+  url: baseUrl,
+  getAccessTokenSilently,
+  params,
+  requestSchema,
+  responseSchema,
+}: HttpGetArgs<Req, Res>) => {
+  try {
+    const token = await getAccessTokenSilently();
+    const opts: RequestInit = {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "post",
+    };
+
+    const url = new URL(baseUrl);
+
+    if (requestSchema && params) {
+      const queryParams = create(params, requestSchema);
+      url.search = new URLSearchParams(queryParams as any).toString();
+    }
+
+    const response = await fetch(url.toString(), opts);
+    let body;
+
+    if (responseSchema) {
+      body = create(body, responseSchema);
+    }
+
+    return { status: response.status, body } as unknown as Res;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const swrFetcher =
+  <Req, Res>(args: Omit<HttpGetArgs<Req, Res>, "url">) =>
+  async (url: string) => {
+    return await httpGet({ url, ...args });
+  };
+
+type UseSwrWithAuth0<Req, Res> = Omit<
+  HttpGetArgs<Req, Res>,
+  "getAccessTokenSilently"
+> & {
+  auth0: Auth0ContextInterface<User>;
+};
+
+export const useSwrWithAuth0 = <Req, Res>({
+  auth0,
+  url,
+  ...args
+}: UseSwrWithAuth0<Req, Res>): SWRResponse<Res, Error> => {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = auth0;
-   
+
   // If Auth0 is still loading or user is not authenticated we make the operation no-op via null url
   const shouldFetch = !isLoading && isAuthenticated;
 
-  return useSWR<T, Error>(
+  return useSWR<Res, Error>(
     shouldFetch ? [url] : null,
-    fetchJson({getAccessTokenSilently, opts, schema}),
+    swrFetcher<Req, Res>({ getAccessTokenSilently, ...args }),
     {
       suspense: true,
       errorRetryCount: 3,
       shouldRetryOnError: false,
-
     }
   );
-
-}
+};

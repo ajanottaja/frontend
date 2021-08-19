@@ -3,7 +3,7 @@ import { DateTime, Duration } from "luxon";
 import { Button, IconButton } from "./button";
 
 interface Timer {
-  beginning?: string;
+  beginning?: DateTime;
   startInterval: () => void;
   stopInterval: () => void;
 }
@@ -15,7 +15,8 @@ const formatDigits = (digits: number) => {
 const Timer = ({ beginning, startInterval, stopInterval }: Timer) => {
 
   const [time, setTime] = useState(DateTime.now());
-  const duration = time.diff(beginning ? DateTime.fromISO(beginning) : DateTime.now(), ["hours", "minutes", "seconds", "milliseconds"]);
+  const duration = time.diff(beginning ? beginning : DateTime.now(), ["hours", "minutes", "seconds", "milliseconds"]);
+
 
   useEffect(() => {
     const interval = setInterval(() => setTime(DateTime.now()), 1000);

@@ -11,39 +11,51 @@ import Header from "../layout/header";
 import { startInterval, stopInterval } from "../../api";
 import DurationInput from "../atoms/duration-form";
 import Timer from "../atoms/timer";
-import { Duration } from "luxon";
+import { DateTime, Duration } from "luxon";
 import { useActiveInterval } from "../../api/interval";
+import { upsertActiveTarget, useActiveTarget } from "../../api/target";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  
+  const {
+    data,
+    error,
+    mutate,
+  } = useActiveTarget(auth0);
+
   return <DurationInput
-    activeTarget={Duration.fromObject({seconds: 1000})}
-    setActiveTarget={() => {}}
+    activeTarget={data?.status === 200 ? data.body.duration : undefined}
+    setActiveTarget={async (duration: Duration) => {
+      const date = DateTime.now();
+      await upsertActiveTarget({auth0, params: {duration, date}});
+      mutate();
+    }}
   />;
 };
 
 const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   const {
-    data: activeData,
-    error: activeError,
-    mutate: activeMutate,
+    data,
+    error,
+    mutate,
   } = useActiveInterval(auth0);
 
-  if (activeData) {
+  console.log(data);
+
+  if (data) {
     return (
       <Timer
         beginning={
-          activeData?.status === 200
-            ? activeData.body.interval.beginning
+          data?.status === 200
+            ? data.body.interval.beginning
             : undefined
         }
         startInterval={async () => {
           await startInterval(auth0);
-          activeMutate();
+          mutate();
         }}
         stopInterval={async () => {
           await stopInterval(auth0);
-          activeMutate();
+          mutate();
         }}
       />
     );
