@@ -1,36 +1,24 @@
-import React, { useState, Suspense } from 'react'
-import logo from './logo.svg'
-import { useAuth0 } from '@auth0/auth0-react';
+import { withAuthenticationRequired } from '@auth0/auth0-react';
+import React, { ReactNode } from 'react'
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
-  Link
 } from "react-router-dom";
-import Header from './components/layout/header';
 import Dashboard from './components/pages/dashboard';
 
-function App() {
-  const [count, setCount] = useState(0)
-  const {
-    isLoading,
-    isAuthenticated,
-    error,
-    user,
-    loginWithRedirect,
-    logout,
-  } = useAuth0();
+const ProtectedRoute = ({ component, ...args }: {component: React.ComponentType<any>, path: string}) => (
+  <Route component={withAuthenticationRequired(component)} {...args} />
+);
 
+function App() {
 
   return (
-    <div className="bg-light-200 dark:bg-dark-800 min-h-screen" w="max-screen">
+    <div className="bg-light-200 dark:bg-dark-800" w="max-screen" h="full">
       <Switch>
         <Route exact path="/">
           <Dashboard />
         </Route>
-        <Route path="/dashboard">
-          <Dashboard />
-        </Route>
+        <ProtectedRoute path="/dashboard" component={Dashboard} />
         <Route path="/hello">
           <h1>Hello!</h1>
         </Route>

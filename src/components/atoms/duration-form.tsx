@@ -1,5 +1,10 @@
+import { Duration } from 'luxon';
 import React, { useState, useRef, useEffect, LegacyRef } from 'react';
 import { Button } from './button';
+
+const durationToNumbers = (duration: Duration) => {
+  return [...duration.toFormat("hhmm")].map(x => Number.parseInt(x, 10))
+}
 
 interface DurationInput {
   value?: number;
@@ -37,10 +42,14 @@ const DigitInput = ({ name, value, setValue, pasteValue, isEditing, onFocus }: D
   />)
 }
 
+interface DurationForm {
+  activeTarget?: Duration;
+  setActiveTarget: (duration: Duration) => void
+}
 
-const DurationForm = () => {
+const DurationForm = ({activeTarget, setActiveTarget}: DurationForm) => {
   const [position, setPosition] = useState(0);
-  const [duration, setDuration] = useState<number[]>([]);
+  const [duration, setDuration] = useState<number[]>(activeTarget ? durationToNumbers(activeTarget): []);
 
   const updateDuration = (newVal: string) => {
     setPosition(position + 1);
@@ -69,9 +78,14 @@ const DurationForm = () => {
   console.log("Position", position);
 
   return <form
-    display="grid" grid="cols-1 gap-y-8" justify="self-center"
-    onSubmit={() => {
-      const duration = ""
+    display="grid" grid="cols-1 gap-y-8" justify="self-center" text="center"
+    onSubmit={(e) => {
+      e.preventDefault();
+      const target = Duration.fromObject({
+        hours: Number.parseInt(`${duration[0]}${duration[1]}`, 10),
+        minutes: Number.parseInt(`${duration[2]}${duration[3]}`, 10)
+      });
+      setActiveTarget(target);
     }}
   >
     <h2 text="4xl dark:gray-300">Todays target</h2>

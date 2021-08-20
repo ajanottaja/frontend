@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { intervalToDuration, parseISO, formatDuration } from 'date-fns';
+import { DateTime, Duration } from "luxon";
 import { Button, IconButton } from "./button";
 
 interface Timer {
-  beginning?: string;
+  beginning?: DateTime;
   startInterval: () => void;
   stopInterval: () => void;
 }
@@ -14,11 +14,12 @@ const formatDigits = (digits: number) => {
 
 const Timer = ({ beginning, startInterval, stopInterval }: Timer) => {
 
-  const [time, setTime] = useState(new Date());
-  const duration = intervalToDuration({ start: beginning ? parseISO(beginning) : new Date(), end: time });
+  const [time, setTime] = useState(DateTime.now());
+  const duration = time.diff(beginning ? beginning : DateTime.now(), ["hours", "minutes", "seconds", "milliseconds"]);
+
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
+    const interval = setInterval(() => setTime(DateTime.now()), 1000);
     return () => {
       clearInterval(interval);
     };
