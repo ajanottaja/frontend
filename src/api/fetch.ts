@@ -46,13 +46,8 @@ export const httpPost = async <Req, Res>({
     }
 
     const response = await fetch(url, opts);
-    let body = await response.json();
-
-    if (responseSchema) {
-      body = create(body, responseSchema);
-    }
-
-    return { status: response.status, body } as unknown as Res;
+    const res = { status: response.status, body: response.body ? await response.json() : {}};
+    return create(res, responseSchema);
   } catch (error) {
     throw error;
   }
@@ -61,9 +56,9 @@ export const httpPost = async <Req, Res>({
 interface HttpGetArgs<Req, Res> {
   url: string;
   getAccessTokenSilently: GetAccessTokenSilently;
-  params: Req;
+  params?: Req;
   requestSchema?: Struct<Req>;
-  responseSchema?: Struct<Res>;
+  responseSchema: Struct<Res>;
 }
 
 export const httpGet = async <Req, Res>({
@@ -81,7 +76,7 @@ export const httpGet = async <Req, Res>({
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      method: "post",
+      method: "get",
     };
 
     const url = new URL(baseUrl);
@@ -92,13 +87,9 @@ export const httpGet = async <Req, Res>({
     }
 
     const response = await fetch(url.toString(), opts);
-    let body;
+    const res = { status: response.status, body: response.body ? await response.json() : {}};
+    return create(res, responseSchema);
 
-    if (responseSchema) {
-      body = create(body, responseSchema);
-    }
-
-    return { status: response.status, body } as unknown as Res;
   } catch (error) {
     throw error;
   }
