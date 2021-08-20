@@ -8,11 +8,10 @@ import {
 } from "@auth0/auth0-react";
 import useSWR, { mutate } from "swr";
 import Header from "../layout/header";
-import { startInterval, stopInterval } from "../../api";
 import DurationInput from "../atoms/duration-form";
 import Timer from "../atoms/timer";
 import { DateTime, Duration } from "luxon";
-import { useActiveInterval } from "../../api/interval";
+import { startInterval, stopInterval, useActiveInterval } from "../../api/interval";
 import { upsertActiveTarget, useActiveTarget } from "../../api/target";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
@@ -51,11 +50,11 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
             : undefined
         }
         startInterval={async () => {
-          await startInterval(auth0);
+          await startInterval({auth0});
           mutate();
         }}
         stopInterval={async () => {
-          await stopInterval(auth0);
+          await stopInterval({auth0});
           mutate();
         }}
       />
