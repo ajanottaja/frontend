@@ -18,7 +18,7 @@ export interface ApiResponse {
 interface HttpPostArgs<Req, Res> {
   url: string;
   getAccessTokenSilently: GetAccessTokenSilently;
-  params: Req;
+  params?: Req;
   requestSchema?: Struct<Req>;
   responseSchema: Struct<Res>;
 }

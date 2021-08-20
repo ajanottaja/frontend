@@ -2,7 +2,7 @@ import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { Describe, type, string, date, Infer, number, union, literal } from "superstruct";
 import { apiHost } from "../config";
 import { paths } from "../schema";
-import { ApiResponse, useSwrWithAuth0 } from "./fetch";
+import { ApiResponse, httpPost, useSwrWithAuth0 } from "./fetch";
 import { ErrorSchemas, InternalServerErrorSchema, LuxonDateTime, NotFoundSchema } from "./schema";
 
 const IntervalSchema = type({
@@ -21,13 +21,38 @@ const ActiveIntervalSchema = type({
   })
 });
 
-const ResponseSchema = union([ActiveIntervalSchema, NotFoundSchema, InternalServerErrorSchema]);
-type Response = Infer<typeof ResponseSchema>;
+const ActiveIntervalResponseSchema = union([ActiveIntervalSchema, NotFoundSchema, InternalServerErrorSchema]);
+type ActiveIntervalResponse = Infer<typeof ActiveIntervalResponseSchema>;
 
 export const useActiveInterval = (auth0: Auth0ContextInterface<User>) => {
-  return useSwrWithAuth0<undefined, Response>({
+  return useSwrWithAuth0<undefined, ActiveIntervalResponse>({
     auth0,
     url: `${apiHost}/intervals/active`,
-    responseSchema: ResponseSchema
+    responseSchema: ActiveIntervalResponseSchema
+  });
+}
+
+
+interface StartIntervalArgs {
+  auth0: Auth0ContextInterface<User>
+}
+
+export const startInterval = async ({auth0: {getAccessTokenSilently}}: StartIntervalArgs) => {
+  return await httpPost<undefined, ActiveIntervalResponse>({
+    url: `${apiHost}/intervals/start`,
+    getAccessTokenSilently,
+    responseSchema: ActiveIntervalResponseSchema,
+  });
+}
+
+interface StopIntervalArgs {
+  auth0: Auth0ContextInterface<User>
+}
+
+export const stopInterval = async ({auth0: {getAccessTokenSilently}}: StopIntervalArgs) => {
+  return await httpPost<undefined, ActiveIntervalResponse>({
+    url: `${apiHost}/intervals/stop`,
+    getAccessTokenSilently,
+    responseSchema: ActiveIntervalResponseSchema,
   });
 }
