@@ -26,7 +26,8 @@ const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     activeTarget={data?.status === 200 ? data.body.duration : undefined}
     setActiveTarget={async (duration: Duration) => {
       const date = DateTime.now();
-      await upsertActiveTarget({auth0, params: {duration, date}});
+      const res = await upsertActiveTarget({auth0, params: {duration, date}});
+      console.log(res);
       mutate();
     }}
   />;

@@ -1,5 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { coerce, define, string } from "superstruct";
+import { defaulted, coerce, define, literal, number, string, type } from "superstruct";
 
 /**
  * Validate and coerce ISO Date strings as a Luxon DateTime object
@@ -26,7 +26,16 @@ export const LuxonDuration = coerce(
  export const IsoDateTime = coerce(
   define<DateTime>('IsoDateTime', v => typeof v === "string"),
   LuxonDateTime,
-  (value: DateTime) => value.toISO()
+  (value: DateTime) => value.toISO({})
+);
+
+/**
+ * Validate and coerce Luxon DateTimes as ISO Date strings (without time part)
+ */
+ export const IsoDate = coerce(
+  define<DateTime>('IsoDate', v => typeof v === "string"),
+  LuxonDateTime,
+  (value: DateTime) => value.toISO({}).split("T")[0]
 );
 
 /**
@@ -38,3 +47,22 @@ export const IsoDuration = coerce(
   (value: Duration) => value.toISO()
 );
 
+export const NotFoundSchema = type({
+  status: literal(404),
+  body: type({
+    status: literal(404),
+    message: string()
+  })
+});
+
+
+export const InternalServerErrorSchema = type({
+  status: literal(500),
+  body: type({
+    status: defaulted(literal(500), 500),
+    message: string()
+  })
+});
+
+
+export const ErrorSchemas = [NotFoundSchema, InternalServerErrorSchema];
