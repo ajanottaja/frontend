@@ -50,7 +50,6 @@ export const IsoDuration = coerce(
 export const NotFoundSchema = type({
   status: literal(404),
   body: type({
-    status: literal(404),
     message: string()
   })
 });
@@ -59,7 +58,6 @@ export const NotFoundSchema = type({
 export const InternalServerErrorSchema = type({
   status: literal(500),
   body: type({
-    status: defaulted(literal(500), 500),
     message: string()
   })
 });
