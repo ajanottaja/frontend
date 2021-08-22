@@ -83,13 +83,15 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   }
 
   const summary = {
-    day: data.body[0],
-    week: data.body[1],
-    month: data.body[2],
+    day: data.body.find((d) => d.unit === "day"),
+    week: data.body.find((d) => d.unit === "week"),
+    month: data.body.find((d) => d.unit === "month"),
   };
 
-  const formatDuration = (d: Duration, format: string) =>
-    `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
+  const formatDuration = (
+    d: Duration | undefined = Duration.fromMillis(0),
+    format: string
+  ) => `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
 
   return (
     <div
@@ -103,15 +105,15 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
         Time summary
       </h2>
       <span text="gray-300">
-        Day: {formatDuration(summary.day.diff, "h 'hours' m 'minutes'")}
+        Day: {formatDuration(summary.day?.diff, "h 'hours' m 'minutes'")}
       </span>
       <span text="gray-300">
         Week:{" "}
-        {formatDuration(summary.week.diff, "d 'days' h 'hours' m 'minutes'")}
+        {formatDuration(summary.week?.diff, "d 'days' h 'hours' m 'minutes'")}
       </span>
       <span text="gray-300">
         Month:{" "}
-        {formatDuration(summary.month.diff, "d 'days' h 'hours' m 'minutes'")}
+        {formatDuration(summary.month?.diff, "d 'days' h 'hours' m 'minutes'")}
       </span>
     </div>
   );
