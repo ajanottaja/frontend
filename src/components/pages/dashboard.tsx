@@ -88,7 +88,7 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     month: data.body[2],
   };
 
-  const formatDuration = (d: Duration, format: string) => `${isNegativeDuration(d) && "- "}${absDuration(d).toFormat(format)}`;
+  const formatDuration = (d: Duration, format: string) => `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
 
 
   return (
