@@ -92,8 +92,8 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
 
 
   return (
-    <div display="grid" grid="cols-1 gap-y-1" justify="self-center" text="center">
-    <h2 text="4xl center dark:gray-300">Time summary</h2>
+    <div display="grid" grid="cols-1 gap-y-1" justify="self-center" align="items-center" text="center">
+    <h2 text="4xl center dark:gray-300" align="self-start">Time summary</h2>
     <span text="gray-300">Day: {formatDuration(summary.day.diff, "h 'hours' m 'minutes'")}</span>
     <span text="gray-300">Week: {formatDuration(summary.week.diff, "d 'days' h 'hours' m 'minutes'")}</span>
     <span text="gray-300">Month: {formatDuration(summary.month.diff, "d 'days' h 'hours' m 'minutes'")}</span>
