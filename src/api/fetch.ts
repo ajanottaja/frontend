@@ -5,6 +5,7 @@ import {
 } from "@auth0/auth0-react";
 import { create, Struct } from "superstruct";
 import useSWR, { SWRResponse } from "swr";
+import { Configuration, Fetcher } from "swr/dist/types";
 
 type GetAccessTokenSilently = (
   opts?: GetTokenSilentlyOptions
@@ -46,7 +47,10 @@ export const httpPost = async <Req, Res>({
     }
 
     const response = await fetch(url, opts);
-    const res = { status: response.status, body: response.body ? await response.json() : {}};
+    const res = {
+      status: response.status,
+      body: response.body ? await response.json() : {},
+    };
     return create(res, responseSchema);
   } catch (error) {
     throw error;
@@ -87,9 +91,11 @@ export const httpGet = async <Req, Res>({
     }
 
     const response = await fetch(url.toString(), opts);
-    const res = { status: response.status, body: response.body ? await response.json() : {}};
+    const res = {
+      status: response.status,
+      body: response.body ? await response.json() : {},
+    };
     return create(res, responseSchema);
-
   } catch (error) {
     throw error;
   }
@@ -108,11 +114,10 @@ type UseSwrWithAuth0<Req, Res> = Omit<
   auth0: Auth0ContextInterface<User>;
 };
 
-export const useSwrWithAuth0 = <Req, Res>({
-  auth0,
-  url,
-  ...args
-}: UseSwrWithAuth0<Req, Res>): SWRResponse<Res, Error> => {
+export const useSwrWithAuth0 = <Req, Res>(
+  { auth0, url, ...args }: UseSwrWithAuth0<Req, Res>,
+  swrOpts: Partial<Configuration>| undefined = {}
+): SWRResponse<Res, Error> => {
   const { isLoading, isAuthenticated, getAccessTokenSilently } = auth0;
 
   // If Auth0 is still loading or user is not authenticated we make the operation no-op via null url
@@ -125,6 +130,7 @@ export const useSwrWithAuth0 = <Req, Res>({
       suspense: true,
       errorRetryCount: 3,
       shouldRetryOnError: false,
+      ...swrOpts,
     }
   );
 };

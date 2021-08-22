@@ -75,8 +75,6 @@ const DurationForm = ({activeTarget, setActiveTarget}: DurationForm) => {
       isEditing={position === i} />
   });
 
-  console.log("Position", position);
-
   return <form
     display="grid" grid="cols-1 gap-y-8" justify="self-center" text="center"
     onSubmit={(e) => {

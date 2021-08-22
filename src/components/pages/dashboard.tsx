@@ -13,6 +13,8 @@ import Timer from "../atoms/timer";
 import { DateTime, Duration } from "luxon";
 import { startInterval, stopInterval, useActiveInterval } from "../../api/interval";
 import { upsertActiveTarget, useActiveTarget } from "../../api/target";
+import { useStatisticsSummary, StatisticsSummary  } from "../../api/statistics";
+import { absDuration, isNegativeDuration } from "../../utils/date";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   const {
@@ -26,7 +28,6 @@ const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     setActiveTarget={async (duration: Duration) => {
       const date = DateTime.now();
       const res = await upsertActiveTarget({auth0, params: {duration, date}});
-      console.log(res);
       mutate();
     }}
   />;
@@ -38,8 +39,6 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     error,
     mutate,
   } = useActiveInterval(auth0);
-
-  console.log(data);
 
   if (data) {
     return (
@@ -69,12 +68,36 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
 };
 
 const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  return (
-    <div display="grid" grid="cols-1" align="self-center">
-      <span className="text-gray-300 text-2xl font-mono align-center">
-        Fancy graph coming here
+  // Get statistics summary and refresh every minute
+  const {
+    data,
+    error,
+  } = useStatisticsSummary(auth0, {refreshInterval: 60 * 1000});
+
+  if(error || data?.status !== 200) {
+    return <div display="grid" grid="cols-1" align="self-center">
+      <span className="text-red-300 text-2xl font-mono pb-8">
+      Could not get summary of tracked time.
       </span>
     </div>
+  }
+
+  const summary = {
+    day: data.body[0],
+    week: data.body[1],
+    month: data.body[2],
+  };
+
+  const formatDuration = (d: Duration, format: string) => `${isNegativeDuration(d) && "- "}${absDuration(d).toFormat(format)}`;
+
+
+  return (
+    <div display="grid" grid="cols-1 gap-y-1" justify="self-center" text="center">
+    <h2 text="4xl center dark:gray-300">Time summary</h2>
+    <span text="gray-300">Day: {formatDuration(summary.day.diff, "h 'hours' m 'minutes'")}</span>
+    <span text="gray-300">Week: {formatDuration(summary.week.diff, "d 'days' h 'hours' m 'minutes'")}</span>
+    <span text="gray-300">Month: {formatDuration(summary.month.diff, "d 'days' h 'hours' m 'minutes'")}</span>
+  </div>
   );
 };
 
