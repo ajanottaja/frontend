@@ -11,49 +11,48 @@ import Header from "../layout/header";
 import DurationInput from "../atoms/duration-form";
 import Timer from "../atoms/timer";
 import { DateTime, Duration } from "luxon";
-import { startInterval, stopInterval, useActiveInterval } from "../../api/interval";
+import {
+  startInterval,
+  stopInterval,
+  useActiveInterval,
+} from "../../api/interval";
 import { upsertActiveTarget, useActiveTarget } from "../../api/target";
-import { useStatisticsSummary, StatisticsSummary  } from "../../api/statistics";
+import { useStatisticsSummary, StatisticsSummary } from "../../api/statistics";
 import { absDuration, isNegativeDuration } from "../../utils/date";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  const {
-    data,
-    error,
-    mutate,
-  } = useActiveTarget(auth0);
+  const { data, error, mutate } = useActiveTarget(auth0);
 
-  return <DurationInput
-    activeTarget={data?.status === 200 ? data.body.duration : undefined}
-    setActiveTarget={async (duration: Duration) => {
-      const date = DateTime.now();
-      const res = await upsertActiveTarget({auth0, params: {duration, date}});
-      mutate();
-    }}
-  />;
+  return (
+    <DurationInput
+      activeTarget={data?.status === 200 ? data.body.duration : undefined}
+      setActiveTarget={async (duration: Duration) => {
+        const date = DateTime.now();
+        const res = await upsertActiveTarget({
+          auth0,
+          params: { duration, date },
+        });
+        mutate();
+      }}
+    />
+  );
 };
 
 const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  const {
-    data,
-    error,
-    mutate,
-  } = useActiveInterval(auth0);
+  const { data, error, mutate } = useActiveInterval(auth0);
 
   if (data) {
     return (
       <Timer
         beginning={
-          data?.status === 200
-            ? data.body.interval.beginning
-            : undefined
+          data?.status === 200 ? data.body.interval.beginning : undefined
         }
         startInterval={async () => {
-          await startInterval({auth0});
+          await startInterval({ auth0 });
           mutate();
         }}
         stopInterval={async () => {
-          await stopInterval({auth0});
+          await stopInterval({ auth0 });
           mutate();
         }}
       />
@@ -69,17 +68,18 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
 
 const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   // Get statistics summary and refresh every minute
-  const {
-    data,
-    error,
-  } = useStatisticsSummary(auth0, {refreshInterval: 60 * 1000});
+  const { data, error } = useStatisticsSummary(auth0, {
+    refreshInterval: 60 * 1000,
+  });
 
-  if(error || data?.status !== 200) {
-    return <div display="grid" grid="cols-1" align="self-center">
-      <span className="text-red-300 text-2xl font-mono pb-8">
-      Could not get summary of tracked time.
-      </span>
-    </div>
+  if (error || data?.status !== 200) {
+    return (
+      <div display="grid" grid="cols-1" align="self-center">
+        <span className="text-red-300 text-2xl font-mono pb-8">
+          Could not get summary of tracked time.
+        </span>
+      </div>
+    );
   }
 
   const summary = {
@@ -88,22 +88,37 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     month: data.body[2],
   };
 
-  const formatDuration = (d: Duration, format: string) => `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
-
+  const formatDuration = (d: Duration, format: string) =>
+    `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
 
   return (
-    <div display="grid" grid="cols-1 gap-y-1" justify="self-center" align="items-center" text="center">
-    <h2 text="4xl center dark:gray-300" align="self-start">Time summary</h2>
-    <span text="gray-300">Day: {formatDuration(summary.day.diff, "h 'hours' m 'minutes'")}</span>
-    <span text="gray-300">Week: {formatDuration(summary.week.diff, "d 'days' h 'hours' m 'minutes'")}</span>
-    <span text="gray-300">Month: {formatDuration(summary.month.diff, "d 'days' h 'hours' m 'minutes'")}</span>
-  </div>
+    <div
+      display="grid"
+      grid="cols-1 gap-y-1"
+      justify="self-center"
+      align="items-center"
+      text="center xl <lg:base"
+    >
+      <h2 text="4xl <lg:3xl center dark:gray-300" align="self-start">
+        Time summary
+      </h2>
+      <span text="gray-300">
+        Day: {formatDuration(summary.day.diff, "h 'hours' m 'minutes'")}
+      </span>
+      <span text="gray-300">
+        Week:{" "}
+        {formatDuration(summary.week.diff, "d 'days' h 'hours' m 'minutes'")}
+      </span>
+      <span text="gray-300">
+        Month:{" "}
+        {formatDuration(summary.month.diff, "d 'days' h 'hours' m 'minutes'")}
+      </span>
+    </div>
   );
 };
 
 const Dashboard = () => {
   const auth0 = useAuth0();
-
 
   if (auth0.isLoading) {
     return <div>Is loading</div>;
@@ -117,24 +132,23 @@ const Dashboard = () => {
     return <div>Not authenticated</div>;
   }
 
-
-
   return (
     <div
       display="flex"
       flex="col"
       align="content-center"
       justify="start"
-      h="full max-full"
+      h="full min-screen"
     >
       <Header />
-      <div display="flex" flex="col" justify="content-center" h="full max-full">
+      <div display="flex" flex="col grow" justify="content-center">
         <div
           w="max-w-7xl screen"
           justify="self-center items-center"
           align="self-center items-self-stretch"
           display="grid"
-          grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-16"
+          grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-8"
+          p="<lg:x-4"
         >
           <Suspense
             fallback={

@@ -1,5 +1,6 @@
 html {
-  height: 100vh;
+  min-height: 100%;
+  height: 100%;
 }
 
 body {
@@ -9,12 +10,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  height: 100vh;
+  min-height: 100%;
+  height: 100%;
   width: 100vw;
 }
 
 #root {
   align-items: stretch;
+  min-height: 100%;
   height: 100%;
 }
 

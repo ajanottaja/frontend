@@ -23,7 +23,7 @@ ReactDOM.render(
       onRedirectCallback={onRedirectCallback}
     >
       <Router>
-        <div className="dark" h="full" w="max-screen">
+        <div className="dark" h="min-screen" w="max-screen">
           <App />
         </div>
       </Router>

@@ -13,7 +13,7 @@ const ProtectedRoute = ({ component, ...args }: {component: React.ComponentType<
 function App() {
 
   return (
-    <div className="bg-light-200 dark:bg-dark-800" w="max-screen" h="full">
+    <div className="bg-light-200 dark:bg-dark-800" w="max-screen" h="min-screen">
       <Switch>
         <Route exact path="/">
           <Dashboard />

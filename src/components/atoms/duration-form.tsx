@@ -27,7 +27,7 @@ const DigitInput = ({ name, value, setValue, pasteValue, isEditing, onFocus }: D
     type="number"
     onFocus={onFocus}
     bg="dark:dark-200"
-    text="5xl dark:green-300 dark:placeholder-gray-500"
+    text="5xl <lg:3xl dark:green-300 dark:placeholder-gray-500"
     font="mono"
     className="mx-1 py-1 w-1em text-center rounded outline-none focus:ring focus:ring-1 focus:ring-green-300 focus:animate-pulse caret-transparent"
     name={name}
@@ -76,7 +76,7 @@ const DurationForm = ({activeTarget, setActiveTarget}: DurationForm) => {
   });
 
   return <form
-    display="grid" grid="cols-1 gap-y-8" justify="self-center" text="center"
+    display="grid" grid="cols-1 gap-y-8 <lg:gap-y-4" justify="self-center" text="center"
     onSubmit={(e) => {
       e.preventDefault();
       const target = Duration.fromObject({
@@ -86,14 +86,14 @@ const DurationForm = ({activeTarget, setActiveTarget}: DurationForm) => {
       setActiveTarget(target);
     }}
   >
-    <h2 text="4xl dark:gray-300">Todays target</h2>
+    <h2 text="4xl <lg:3xl dark:gray-300">Todays target</h2>
     <div
       display="flex"
       flex="row"
       justify="center"
       align="items-center">
       {inputFields.slice(0, 2)}
-      <span className="text-green-300 text-2xl">:</span>
+      <span text="green-300 4xl <lg:2xl">:</span>
       {inputFields.slice(-2, inputFields.length)}
     </div>
     <Button hasFocus={position === 4}>Set target</Button>
