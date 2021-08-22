@@ -123,12 +123,12 @@ const Dashboard = () => {
     <div
       display="flex"
       flex="col"
-      align="items-center"
+      align="content-center"
       justify="start"
-      h="full"
+      h="full max-full"
     >
       <Header />
-      <div display="flex" flex="col" justify="content-center" h="full">
+      <div display="flex" flex="col" justify="content-center" h="full max-full">
         <div
           w="max-w-7xl screen"
           justify="self-center items-center"
