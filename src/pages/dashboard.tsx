@@ -7,18 +7,18 @@ import {
   withAuthenticationRequired,
 } from "@auth0/auth0-react";
 import useSWR, { mutate } from "swr";
-import Header from "../layout/header";
-import DurationInput from "../atoms/duration-form";
-import Timer from "../atoms/timer";
+import Header from "../components/layout/header";
+import DurationInput from "../components/atoms/duration-form";
+import Timer from "../components/atoms/timer";
 import { DateTime, Duration } from "luxon";
 import {
   startInterval,
   stopInterval,
   useActiveInterval,
-} from "../../api/interval";
-import { upsertActiveTarget, useActiveTarget } from "../../api/target";
-import { useStatisticsSummary, StatisticsSummary } from "../../api/statistics";
-import { absDuration, isNegativeDuration } from "../../utils/date";
+} from "../api/interval";
+import { upsertActiveTarget, useActiveTarget } from "../api/target";
+import { useStatisticsSummary, StatisticsSummary } from "../api/statistics";
+import { absDuration, isNegativeDuration } from "../utils/date";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   const { data, error, mutate } = useActiveTarget(auth0);
