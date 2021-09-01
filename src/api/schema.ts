@@ -1,5 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { defaulted, coerce, define, literal, number, string, type } from "superstruct";
+import { coerce, define, literal, string, type, nullable } from "superstruct";
 
 /**
  * Validate and coerce ISO Date strings as a Luxon DateTime object
@@ -19,6 +19,13 @@ export const LuxonDuration = coerce(
   (value) => Duration.fromISO(value)
 );
 
+/**
+ * Validate and coerce Interval map of beginning and end date times
+ */
+export const Interval = type({
+  beginning: LuxonDateTime,
+  end: nullable(LuxonDateTime)
+});
 
 /**
  * Validate and coerce Luxon DateTimes as ISO Date strings
