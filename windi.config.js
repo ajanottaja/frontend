@@ -8,6 +8,11 @@ module.exports = {
     require('@windicss/plugin-icons'),
   ],
   safelist: [
-    range(7).map(i => `col-start-${i}`)
-  ]
+    range(7).map(i => `col-start-${i}`),
+  ],
+  shortcuts: {
+    "grid-auto-fit": {
+      "grid-template-columns": "repeat(auto-fit, minmax(8rem, auto))"
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { coerce, define, literal, string, type, nullable } from "superstruct";
+import { coerce, define, literal, string, type, nullable, enums, Infer } from "superstruct";
 
 /**
  * Validate and coerce ISO Date strings as a Luxon DateTime object
@@ -54,6 +54,13 @@ export const IsoDuration = coerce(
   (value: Duration) => value.toISO()
 );
 
+
+export const StepsSchema = enums(["day", "week", "month", "year"]);
+export type Steps = Infer<typeof StepsSchema>;
+
+/**
+ * 404 responses
+ */
 export const NotFoundSchema = type({
   status: literal(404),
   body: type({

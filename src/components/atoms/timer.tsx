@@ -46,8 +46,6 @@ const Timer = ({ beginning, startInterval, stopInterval }: Timer) => {
       }}>
         Start interval
       </IconButton>}
-
-
   </div>
 }
 

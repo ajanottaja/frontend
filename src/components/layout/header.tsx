@@ -12,7 +12,7 @@ const Header = () => {
   } = useAuth0();
 
   return <header bg="dark:dark-700" shadow="dark-50" className="w-full">
-    <div className="max-w-7xl mx-auto ">
+    <div className="max-w-7xl mx-auto" p="x-2">
       <div className="flex justify-between items-center py-6 md:justify-start md:space-x-10">
         <div className="flex justify-start lg:w-0 lg:flex-1">
           <Link to="/" className="text-green-800 dark:text-green-200">

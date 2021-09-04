@@ -1,15 +1,16 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { type, string, date, Infer, union, literal, array, enums, optional, nullable } from "superstruct";
-import { Configuration } from "swr/dist/types";
+import { PublicConfiguration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { httpPost, useSwrWithAuth0 } from "./fetch";
-import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration } from "./schema";
+import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration, StepsSchema } from "./schema";
 
 const DateSchema = type({
   date: LuxonDateTime,
   target: nullable(LuxonDuration),
   intervals: array(Interval)
 });
+export type CalendarDate = Infer<typeof DateSchema>;
 
 const CalendarSchema = type({
   status: literal(200),
@@ -22,14 +23,14 @@ type CalendarResponse = Infer<typeof CalendarResponseSchema>;
 
 const CalendarParamsSchema = type({
   date: IsoDate,
-  step: enums(["day", "week", "month", "year"])
+  step: StepsSchema
 });
 
 type CalendarParams = Infer<typeof CalendarParamsSchema>;
 
 interface UseCalendar {
   auth0: Auth0ContextInterface<User>;
-  swrOpts?: Partial<Configuration>;
+  swrOpts?: Partial<PublicConfiguration>;
   params: CalendarParams;
 }
 

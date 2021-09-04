@@ -17,8 +17,8 @@ function App() {
   return (
     <div
       className="bg-light-200 dark:bg-dark-800"
-      w="max-screen"
-      h="min-screen"
+      w="max-full"
+      h="min-full"
     >
       <Switch>
         <Route exact path="/" component={Home}>

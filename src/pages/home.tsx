@@ -36,12 +36,12 @@ const Home = () => {
       flex="col"
       align="content-center"
       justify="start"
-      h="full min-screen"
+      h="full min-full"
     >
       <Header />
       <div display="flex" flex="col grow" justify="content-center">
         <div
-          w="max-w-7xl screen"
+          w="max-w-7xl full"
           justify="self-center items-center"
           align="self-center items-self-stretch"
           display="grid"

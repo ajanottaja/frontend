@@ -124,7 +124,7 @@ export const useSwrWithAuth0 = <Req, Res>(
   const shouldFetch = !isLoading && isAuthenticated;
 
   return useSWR<Res, Error>(
-    shouldFetch ? [url] : null,
+    shouldFetch ? [url, JSON.stringify(args.params)] : null,
     swrFetcher<Req, Res>({ getAccessTokenSilently, ...args }),
     {
       suspense: true,

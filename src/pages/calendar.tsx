@@ -1,80 +1,152 @@
-import React, { useEffect, useState, Suspense } from "react";
-import {
-  Auth0ContextInterface,
-  useAuth0,
-  User,
-  withAuthenticationRequired,
-} from "@auth0/auth0-react";
+import React, { Suspense, useReducer } from "react";
+import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import Header from "../components/layout/header";
 import { useCalendar } from "../api/calendar";
-import { DateTime } from "luxon";
-import { map } from "superstruct";
+import { DateTime, Duration } from "luxon";
+import { MonthCalendar } from "../components/organisms/calendar";
+import { Button } from "../components/atoms/button";
+import { Select } from "../components/atoms/select";
+import { queryToSearchString, useQuery } from "../utils/router";
+import { date, defaulted, optional, type } from "superstruct";
+import { IsoDate, LuxonDateTime, StepsSchema } from "../api/schema";
+import { useHistory } from "react-router-dom";
+import { useDebounce } from "use-debounce/lib";
 
+const QuerySchema = type({
+  date: defaulted(LuxonDateTime, DateTime.now()),
+  step: defaulted(StepsSchema, "month"),
+});
+
+const SearchSchema = type({
+  date: IsoDate,
+  step: StepsSchema
+})
 
 interface CalendarInner {
   auth0: Auth0ContextInterface<User>;
 }
 
-const CalendarInner = ({ auth0 }: CalendarInner) => {
-  
-  const [] = useState<DateTime>();
-  const { data, error } = useCalendar({auth0, params: {date: DateTime.fromObject({year: 2021, month: 8, day: 1}), step: "month"}});
+interface Step {
+  id: "day" | "week" | "month";
+  label: "Day" | "Week" | "Month";
+  selected?: boolean;
+  disabled?: boolean;
+}
 
-  if(error || data?.status !== 200) {
-    return <div>Error</div>
+interface CalendarState {
+  date: DateTime;
+  steps: Step[];
+  selectedStep: Step;
+}
+
+type Action = { type: "setSelectedStep"; payload: Step };
+
+const steps: Step[] = [
+  { id: "day", label: "Day" },
+  { id: "week", label: "Week" },
+  { id: "month", label: "Month" },
+];
+
+const CalendarInner = ({ auth0 }: CalendarInner) => {
+  const { push, location } = useHistory();
+  const query = useQuery(QuerySchema);
+
+  const initialState: CalendarState = {
+    date: query.date.startOf(query.step),
+    steps: steps,
+    selectedStep: steps.find((s) => s.id === query.step) ?? steps[0],
+  };
+
+  const [state, dispatch] = useReducer(
+    (state: CalendarState, action: Action): CalendarState => {
+      switch (action.type) {
+        case "setSelectedStep":
+          return { ...state, selectedStep: action.payload };
+        default:
+          return state;
+      }
+    },
+    initialState
+  );
+
+  const { data, error } = useCalendar({
+    auth0,
+    params: {
+      date: query.date,
+      step: query.step,
+    },
+    swrOpts: {}
+  });
+
+  if (error || data?.status !== 200) {
+    return <div>Error</div>;
   }
 
   return (
     <div
       display="flex"
       flex="col"
-      align="content-center"
+      align="content-center items-center"
       justify="start"
       h="full min-screen"
     >
       <Header />
-      <div display="flex" flex="col grow" justify="content-center">
-        <div
-          w="max-full"
-          justify="self-center items-center"
-          align="self-center items-self-stretch"
-          display="flex"
-          p="<lg:x-4"
-        >
-          <div
-            w="screen-xl"
-            m="x-8"
-            display="grid"
-            grid="cols-7 <lg:auto-cols-fr gap-1"
-            
-            text="gray-400"
-          >
-            {/* repeat(auto-fit, minmax(100px, 1fr)); */}
-            <div grid="col-span-7 <lg:col-auto" text="center green-300" p="b-4">
-              <h1 text="4xl">August</h1>
-            </div>
-
-            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day =>
-              <div display="<lg:hidden" text="center" m="x-2 b-4">
-                {day}
-              </div>
-            )}
-
-            {data?.body.map(({date, target, intervals}, i) =>
-              <div display="flex" flex="col" h="min-32" w="min-32" p="2" bg="dark-500" className={i !== 0 ? "" : `col-start-${date.weekday} <lg:col-start-1`}>
-                <div display="flex" flex="row" justify="between" p="b-2">
-                  <span text="gray-500">{date.day}</span>
-                  {target && <button>{target.toFormat("hh:mm")}</button>}
-                </div>
-                
-                {intervals.map(interval => <div bg="green-900" text="xs gray-300" p="1">
-                  {interval.beginning.toFormat("HH:mm")} - {interval.end?.toFormat("HH:MM")}
-                </div>)}
-              </div>)
-            }
-            
+      <div
+        display="flex"
+        flex="col grow"
+        align="items-center"
+        w="full max-screen-7xl"
+        p="x-2"
+      >
+        <div display="flex" flex="row" justify="between" w="full" p="y-4">
+          <div display="grid" grid="gap-2 cols-[auto_auto_auto]">
+            <Button
+              onClick={() =>
+                push({
+                  ...location,
+                  search: queryToSearchString({
+                    ...query,
+                    date: DateTime.now(),
+                  }, SearchSchema),
+                })
+              }
+            >
+              Today
+            </Button>
+            <Button onClick={() => {
+              push({
+                ...location,
+                search: queryToSearchString({
+                  ...query,
+                  date: state.date.set({month: state.date.month - 1}),
+                }, SearchSchema),
+              })
+            }}>
+              <span className="icon-chevron-left"></span>
+            </Button>
+            <Button onClick={() => {
+              push({
+                ...location,
+                search: queryToSearchString({
+                  ...query,
+                  date: state.date.set({month: state.date.month + 1}),
+                }, SearchSchema),
+              })
+            }}>
+              <span className="icon-chevron-right"></span>
+            </Button>
           </div>
+          <Select
+            values={state.steps}
+            selected={state.selectedStep}
+            setSelected={(s) =>
+              dispatch({ type: "setSelectedStep", payload: s })
+            }
+          />
         </div>
+        {state.selectedStep.id === "month" && (
+          <MonthCalendar dates={data.body} />
+        )}
       </div>
     </div>
   );
