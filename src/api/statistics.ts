@@ -1,9 +1,9 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
-import { type, string, date, Infer, union, literal, array, enums } from "superstruct";
+import { type, Infer, union, literal, array, enums } from "superstruct";
 import { Configuration } from "swr/dist/types";
 import { apiHost } from "../config";
-import { httpPost, useSwrWithAuth0 } from "./fetch";
-import { InternalServerErrorSchema, IsoDate, IsoDateTime, IsoDuration, LuxonDateTime, LuxonDuration, NotFoundSchema } from "./schema";
+import { useSwrWithAuth0 } from "./fetch";
+import { InternalServerErrorSchema, LuxonDuration } from "./schema";
 
 const SummarySchema = type({
   unit: enums(["day", "week", "month"]),

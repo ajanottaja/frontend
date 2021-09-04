@@ -10,7 +10,6 @@ import { queryToSearchString, useQuery } from "../utils/router";
 import { date, defaulted, optional, type } from "superstruct";
 import { IsoDate, LuxonDateTime, StepsSchema } from "../api/schema";
 import { useHistory } from "react-router-dom";
-import { useDebounce } from "use-debounce/lib";
 
 const QuerySchema = type({
   date: defaulted(LuxonDateTime, DateTime.now()),

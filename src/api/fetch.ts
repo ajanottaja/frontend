@@ -5,7 +5,7 @@ import {
 } from "@auth0/auth0-react";
 import { create, Struct } from "superstruct";
 import useSWR, { SWRResponse } from "swr";
-import { Configuration, Fetcher } from "swr/dist/types";
+import { Configuration } from "swr/dist/types";
 
 type GetAccessTokenSilently = (
   opts?: GetTokenSilentlyOptions
