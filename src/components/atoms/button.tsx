@@ -16,11 +16,14 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
   return <button
     {...props}
     ref={buttonRef}
+    display="flex"
+    flex="row"
+    justify="center"
+    align="items-center"
     p="2"
     animate="hover:pulse focus:pulse"
-    border="transparent 1 hover:green-300 focus:green-300 rounded"
-    outline="none"
-    bg="dark-200"
+    border="1 dark-50 hover:green-300 focus:green-300 rounded"
+    outline="focus:none"
     text="gray-200" />;
 }
 
@@ -47,9 +50,8 @@ export const IconButton = ({hasFocus = false, icon, ariaLabel, children, ...prop
     align="items-center"
     p="2"
     animate="hover:pulse focus:pulse"
-    border="transparent 1 hover:green-300 focus:green-300 rounded"
-    outline="none"
-    bg="dark-200"
+    border="dark-50 1 hover:green-300 focus:green-300 rounded"
+    outline="focus:none"
     text="gray-200"
     >
       <span className={icon} m="r-1 -l-1"></span>

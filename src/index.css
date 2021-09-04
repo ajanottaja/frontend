@@ -1,7 +1,7 @@
 html {
-  min-height: 100%;
+  min-height: 100vh;
   height: 100%;
-  @apply bg-light-200 dark:bg-dark-800;
+  width: 100%;
 }
 
 body {
@@ -11,9 +11,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100%;
+  min-height: 100vh;
   height: 100%;
-  width: 100vw;
+
+  @apply dark:bg-dark-800;
+  @apply bg-light-200;
 }
 
 #root {

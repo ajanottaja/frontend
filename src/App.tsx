@@ -14,20 +14,17 @@ const ProtectedRoute = ({
 }) => <Route component={withAuthenticationRequired(component)} {...args} />;
 
 function App() {
-
   return (
     <div
       className="bg-light-200 dark:bg-dark-800"
-      w="max-screen"
-      h="min-screen"
+      w="max-full"
+      h="min-full"
     >
       <Switch>
         <Route exact path="/" component={Home}>
         </Route>
         <ProtectedRoute path="/dashboard" component={Dashboard} />
-        <Route path="/hello">
-          <h1>Hello!</h1>
-        </Route>
+        <ProtectedRoute path="/calendar" component={Calendar} />
       </Switch>
     </div>
   );
