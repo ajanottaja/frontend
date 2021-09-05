@@ -1,4 +1,4 @@
-import { Duration } from "luxon";
+import { DateTime, Duration } from "luxon";
 
 /**
  * Check if duration is negative
@@ -13,3 +13,16 @@ export const isNegativeDuration = (duration: Duration) => duration.toMillis() < 
  * @returns 
  */
 export const absDuration = (duration: Duration) => isNegativeDuration(duration) ? duration.negate() : duration;
+
+export const daysOfMonth = (date: DateTime) => {
+  const start = date.startOf("month");
+  const end = date.endOf("month");
+  const dates = [];
+  let cursor = start;
+  while(cursor < end) {
+    dates.push(cursor);
+    cursor = cursor.plus({ days: 1});
+  }
+
+  return dates;
+}

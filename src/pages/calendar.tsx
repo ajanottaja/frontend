@@ -1,4 +1,5 @@
 import React, { Suspense, useReducer } from "react";
+import { useHistory } from "react-router-dom";
 import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import Header from "../components/layout/header";
 import { useCalendar } from "../api/calendar";
@@ -7,23 +8,20 @@ import { MonthCalendar } from "../components/organisms/calendar";
 import { Button } from "../components/atoms/button";
 import { Select } from "../components/atoms/select";
 import { queryToSearchString, useQuery } from "../utils/router";
-import { date, defaulted, optional, type } from "superstruct";
+import { date, defaulted, Infer, optional, type } from "superstruct";
 import { IsoDate, LuxonDateTime, StepsSchema } from "../api/schema";
-import { useHistory } from "react-router-dom";
 
 const QuerySchema = type({
   date: defaulted(LuxonDateTime, DateTime.now()),
   step: defaulted(StepsSchema, "month"),
 });
 
+type Query = Infer<typeof QuerySchema>;
+
 const SearchSchema = type({
   date: IsoDate,
-  step: StepsSchema
-})
-
-interface CalendarInner {
-  auth0: Auth0ContextInterface<User>;
-}
+  step: StepsSchema,
+});
 
 interface Step {
   id: "day" | "week" | "month";
@@ -46,39 +44,106 @@ const steps: Step[] = [
   { id: "month", label: "Month" },
 ];
 
-const CalendarInner = ({ auth0 }: CalendarInner) => {
-  const { push, location } = useHistory();
-  const query = useQuery(QuerySchema);
+interface CalendarHeader {
+  query: Query;
+  navigate: (newQuery: Query) => void;
+}
 
-  const initialState: CalendarState = {
-    date: query.date.startOf(query.step),
-    steps: steps,
-    selectedStep: steps.find((s) => s.id === query.step) ?? steps[0],
-  };
-
-  const [state, dispatch] = useReducer(
-    (state: CalendarState, action: Action): CalendarState => {
-      switch (action.type) {
-        case "setSelectedStep":
-          return { ...state, selectedStep: action.payload };
-        default:
-          return state;
-      }
-    },
-    initialState
+const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
+  return (
+    <div display="flex" flex="row" justify="between" w="full" p="y-4">
+      <div display="grid" grid="gap-2 cols-[auto_auto_auto]">
+        <Button
+          onClick={() =>
+            navigate({
+              ...query,
+              date: DateTime.now(),
+            })
+          }
+        >
+          Today
+        </Button>
+        <Button
+          onClick={() => {
+            navigate({
+              ...query,
+              date: query.date.set({ month: query.date.month - 1 }),
+            });
+          }}
+        >
+          <span className="icon-chevron-left"></span>
+        </Button>
+        <Button
+          onClick={() => {
+            navigate({
+              ...query,
+              date: query.date.set({ month: query.date.month + 1 }),
+            });
+          }}
+        >
+          <span className="icon-chevron-right"></span>
+        </Button>
+      </div>
+      <Select
+        values={steps}
+        selected={steps.find((s) => s.id === query.step) ?? steps[0]}
+        setSelected={(s) => {
+          navigate({
+            ...query,
+            step: s.id,
+          });
+        }}
+      />
+    </div>
   );
+};
 
-  const { data, error } = useCalendar({
+interface CalendarInner {
+  auth0: Auth0ContextInterface<User>;
+  query: Query;
+}
+
+const CalendarInner = ({ auth0, query }: CalendarInner) => {
+  const { data, error, mutate } = useCalendar({
     auth0,
     params: {
-      date: query.date,
+      date: query.date.startOf(query.step),
       step: query.step,
     },
-    swrOpts: {}
+    swrOpts: {
+      revalidateOnMount: false,
+    },
   });
 
   if (error || data?.status !== 200) {
     return <div>Error</div>;
+  }
+
+  return <>{query.step === "month" && <MonthCalendar date={query.date} dates={data.body} />}</>;
+};
+
+const Calendar = () => {
+  const auth0 = useAuth0();
+  const { push, location } = useHistory();
+  const query = useQuery(QuerySchema);
+
+  const navigate = (query: Query) => {
+    push({
+      ...location,
+      search: queryToSearchString(query, SearchSchema),
+    });
+  }
+
+  if (auth0.isLoading) {
+    return <div>Is loading</div>;
+  }
+
+  if (auth0.error) {
+    return <div>Authentication error</div>;
+  }
+
+  if (!auth0.isAuthenticated) {
+    return <div>Not authenticated</div>;
   }
 
   return (
@@ -97,86 +162,16 @@ const CalendarInner = ({ auth0 }: CalendarInner) => {
         w="full max-screen-7xl"
         p="x-2"
       >
-        <div display="flex" flex="row" justify="between" w="full" p="y-4">
-          <div display="grid" grid="gap-2 cols-[auto_auto_auto]">
-            <Button
-              onClick={() =>
-                push({
-                  ...location,
-                  search: queryToSearchString({
-                    ...query,
-                    date: DateTime.now(),
-                  }, SearchSchema),
-                })
-              }
-            >
-              Today
-            </Button>
-            <Button onClick={() => {
-              push({
-                ...location,
-                search: queryToSearchString({
-                  ...query,
-                  date: state.date.set({month: state.date.month - 1}),
-                }, SearchSchema),
-              })
-            }}>
-              <span className="icon-chevron-left"></span>
-            </Button>
-            <Button onClick={() => {
-              push({
-                ...location,
-                search: queryToSearchString({
-                  ...query,
-                  date: state.date.set({month: state.date.month + 1}),
-                }, SearchSchema),
-              })
-            }}>
-              <span className="icon-chevron-right"></span>
-            </Button>
-          </div>
-          <Select
-            values={state.steps}
-            selected={state.selectedStep}
-            setSelected={(s) =>
-              dispatch({ type: "setSelectedStep", payload: s })
-            }
-          />
-        </div>
-        {state.selectedStep.id === "month" && (
-          <MonthCalendar dates={data.body} />
-        )}
+        <CalendarHeader query={query} navigate={navigate} />
+        <Suspense
+          fallback={<>
+            {query.step === "month" && <MonthCalendar date={query.date} />}
+          </>}
+        >
+          <CalendarInner auth0={auth0} query={query} />
+        </Suspense>
       </div>
     </div>
-  );
-};
-
-const Calendar = () => {
-  const auth0 = useAuth0();
-
-  if (auth0.isLoading) {
-    return <div>Is loading</div>;
-  }
-
-  if (auth0.error) {
-    return <div>Authentication error</div>;
-  }
-
-  if (!auth0.isAuthenticated) {
-    return <div>Not authenticated</div>;
-  }
-
-  return (
-    <Suspense
-      fallback={
-        <div className="flex flex-col items-center text-green-300 text-4xl">
-          <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-          <div>Loading</div>
-        </div>
-      }
-    >
-      <CalendarInner auth0={auth0} />
-    </Suspense>
   );
 };
 

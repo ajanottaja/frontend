@@ -1,11 +1,17 @@
+import { DateTime } from "luxon";
 import React from "react";
-import { CalendarDate } from "../../api/calendar"
+import { CalendarDate } from "../../api/calendar";
+import { daysOfMonth } from "../../utils/date";
 
 interface MonthCalendar {
-  dates: CalendarDate[];
+  dates?: CalendarDate[];
+  date: DateTime;
 }
 
-export const MonthCalendar = ({dates}: MonthCalendar) => {
+export const MonthCalendar = ({dates, date}: MonthCalendar) => {
+  // While loading, display skeleton for number of dates
+  const fallbackDates = daysOfMonth(date);
+
   return <div
   w="full"
   display="grid"
@@ -15,7 +21,7 @@ export const MonthCalendar = ({dates}: MonthCalendar) => {
 >
   {/* repeat(auto-fit, minmax(100px, 1fr)); */}
   <div grid="col-span-full md:col-span-7" text="center green-300" p="b-4">
-    <h1 text="4xl">{dates[0].date.monthLong} {dates[0].date.year}</h1>
+    <h1 text="4xl">{date.monthLong} {date.year}</h1>
   </div>
 
   {[
@@ -32,7 +38,7 @@ export const MonthCalendar = ({dates}: MonthCalendar) => {
     </div>
   ))}
 
-  {dates.map(({ date, target, intervals }, i) => (
+  {dates && dates.map(({ date, target, intervals }, i) => (
     <div
       key={date.toISODate()}
       display="flex"
@@ -64,5 +70,27 @@ export const MonthCalendar = ({dates}: MonthCalendar) => {
       ))}
     </div>
   ))}
+
+  {!dates && fallbackDates.map((date, i) => (
+    <div
+    key={date.toISODate()}
+    display="flex"
+    bg="dark-500"
+    flex="col"
+    h="min-32"
+    w="min-24"
+    p="1"
+    animate="pulse"
+    className={
+      i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
+    }
+  >
+    <div display="flex" flex="row" justify="between" p="b-2">
+      <span text="gray-500">{date.day}</span>
+    </div>
+
+  </div>
+  ))}
+
 </div>
 }
