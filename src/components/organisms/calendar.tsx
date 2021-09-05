@@ -63,6 +63,7 @@ export const MonthCalendar = ({dates, date}: MonthCalendar) => {
           border="rounded"
           text="xs gray-300 center"
           p="1"
+          m="b-1"
         >
           {interval.beginning.toFormat("HH:mm")} -{" "}
           {interval.end?.toFormat("HH:MM")}
