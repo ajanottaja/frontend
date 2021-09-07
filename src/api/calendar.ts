@@ -3,7 +3,7 @@ import { type, string, date, Infer, union, literal, array, enums, optional, null
 import { Configuration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { httpPost, useSwrWithAuth0 } from "./fetch";
-import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration, StepsSchema } from "./schema";
+import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration, StepSchema } from "./schema";
 
 const DateSchema = type({
   date: LuxonDateTime,
@@ -23,7 +23,7 @@ type CalendarResponse = Infer<typeof CalendarResponseSchema>;
 
 const CalendarParamsSchema = type({
   date: IsoDate,
-  step: StepsSchema
+  step: StepSchema
 });
 
 type CalendarParams = Infer<typeof CalendarParamsSchema>;

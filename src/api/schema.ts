@@ -63,8 +63,8 @@ export const IsoDuration = coerce(
 );
 
 
-export const StepsSchema = enums(["day", "week", "month", "year"]);
-export type Steps = Infer<typeof StepsSchema>;
+export const StepSchema = enums(["day", "week", "month", "year"]);
+export type Step = Infer<typeof StepSchema>;
 
 /**
  * 404 responses

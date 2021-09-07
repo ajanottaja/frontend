@@ -1,4 +1,4 @@
-import React, { Fragment } from "react";
+import React, { DetailedHTMLProps, Fragment, HTMLAttributes, SelectHTMLAttributes, useRef } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 
 interface SelectValue {
@@ -7,19 +7,27 @@ interface SelectValue {
   disabled?: boolean;
 }
 
-interface Select<T extends SelectValue> {
+type Select<T extends SelectValue> = DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
   selected: T;
   values: T[];
   setSelected: (selected: T) => void;
 }
 
+
+// interface Select<T extends SelectValue> {
+//   selected: T;
+//   values: T[];
+//   setSelected: (selected: T) => void;
+// }
+
 export function Select<T extends SelectValue>({
   selected,
   values,
   setSelected,
+  ...props
 }: Select<T>) {
   return (
-    <div text="gray-200" w="w-32">
+    <div text="gray-200" w="w-32" {...props}>
       <Listbox value={selected} onChange={setSelected}>
         <div pos="relative">
           <Listbox.Button
@@ -50,6 +58,7 @@ export function Select<T extends SelectValue>({
           >
             <Listbox.Options
               pos="absolute"
+              z="50"
               m="y-1"
               p="0"
               w="full"

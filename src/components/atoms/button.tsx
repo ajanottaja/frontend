@@ -14,7 +14,6 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
   }, [hasFocus])
 
   return <button
-    {...props}
     ref={buttonRef}
     display="flex"
     flex="row"
@@ -24,7 +23,8 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
     animate="hover:pulse focus:pulse"
     border="1 dark-50 hover:green-300 focus:green-300 rounded"
     outline="focus:none"
-    text="gray-200" />;
+    text="gray-200"
+    {...props} />;
 }
 
 type IconButton = Button & {

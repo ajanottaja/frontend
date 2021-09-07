@@ -4,23 +4,24 @@ import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import Header from "../components/layout/header";
 import { useCalendar } from "../api/calendar";
 import { DateTime, Duration } from "luxon";
-import { MonthCalendar } from "../components/organisms/calendar";
+import { MonthCalendar, WeekCalendar } from "../components/organisms/calendar";
 import { Button } from "../components/atoms/button";
 import { Select } from "../components/atoms/select";
 import { queryToSearchString, useQuery } from "../utils/router";
 import { date, defaulted, Infer, optional, type } from "superstruct";
-import { IsoDate, LuxonDateTime, StepsSchema } from "../api/schema";
+import { IsoDate, LuxonDateTime, StepSchema } from "../api/schema";
+import { current, next, previous } from "../utils/date";
 
 const QuerySchema = type({
   date: defaulted(LuxonDateTime, DateTime.now()),
-  step: defaulted(StepsSchema, "month"),
+  step: defaulted(StepSchema, "month"),
 });
 
 type Query = Infer<typeof QuerySchema>;
 
 const SearchSchema = type({
   date: IsoDate,
-  step: StepsSchema,
+  step: StepSchema,
 });
 
 interface Step {
@@ -51,49 +52,133 @@ interface CalendarHeader {
 
 const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
   return (
-    <div display="flex" flex="row" justify="between" w="full" p="y-4">
-      <div display="grid" grid="gap-2 cols-[auto_auto_auto]">
+    <div
+      pos="sticky top-0"
+      bg="dark-800"
+      z="10"
+      display="flex"
+      flex="col"
+      justify="items-stretch"
+      w="full"
+      text="gray-300"
+      >
+      <div
+        z="10"
+        display="grid"
+        grid="cols-[auto_auto_1fr_auto] rows-1 gap-8"
+        align="items-center"
+        justify="start"
+        w="full"
+        p="y-8"
+      >
         <Button
+          text="green-300"
+          border="none"
+          justify="self-start"
+          title="menu"
           onClick={() =>
             navigate({
               ...query,
-              date: DateTime.now(),
+              date: current(query.step),
             })
           }
         >
-          Today
+          <span className="icon-time"></span>
         </Button>
-        <Button
-          onClick={() => {
+        <div display="grid" grid="gap-2 cols-[1fr_auto_auto]" w="max-64">
+          <Button
+            title={query.date.toFormat("DDDD")}
+            onClick={() =>
+              navigate({
+                ...query,
+                date: current(query.step),
+              })
+            }
+          >
+            Today
+          </Button>
+          <Button
+            title={`Previous ${query.step}`}
+            onClick={() => {
+              navigate({
+                ...query,
+                date: previous(query.step, query.date),
+              });
+            }}
+          >
+            <span className="icon-chevron-left"></span>
+          </Button>
+          <Button
+            title={`Next ${query.step}`}
+            onClick={() => {
+              navigate({
+                ...query,
+                date: next(query.step, query.date),
+              });
+            }}
+          >
+            <span className="icon-chevron-right"></span>
+          </Button>
+        </div>
+        <h1 text="green-300 2xl">
+          {query.step === "month" && (
+            <>
+              {" "}
+              {query.date.monthLong} {query.date.year}
+            </>
+          )}
+          {query.step === "week" && (
+            <>
+              {" "}
+              Week {query.date.weekNumber} {query.date.year}
+            </>
+          )}
+        </h1>
+        <Select
+          justify="self-end"
+          values={steps}
+          selected={steps.find((s) => s.id === query.step) ?? steps[0]}
+          setSelected={(s) => {
             navigate({
               ...query,
-              date: query.date.set({ month: query.date.month - 1 }),
+              step: s.id,
             });
           }}
-        >
-          <span className="icon-chevron-left"></span>
-        </Button>
-        <Button
-          onClick={() => {
-            navigate({
-              ...query,
-              date: query.date.set({ month: query.date.month + 1 }),
-            });
-          }}
-        >
-          <span className="icon-chevron-right"></span>
-        </Button>
+        />
       </div>
-      <Select
-        values={steps}
-        selected={steps.find((s) => s.id === query.step) ?? steps[0]}
-        setSelected={(s) => {
-          navigate({
-            ...query,
-            step: s.id,
-          });
-        }}
-      />
+      {query.step === "week" && <div w="min-3xl" bg="dark-800" display="grid" grid="cols-[4rem_auto_auto_auto_auto_auto_auto_auto] col-span-7">
+        <div></div>
+        {[
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ].map((day) => (
+          <div key={day} text="center" p="b-2">
+            {day}
+          </div>
+        ))}
+      </div>}
+
+      {query.step === "month" && <div w="min-3xl" bg="dark-800" display="grid" grid="cols-7 col-span-7">
+        {[
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ].map((day) => (
+          <div key={day} text="center" p="b-2">
+            {day}
+          </div>
+        ))}
+      </div>}
+      
     </div>
   );
 };
@@ -119,7 +204,16 @@ const CalendarInner = ({ auth0, query }: CalendarInner) => {
     return <div>Error</div>;
   }
 
-  return <>{query.step === "month" && <MonthCalendar date={query.date} dates={data.body} />}</>;
+  return (
+    <>
+      {query.step === "month" && (
+        <MonthCalendar date={query.date} dates={data.body} />
+      )}
+      {query.step === "week" && (
+        <WeekCalendar date={query.date} dates={data.body} />
+      )}
+    </>
+  );
 };
 
 const Calendar = () => {
@@ -132,7 +226,7 @@ const Calendar = () => {
       ...location,
       search: queryToSearchString(query, SearchSchema),
     });
-  }
+  };
 
   if (auth0.isLoading) {
     return <div>Is loading</div>;
@@ -152,21 +246,20 @@ const Calendar = () => {
       flex="col"
       align="content-center items-center"
       justify="start"
-      h="full min-screen"
+      h="screen max-screen"
     >
-      <Header />
       <div
         display="flex"
         flex="col grow"
         align="items-center"
         w="full max-screen-7xl"
-        p="x-2"
+        h="screen max-screen"
       >
         <CalendarHeader query={query} navigate={navigate} />
         <Suspense
-          fallback={<>
-            {query.step === "month" && <MonthCalendar date={query.date} />}
-          </>}
+          fallback={
+            <>{query.step === "month" && <MonthCalendar date={query.date} />}</>
+          }
         >
           <CalendarInner auth0={auth0} query={query} />
         </Suspense>
