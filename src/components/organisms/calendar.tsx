@@ -78,7 +78,7 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
                       }}
                     >
                       {interval.beginning.toFormat("HH:mm")} -{" "}
-                      {interval.end?.toFormat("HH:MM")}
+                      {interval.end?.toFormat("HH:mm")}
                     </div>
                   </div>
                 );
