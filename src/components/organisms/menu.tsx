@@ -127,17 +127,11 @@ export const MainMenu = () => {
       w={expanded ? "max-full" : "min-12"}
       bg="dark-600"
       border="r-2 dark-400"
-      p="y-8"
+      p=""
     >
-      <MenuButton
-        expanded={expanded}
-        onClick={() => setExpanded(!expanded)}
-        icon={faArrowRight}
-        expandedIcon={faArrowLeft}
-        title={!expanded ? "Expand menu" : ""}
-      >
-        Collapse
-      </MenuButton>
+      <button h="4" m="b-4" p="x-2" w="full" text="right" animate="wobble duration-1000" onClick={() => setExpanded(!expanded)}>
+        <FontAwesomeIcon icon={expanded ? faTimes : faArrowRight} size="xs" />
+      </button>
 
       <MenuLink
         to="/dashboard"
