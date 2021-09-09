@@ -6,6 +6,8 @@ import React, {
 import { Link, LinkProps, useRouteMatch } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faArrowLeft,
+  faArrowRight,
   faCalendar,
   faChartLine,
   faHamburger,
@@ -58,7 +60,7 @@ const MenuLink = ({
         <FontAwesomeIcon icon={icon} size="lg" />
       </div>
       {expanded && (
-        <div w="full" display="flex" flex="row" justify="center">
+        <div w="full" display="flex" flex="row" justify="start" m="l-4">
           {children}
         </div>
       )}
@@ -71,11 +73,18 @@ type MenuButton = Omit<
   "icon"
 > & {
   icon: IconDefinition;
+  expandedIcon?: IconDefinition;
   expanded: boolean;
 };
 
-const MenuButton = ({ children, icon, expanded, onClick, ...props }: MenuButton) => {
-  
+const MenuButton = ({
+  children,
+  icon,
+  expandedIcon = icon,
+  expanded,
+  onClick,
+  ...props
+}: MenuButton) => {
   return (
     <button
       onClick={onClick}
@@ -93,10 +102,10 @@ const MenuButton = ({ children, icon, expanded, onClick, ...props }: MenuButton)
       {...props}
     >
       <div display="flex" w="4" justify="center">
-        <FontAwesomeIcon icon={icon} size="lg" />
+        <FontAwesomeIcon icon={expanded ? expandedIcon : icon} size="lg" />
       </div>
       {expanded && (
-        <div w="full" display="flex" flex="row" justify="center">
+        <div w="full" display="flex" flex="row" justify="start" m="l-4">
           {children}
         </div>
       )}
@@ -115,13 +124,18 @@ export const MainMenu = () => {
       justify="items-start"
       align="items-start"
       text="gray-300"
-      w={expanded ? "min-64" : "min-12"}
+      w={expanded ? "max-full" : "min-12"}
       bg="dark-600"
       border="r-2 dark-400"
       p="y-8"
     >
-
-      <MenuButton expanded={expanded} onClick={() => setExpanded(!expanded)} icon={faHamburger} title={!expanded ? "Expand menu" : ""}>
+      <MenuButton
+        expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+        icon={faArrowRight}
+        expandedIcon={faArrowLeft}
+        title={!expanded ? "Expand menu" : ""}
+      >
         Collapse
       </MenuButton>
 
@@ -152,10 +166,14 @@ export const MainMenu = () => {
         Statistics
       </MenuLink>
 
-      <MenuButton expanded={expanded} onClick={() => logout()} icon={faSignOutAlt} title={!expanded ? "Sign out" : ""}>
+      <MenuButton
+        expanded={expanded}
+        onClick={() => logout()}
+        icon={faSignOutAlt}
+        title={!expanded ? "Sign out" : ""}
+      >
         Sign out
       </MenuButton>
-      
     </nav>
   );
 };
