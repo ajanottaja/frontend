@@ -4,6 +4,7 @@ import { Switch, Route } from "react-router-dom";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Calendar from "./pages/calendar";
+import { MainMenu } from "./components/organisms/menu";
 
 const ProtectedRoute = ({
   component,
@@ -19,7 +20,10 @@ function App() {
       className="bg-light-200 dark:bg-dark-800"
       w="max-full"
       h="min-full"
+      display="flex"
+      flex="row"
     >
+      <MainMenu />
       <Switch>
         <Route exact path="/" component={Home}>
         </Route>

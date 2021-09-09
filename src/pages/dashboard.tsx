@@ -135,19 +135,10 @@ const Dashboard = () => {
   }
 
   return (
-    <div
-      display="flex"
-      flex="col"
-      align="content-center"
-      justify="start"
-      h="min-screen"
-    >
-      <Header />
-      <div display="flex" flex="col grow" justify="content-center">
+    <div w="full" display="flex" flex="col" justify="center" align="items-center">
         <div
-          w="max-w-7xl full"
           justify="self-center items-center"
-          align="self-center items-self-stretch"
+          align="self-center items-center"
           display="grid"
           grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-8"
           p="<lg:x-4"
@@ -184,7 +175,6 @@ const Dashboard = () => {
           </Suspense>
         </div>
       </div>
-    </div>
   );
 };
 

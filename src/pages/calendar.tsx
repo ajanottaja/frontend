@@ -65,26 +65,12 @@ const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
       <div
         z="10"
         display="grid"
-        grid="cols-[auto_auto_1fr_auto] rows-1 gap-8"
+        grid="cols-[auto_1fr_auto] rows-1 gap-8"
         align="items-center"
         justify="start"
         w="full"
         p="y-8"
       >
-        <Button
-          text="green-300"
-          border="none"
-          justify="self-start"
-          title="menu"
-          onClick={() =>
-            navigate({
-              ...query,
-              date: current(query.step),
-            })
-          }
-        >
-          <span className="icon-time"></span>
-        </Button>
         <div display="grid" grid="gap-2 cols-[1fr_auto_auto]" w="max-64">
           <Button
             title={query.date.toFormat("DDDD")}
@@ -247,6 +233,8 @@ const Calendar = () => {
       align="content-center items-center"
       justify="start"
       h="screen max-screen"
+      w="full"
+      p="x-6"
     >
       <div
         display="flex"
