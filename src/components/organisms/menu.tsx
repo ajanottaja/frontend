@@ -121,7 +121,7 @@ export const MainMenu = () => {
       p="y-8"
     >
 
-      <MenuButton expanded={expanded} onClick={() => setExpanded(!expanded)} icon={faHamburger} m="y-4">
+      <MenuButton expanded={expanded} onClick={() => setExpanded(!expanded)} icon={faHamburger} title={!expanded ? "Expand menu" : ""}>
         Collapse
       </MenuButton>
 
@@ -152,7 +152,7 @@ export const MainMenu = () => {
         Statistics
       </MenuLink>
 
-      <MenuButton expanded={expanded} onClick={() => setExpanded(!expanded)} icon={faSignOutAlt}>
+      <MenuButton expanded={expanded} onClick={() => logout()} icon={faSignOutAlt} title={!expanded ? "Sign out" : ""}>
         Sign out
       </MenuButton>
       
