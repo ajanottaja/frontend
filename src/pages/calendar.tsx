@@ -1,7 +1,6 @@
 import React, { Suspense, useReducer } from "react";
 import { useHistory } from "react-router-dom";
 import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
-import Header from "../components/layout/header";
 import { useCalendar } from "../api/calendar";
 import { DateTime, Duration } from "luxon";
 import { MonthCalendar, WeekCalendar } from "../components/organisms/calendar";

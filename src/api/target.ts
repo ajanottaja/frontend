@@ -22,28 +22,28 @@ type ActiveTargetResponse = Infer<typeof ActiveTargetResponseSchema>;
 
 
 export const useActiveTarget = (auth0: Auth0ContextInterface<User>) => {
-  return useSwrWithAuth0<undefined, ActiveTargetResponse>({ url: `${apiHost}/targets/active`, auth0, responseSchema: ActiveTargetResponseSchema });
+  return useSwrWithAuth0<undefined, ActiveTargetResponse>({ url: `${apiHost}/targets-active`, auth0, responseSchema: ActiveTargetResponseSchema });
 }
 
 
-const UpsertActiveTargetParamSchema = type({
+const CreateTargetParamSchema = type({
   date: IsoDate,
   duration: IsoDuration
 });
 
-type UpsertActiveTargetParams = Infer<typeof UpsertActiveTargetParamSchema>;
+type CreateTargetParams = Infer<typeof CreateTargetParamSchema>;
 
-interface UpsertActiveTarget {
+interface CreateTarget {
   auth0: Auth0ContextInterface<User>;
-  params: UpsertActiveTargetParams;
+  params: CreateTargetParams;
 }
 
-export const upsertActiveTarget = async ({auth0: {getAccessTokenSilently}, params}: UpsertActiveTarget) => {
-  return await httpPost<UpsertActiveTargetParams, ActiveTargetResponse>({
+export const createActiveTarget = async ({auth0: {getAccessTokenSilently}, params}: CreateTarget) => {
+  return await httpPost<CreateTargetParams, ActiveTargetResponse>({
     url: `${apiHost}/targets`,
     params,
     getAccessTokenSilently,
-    requestSchema: UpsertActiveTargetParamSchema,
+    requestSchema: CreateTargetParamSchema,
     responseSchema: ActiveTargetResponseSchema,
   });
 }

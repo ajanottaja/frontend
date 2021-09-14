@@ -48,12 +48,12 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
             <div display="grid" grid="rows-24 gap-1" h="[720px]" pos="relative">
               {intervals.map((interval) => {
                 const minutesPastMidnight =
-                  interval.beginning
-                    .diff(interval.beginning.startOf("day"))
+                  interval.interval.beginning
+                    .diff(interval.interval.beginning.startOf("day"))
                     .as("minutes") / 2;
                 const length =
-                  (interval.end ?? DateTime.now())
-                    .diff(interval.beginning)
+                  (interval.interval.end ?? DateTime.now())
+                    .diff(interval.interval.beginning)
                     .as("minutes") / 2;
                 return (
                   <div
@@ -65,7 +65,7 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
                     }}
                   >
                     <div
-                      key={interval.beginning.toISODate()}
+                      key={interval.interval.beginning.toISODate()}
                       bg="green-900"
                       border="rounded"
                       text="xs gray-300 center"
@@ -77,8 +77,8 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
                         height: `${length}px`,
                       }}
                     >
-                      {interval.beginning.toFormat("HH:mm")} -{" "}
-                      {interval.end?.toFormat("HH:mm")}
+                      {interval.interval.beginning.toFormat("HH:mm")} -{" "}
+                      {interval.interval.end?.toFormat("HH:mm")}
                     </div>
                   </div>
                 );
@@ -125,20 +125,20 @@ export const MonthCalendar = ({ dates, date }: Calendar) => {
           >
             <div display="flex" flex="row" justify="between" p="b-2">
               <span text="gray-500">{date.day}</span>
-              {target && <span text="sm">{target.toFormat("hh:mm")}</span>}
+              {target && <span text="sm">{target.duration.toFormat("hh:mm")}</span>}
             </div>
 
             {intervals.map((interval) => (
               <div
-                key={interval.beginning.toISODate()}
+                key={interval.interval.beginning.toISODate()}
                 bg="green-900"
                 border="rounded"
                 text="xs gray-300 center"
                 p="1"
                 m="b-1"
               >
-                {interval.beginning.toFormat("HH:mm")} -{" "}
-                {interval.end?.toFormat("HH:mm")}
+                {interval.interval.beginning.toFormat("HH:mm")} -{" "}
+                {interval.interval.end?.toFormat("HH:mm")}
               </div>
             ))}
           </div>

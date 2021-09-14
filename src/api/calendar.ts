@@ -3,13 +3,25 @@ import { type, string, date, Infer, union, literal, array, enums, optional, null
 import { Configuration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { httpPost, useSwrWithAuth0 } from "./fetch";
+import { IntervalSchema } from "./interval";
 import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration, StepSchema } from "./schema";
+
+const IntervalRecordSchema = type({
+  id: string(),
+  interval: IntervalSchema,
+});
+
+const TargetRecordSchema = type({
+  id: string(),
+  duration: LuxonDuration,
+});
 
 const DateSchema = type({
   date: LuxonDateTime,
-  target: nullable(LuxonDuration),
-  intervals: array(Interval)
+  target: nullable(TargetRecordSchema),
+  intervals: array(IntervalRecordSchema)
 });
+
 export type CalendarDate = Infer<typeof DateSchema>;
 
 const CalendarSchema = type({

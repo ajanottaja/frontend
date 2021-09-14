@@ -22,7 +22,7 @@ import {
 
 // Common interval schemas
 
-const IntervalSchema = type({
+export const IntervalSchema = type({
   beginning: LuxonDateTime,
   end: LuxonDateTime,
 });
@@ -51,7 +51,7 @@ type IntervalsResponse = Infer<typeof IntervalsResponseSchema>;
 export const useIntervals = (auth0: Auth0ContextInterface<User>) => {
   return useSwrWithAuth0<undefined, IntervalsResponse>({
     auth0,
-    url: `${apiHost}/intervals/active`,
+    url: `${apiHost}/intervals`,
     responseSchema: IntervalsResponseSchema,
   });
 };
@@ -73,7 +73,7 @@ type ActiveIntervalResponse = Infer<typeof ActiveIntervalResponseSchema>;
 export const useActiveInterval = (auth0: Auth0ContextInterface<User>) => {
   return useSwrWithAuth0<undefined, ActiveIntervalResponse>({
     auth0,
-    url: `${apiHost}/intervals/active`,
+    url: `${apiHost}/intervals-active`,
     responseSchema: ActiveIntervalResponseSchema,
   });
 };
@@ -88,7 +88,7 @@ export const startInterval = async ({
   auth0: { getAccessTokenSilently },
 }: StartIntervalArgs) => {
   return await httpPost<undefined, ActiveIntervalResponse>({
-    url: `${apiHost}/intervals/start`,
+    url: `${apiHost}/intervals-active/start`,
     getAccessTokenSilently,
     responseSchema: ActiveIntervalResponseSchema,
   });
@@ -104,7 +104,7 @@ export const stopInterval = async ({
   auth0: { getAccessTokenSilently },
 }: StopIntervalArgs) => {
   return await httpPost<undefined, ActiveIntervalResponse>({
-    url: `${apiHost}/intervals/stop`,
+    url: `${apiHost}/intervals-active/stop`,
     getAccessTokenSilently,
     responseSchema: ActiveIntervalResponseSchema,
   });

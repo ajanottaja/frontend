@@ -1,13 +1,9 @@
 import React, { useEffect, useState, Suspense } from "react";
-import logo from "./logo.svg";
 import {
   Auth0ContextInterface,
   useAuth0,
   User,
-  withAuthenticationRequired,
 } from "@auth0/auth0-react";
-import useSWR, { mutate } from "swr";
-import Header from "../components/layout/header";
 import DurationInput from "../components/atoms/duration-form";
 import Timer from "../components/atoms/timer";
 import { DateTime, Duration } from "luxon";
@@ -16,8 +12,8 @@ import {
   stopInterval,
   useActiveInterval,
 } from "../api/interval";
-import { upsertActiveTarget, useActiveTarget } from "../api/target";
-import { useStatisticsSummary, StatisticsSummary } from "../api/statistics";
+import { createActiveTarget, useActiveTarget } from "../api/target";
+import { useStatisticsSummary } from "../api/statistics";
 import { absDuration, isNegativeDuration } from "../utils/date";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
@@ -28,7 +24,7 @@ const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
       activeTarget={data?.status === 200 ? data.body.duration : undefined}
       setActiveTarget={async (duration: Duration) => {
         const date = DateTime.now();
-        const res = await upsertActiveTarget({
+        const res = await createActiveTarget({
           auth0,
           params: { duration, date },
         });
