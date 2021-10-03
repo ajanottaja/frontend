@@ -5,7 +5,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
 import { IntervalRecord } from "../../api/calendar";
-import { updateInterval } from "../../api/interval";
+import { updateInterval, deleteInterval } from "../../api/interval";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import TimePicker from "../atoms/time-picker";
@@ -38,6 +38,18 @@ export const IntervalEditor = ({
       mutate();
     }
   };
+
+  const removeInterval = async () => {
+    const res = await deleteInterval({
+      auth0,
+      path: { id: intervalRecord.id },
+    });
+
+    if(res.status === 200) {
+      close();
+      mutate();
+    }
+  }
 
   return (
     <Transition show={isOpen} as={Fragment}>
@@ -175,6 +187,7 @@ export const IntervalEditor = ({
                 <Button
                   text="red-300"
                   border="1 dark-50 hover:red-300 focus:red-300 rounded"
+                  onClick={removeInterval}
                 >
                   Delete
                 </Button>

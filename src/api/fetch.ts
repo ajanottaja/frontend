@@ -107,6 +107,9 @@ export const httpPut = async <Path, Query, Body, Response>(args: HttpMethodArgs<
   return http({...args, method: "PUT"});
 }
 
+export const httpDelete = async <Path, Query, Body, Response>(args: HttpMethodArgs<Path, Query, Body, Response>) => {
+  return http({...args, method: "DELETE"});
+}
 
 export const swrFetcher =
   <Path, Query, Body, Response>(args: Omit<HttpMethodArgs<Path, Query, Body, Response>, "url">) =>

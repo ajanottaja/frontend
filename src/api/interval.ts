@@ -11,10 +11,8 @@ import {
   array,
 } from "superstruct";
 import { apiHost } from "../config";
-import { paths } from "../schema";
-import { ApiResponse, httpPatch, httpPost, useSwrWithAuth0 } from "./fetch";
+import { httpPatch, httpPost, httpDelete, useSwrWithAuth0 } from "./fetch";
 import {
-  ErrorSchemas,
   InternalServerErrorSchema,
   LuxonDateTime,
   NotFoundSchema,
@@ -138,6 +136,33 @@ export const updateInterval = async ({auth0: {getAccessTokenSilently}, path, bod
     url: `${apiHost}/intervals/:id`,
     path: {schema: UpdateIntervalPathSchema, value: path},
     body: {schema: UpdateIntervalBodySchema, value: body},
+    getAccessTokenSilently,
+    responseSchema: IntervalResponseSchema,
+  });
+}
+
+
+// Delete an interval
+
+const DeleteIntervalPathSchema = type({
+  id: Uuid,
+});
+
+type DeleteIntervalPath = Infer<typeof DeleteIntervalPathSchema>;
+
+const DeleteIntervalBodySchema = type({
+  interval: IntervalSchema
+});
+
+interface DeleteInterval {
+  auth0: Auth0ContextInterface<User>;
+  path: DeleteIntervalPath;
+}
+
+export const deleteInterval = async ({auth0: {getAccessTokenSilently}, path}: DeleteInterval) => {
+  return await httpDelete<UpdateIntervalPath, undefined, UpdateIntervalBody, IntervalResponse>({
+    url: `${apiHost}/intervals/:id`,
+    path: {schema: UpdateIntervalPathSchema, value: path},
     getAccessTokenSilently,
     responseSchema: IntervalResponseSchema,
   });
