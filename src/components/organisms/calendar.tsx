@@ -112,9 +112,11 @@ const Interval = ({ interval, auth0 }: { interval: IntervalRecord; auth0: Auth0C
     <button
       key={interval.id}
       role="button"
-      bg="green-900"
+      bg="green-900 focus:green-800"
       border="rounded"
       text="xs gray-300 center"
+      outline="focus:none"
+      focus="animate-pulse"
       w="full"
       p="1"
       m="b-1"
