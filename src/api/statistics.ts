@@ -1,6 +1,6 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { type, Infer, union, literal, array, enums } from "superstruct";
-import { Configuration } from "swr/dist/types";
+import { PublicConfiguration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { useSwrWithAuth0 } from "./fetch";
 import { InternalServerErrorSchema, LuxonDuration } from "./schema";
@@ -23,6 +23,6 @@ const StatisticsSummaryResponseSchema = union([StatisticsSummarySchema, Internal
 type StatisticsSummaryResponse = Infer<typeof StatisticsSummaryResponseSchema>;
 
 
-export const useStatisticsSummary = (auth0: Auth0ContextInterface<User>, swrOpts: Partial<Configuration> | undefined = {}) => {
-  return useSwrWithAuth0<undefined, StatisticsSummaryResponse>({ url: `${apiHost}/statistics/summary`, auth0, responseSchema: StatisticsSummaryResponseSchema }, swrOpts);
+export const useStatisticsSummary = (auth0: Auth0ContextInterface<User>, swrOpts: Partial<PublicConfiguration> | undefined = {}) => {
+  return useSwrWithAuth0<undefined, undefined, undefined, StatisticsSummaryResponse>({ url: `${apiHost}/statistics/summary`, auth0, responseSchema: StatisticsSummaryResponseSchema }, swrOpts);
 }

@@ -117,3 +117,8 @@ export const next = (unit: Step, date: DateTime) => {
  * @returns date for current unit
  */
 export const current = (unit: Step) => DateTime.now().startOf(unit);
+
+
+
+
+export const weekdays = ["Monday", "Tuesday", "Wednesday", "Thurday", "Friday", "Saturday", "Sunday"];

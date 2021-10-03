@@ -10,6 +10,7 @@ import { queryToSearchString, useQuery } from "../utils/router";
 import { date, defaulted, Infer, optional, type } from "superstruct";
 import { IsoDate, LuxonDateTime, StepSchema } from "../api/schema";
 import { current, next, previous } from "../utils/date";
+import { SwrMutateProvider } from "../components/providers/swr-mutation-provider";
 
 const QuerySchema = type({
   date: defaulted(LuxonDateTime, DateTime.now()),
@@ -35,8 +36,6 @@ interface CalendarState {
   steps: Step[];
   selectedStep: Step;
 }
-
-type Action = { type: "setSelectedStep"; payload: Step };
 
 const steps: Step[] = [
   { id: "day", label: "Day" },
@@ -176,7 +175,7 @@ interface CalendarInner {
 const CalendarInner = ({ auth0, query }: CalendarInner) => {
   const { data, error, mutate } = useCalendar({
     auth0,
-    params: {
+    query: {
       date: query.date.startOf(query.step),
       step: query.step,
     },
@@ -189,15 +188,18 @@ const CalendarInner = ({ auth0, query }: CalendarInner) => {
     return <div>Error</div>;
   }
 
+  const provider = {mutate};
+
+
   return (
-    <>
+    <SwrMutateProvider value={provider}>
       {query.step === "month" && (
-        <MonthCalendar date={query.date} dates={data.body} />
+        <MonthCalendar date={query.date} dates={data.body} auth0={auth0} />
       )}
       {query.step === "week" && (
-        <WeekCalendar date={query.date} dates={data.body} />
+        <WeekCalendar date={query.date} dates={data.body} auth0={auth0} />
       )}
-    </>
+    </SwrMutateProvider>
   );
 };
 
@@ -245,7 +247,7 @@ const Calendar = () => {
         <CalendarHeader query={query} navigate={navigate} />
         <Suspense
           fallback={
-            <>{query.step === "month" && <MonthCalendar date={query.date} />}</>
+            <>{query.step === "month" && <MonthCalendar auth0={auth0} date={query.date} />}</>
           }
         >
           <CalendarInner auth0={auth0} query={query} />

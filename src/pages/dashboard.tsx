@@ -26,7 +26,7 @@ const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
         const date = DateTime.now();
         const res = await createActiveTarget({
           auth0,
-          params: { duration, date },
+          body: { duration, date },
         });
         mutate();
       }}

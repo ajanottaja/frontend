@@ -1,18 +1,28 @@
+import { Auth0ContextInterface, User } from "@auth0/auth0-react";
+import { Transition } from "@headlessui/react";
 import { DateTime } from "luxon";
-import React from "react";
-import { CalendarDate } from "../../api/calendar";
+import React, { Fragment, useState } from "react";
+import { CalendarDate, IntervalRecord } from "../../api/calendar";
 import { daysOfMonth, daysOfWeek } from "../../utils/date";
+import { IntervalEditor } from "./interval-editor";
 
 interface Calendar {
   dates?: CalendarDate[];
   date: DateTime;
+  auth0: Auth0ContextInterface<User>;
 }
 
 export const WeekCalendar = ({ dates, date }: Calendar) => {
   const fallbackDates = daysOfWeek(date);
 
   return (
-    <div display="flex" flex="col" justify="items-end" w="full" overflow="y-auto">
+    <div
+      display="flex"
+      flex="col"
+      justify="items-end"
+      w="full"
+      overflow="y-auto"
+    >
       <div
         w="min-full full"
         display="grid"
@@ -96,11 +106,51 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
   );
 };
 
-export const MonthCalendar = ({ dates, date }: Calendar) => {
+const Interval = ({ interval, auth0 }: { interval: IntervalRecord; auth0: Auth0ContextInterface<User> }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  return (
+    <button
+      key={interval.id}
+      role="button"
+      bg="green-900"
+      border="rounded"
+      text="xs gray-300 center"
+      w="full"
+      p="1"
+      m="b-1"
+      onClick={() => setIsEditing(true)}
+    >
+      {interval.interval.beginning.toFormat("HH:mm")} -{" "}
+      {interval.interval.end.isValid
+        ? interval.interval.end.toFormat("HH:mm")
+        : "now"}
+      <IntervalEditor
+        auth0={auth0}
+        interval={interval}
+        isOpen={isEditing}
+        close={() => setIsEditing(false)}
+      />
+    </button>
+  );
+};
+
+export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
   // While loading, display skeleton for number of dates
   const fallbackDates = daysOfMonth(date);
 
   return (
+
+    <Transition
+    w="full"
+    show
+    appear
+    enter="ease-out duration-1000 delay-50"
+    enterFrom="opacity-0 scale-95"
+    enterTo="opacity-100 scale-100"
+    leave="ease-in duration-200"
+    leaveFrom="opacity-100 scale-100"
+    leaveTo="opacity-0 scale-95"
+  >
     <div
       w="full"
       flex="grow"
@@ -125,21 +175,24 @@ export const MonthCalendar = ({ dates, date }: Calendar) => {
           >
             <div display="flex" flex="row" justify="between" p="b-2">
               <span text="gray-500">{date.day}</span>
-              {target && <span text="sm">{target.duration.toFormat("hh:mm")}</span>}
+              {target && (
+                <span text="sm">{target.duration.toFormat("hh:mm")}</span>
+              )}
             </div>
 
             {intervals.map((interval) => (
-              <div
-                key={interval.interval.beginning.toISODate()}
-                bg="green-900"
-                border="rounded"
-                text="xs gray-300 center"
-                p="1"
-                m="b-1"
+              <Transition.Child
+                key={interval.id}
+                appear
+                enter="ease-out duration-1000"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                {interval.interval.beginning.toFormat("HH:mm")} -{" "}
-                {interval.interval.end?.toFormat("HH:mm")}
-              </div>
+                <Interval interval={interval} auth0={auth0} />
+              </Transition.Child>
             ))}
           </div>
         ))}
@@ -165,5 +218,6 @@ export const MonthCalendar = ({ dates, date }: Calendar) => {
           </div>
         ))}
     </div>
+    </Transition>
   );
 };

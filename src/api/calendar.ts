@@ -1,15 +1,17 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { type, string, date, Infer, union, literal, array, enums, optional, nullable } from "superstruct";
-import { Configuration } from "swr/dist/types";
+import { PublicConfiguration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { httpPost, useSwrWithAuth0 } from "./fetch";
 import { IntervalSchema } from "./interval";
-import { InternalServerErrorSchema, Interval, IsoDate, LuxonDateTime, LuxonDuration, StepSchema } from "./schema";
+import { InternalServerErrorSchema, IsoDate, LuxonDateTime, LuxonDuration, StepSchema } from "./schema";
 
 const IntervalRecordSchema = type({
   id: string(),
   interval: IntervalSchema,
 });
+
+export type IntervalRecord = Infer<typeof IntervalRecordSchema>;
 
 const TargetRecordSchema = type({
   id: string(),
@@ -42,15 +44,14 @@ type CalendarParams = Infer<typeof CalendarParamsSchema>;
 
 interface UseCalendar {
   auth0: Auth0ContextInterface<User>;
-  swrOpts?: Partial<Configuration>;
-  params: CalendarParams;
+  swrOpts?: Partial<PublicConfiguration>;
+  query: CalendarParams;
 }
 
-export const useCalendar = ({params, auth0, swrOpts = {}}: UseCalendar) => {
-  return useSwrWithAuth0<CalendarParams, CalendarResponse>({ 
+export const useCalendar = ({query, auth0, swrOpts = {}}: UseCalendar) => {
+  return useSwrWithAuth0<undefined, CalendarParams, undefined, CalendarResponse>({ 
     url: `${apiHost}/calendar`,
-    params,
+    query: {value: query, schema: CalendarParamsSchema},
     auth0,
-    requestSchema: CalendarParamsSchema,
     responseSchema: CalendarResponseSchema }, swrOpts);
 }

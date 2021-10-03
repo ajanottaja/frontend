@@ -30,10 +30,14 @@ export const LuxonDuration = coerce(
 /**
  * Validate and coerce Interval map of beginning and end date times
  */
-export const Interval = type({
+export const IntervalSchema = type({
   beginning: LuxonDateTime,
   end: nullable(LuxonDateTime)
 });
+
+
+export type Interval = Infer<typeof IntervalSchema>;
+
 
 /**
  * Validate and coerce Luxon DateTimes as ISO Date strings
@@ -62,9 +66,12 @@ export const IsoDuration = coerce(
   (value: Duration) => value.toISO()
 );
 
+export const Uuid = define<string>('Uuid', v => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v as string));
 
 export const StepSchema = enums(["day", "week", "month", "year"]);
 export type Step = Infer<typeof StepSchema>;
+
+
 
 /**
  * 404 responses
