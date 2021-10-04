@@ -12,7 +12,7 @@ import {
   stopInterval,
   useActiveInterval,
 } from "../api/interval";
-import { createActiveTarget, useActiveTarget } from "../api/target";
+import { createTarget, useActiveTarget } from "../api/target";
 import { useStatisticsSummary } from "../api/statistics";
 import { absDuration, isNegativeDuration } from "../utils/date";
 
@@ -24,7 +24,7 @@ const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
       activeTarget={data?.status === 200 ? data.body.duration : undefined}
       setActiveTarget={async (duration: Duration) => {
         const date = DateTime.now();
-        const res = await createActiveTarget({
+        const res = await createTarget({
           auth0,
           body: { duration, date },
         });

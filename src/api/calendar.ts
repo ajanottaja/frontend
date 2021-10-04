@@ -13,10 +13,13 @@ const IntervalRecordSchema = type({
 
 export type IntervalRecord = Infer<typeof IntervalRecordSchema>;
 
+
 const TargetRecordSchema = type({
   id: string(),
   duration: LuxonDuration,
 });
+
+export type TargetRecord = Infer<typeof TargetRecordSchema>;
 
 const DateSchema = type({
   date: LuxonDateTime,

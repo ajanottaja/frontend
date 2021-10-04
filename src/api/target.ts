@@ -1,11 +1,26 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { type, string, date, Infer, union, literal } from "superstruct";
 import { apiHost } from "../config";
-import { httpPatch, httpPost, useSwrWithAuth0 } from "./fetch";
-import { InternalServerErrorSchema, IsoDate, IsoDateTime, IsoDuration, LuxonDateTime, LuxonDuration, NotFoundSchema, Uuid } from "./schema";
+import { httpDelete, httpPatch, httpPost, useSwrWithAuth0 } from "./fetch";
+import {
+  InternalServerErrorSchema,
+  IsoDate,
+  IsoDateTime,
+  IsoDuration,
+  LuxonDateTime,
+  LuxonDuration,
+  NotFoundSchema,
+  Uuid,
+} from "./schema";
 
 
-const ActiveTargetSchema = type({
+const TargetPathSchema = type({
+  id: Uuid,
+});
+
+type TargetPath = Infer<typeof TargetPathSchema>;
+
+const TargetSchema = type({
   status: literal(200),
   body: type({
     id: string(),
@@ -14,21 +29,31 @@ const ActiveTargetSchema = type({
     updatedAt: LuxonDateTime,
     date: LuxonDateTime,
     duration: LuxonDuration,
-  })
+  }),
 });
 
-const ActiveTargetResponseSchema = union([ActiveTargetSchema, NotFoundSchema, InternalServerErrorSchema]);
-type ActiveTargetResponse = Infer<typeof ActiveTargetResponseSchema>;
+const TargetResponseSchema = union([
+  TargetSchema,
+  NotFoundSchema,
+  InternalServerErrorSchema,
+]);
+type TargetResponse = Infer<typeof TargetResponseSchema>;
 
+// Get active target
 
 export const useActiveTarget = (auth0: Auth0ContextInterface<User>) => {
-  return useSwrWithAuth0<undefined, undefined, undefined, ActiveTargetResponse>({ url: `${apiHost}/targets-active`, auth0, responseSchema: ActiveTargetResponseSchema });
-}
+  return useSwrWithAuth0<undefined, undefined, undefined, TargetResponse>({
+    url: `${apiHost}/targets-active`,
+    auth0,
+    responseSchema: TargetResponseSchema,
+  });
+};
 
+// Create target
 
 const CreateTargetBodySchema = type({
   date: IsoDate,
-  duration: IsoDuration
+  duration: IsoDuration,
 });
 
 type CreateTargetBody = Infer<typeof CreateTargetBodySchema>;
@@ -38,40 +63,75 @@ interface CreateTarget {
   body: CreateTargetBody;
 }
 
-export const createActiveTarget = async ({auth0: {getAccessTokenSilently}, body}: CreateTarget) => {
-  return await httpPost<undefined, undefined, CreateTargetBody, ActiveTargetResponse>({
-    url: `${apiHost}/targets`,
-    body: { value: body, schema: CreateTargetBodySchema },
-    getAccessTokenSilently,
-    responseSchema: ActiveTargetResponseSchema,
-  });
-}
+export const createTarget = async ({
+  auth0: { getAccessTokenSilently },
+  body,
+}: CreateTarget) => {
+  return await httpPost<undefined, undefined, CreateTargetBody, TargetResponse>(
+    {
+      url: `${apiHost}/targets`,
+      body: { value: body, schema: CreateTargetBodySchema },
+      getAccessTokenSilently,
+      responseSchema: TargetResponseSchema,
+    }
+  );
+};
 
-
-const UpdateTargetPathSchema = type({
-  id: Uuid,
-});
-
-type UpdateTargetPath = Infer<typeof UpdateTargetPathSchema>;
-
+// Update target
 const UpdateTargetBodySchema = type({
-  duration: IsoDuration
+  duration: IsoDuration,
 });
 
 type UpdateTargetBody = Infer<typeof UpdateTargetBodySchema>;
 
 interface UpdateTarget {
   auth0: Auth0ContextInterface<User>;
-  path: UpdateTargetPath;
+  path: TargetPath;
   body: UpdateTargetBody;
 }
 
-export const updateActiveTarget = async ({auth0: {getAccessTokenSilently}, path, body}: UpdateTarget) => {
-  return await httpPatch<UpdateTargetPath, undefined, UpdateTargetBody, ActiveTargetResponse>({
+export const updateTarget = async ({
+  auth0: { getAccessTokenSilently },
+  path,
+  body,
+}: UpdateTarget) => {
+  return await httpPatch<
+    TargetPath,
+    undefined,
+    UpdateTargetBody,
+    TargetResponse
+  >({
     url: `${apiHost}/targets/:id`,
-    path: {schema: UpdateTargetPathSchema, value: path},
-    body: {schema: UpdateTargetBodySchema, value: body},
+    path: { schema: TargetPathSchema, value: path },
+    body: { schema: UpdateTargetBodySchema, value: body },
     getAccessTokenSilently,
-    responseSchema: ActiveTargetResponseSchema,
+    responseSchema: TargetResponseSchema,
   });
+};
+
+// Delete target
+
+
+
+
+interface DeleteTarget {
+  auth0: Auth0ContextInterface<User>;
+  path: TargetPath;
 }
+
+export const deleteTarget = async ({
+  auth0: { getAccessTokenSilently },
+  path,
+}: DeleteTarget) => {
+  return await httpDelete<
+    TargetPath,
+    undefined,
+    undefined,
+    TargetResponse
+  >({
+    url: `${apiHost}/targets/:id`,
+    path: { schema: TargetPathSchema, value: path },
+    getAccessTokenSilently,
+    responseSchema: TargetResponseSchema,
+  });
+};

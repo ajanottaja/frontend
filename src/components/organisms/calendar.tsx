@@ -2,9 +2,10 @@ import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { Transition } from "@headlessui/react";
 import { DateTime } from "luxon";
 import React, { Fragment, useState } from "react";
-import { CalendarDate, IntervalRecord } from "../../api/calendar";
+import { CalendarDate, IntervalRecord, TargetRecord } from "../../api/calendar";
 import { daysOfMonth, daysOfWeek } from "../../utils/date";
 import { IntervalEditor } from "./interval-editor";
+import { TargetEditor } from "./target-editor";
 
 interface Calendar {
   dates?: CalendarDate[];
@@ -106,6 +107,32 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
   );
 };
 
+const Target = ({ target, auth0 }: { target: TargetRecord; auth0: Auth0ContextInterface<User> }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  return (
+    <button
+      key={target.id}
+      role="button"
+      border="rounded"
+      text="xs gray-300 right"
+      outline="focus:none"
+      focus="animate-pulse"
+      w="full"
+      p="1"
+      m="b-1"
+      onClick={() => setIsEditing(true)}
+    >
+      {target.duration.toFormat("hh:mm")}
+      <TargetEditor
+        auth0={auth0}
+        target={target}
+        isOpen={isEditing}
+        close={() => setIsEditing(false)}
+      />
+    </button>
+  );
+};
+
 const Interval = ({ interval, auth0 }: { interval: IntervalRecord; auth0: Auth0ContextInterface<User> }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -177,9 +204,7 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
           >
             <div display="flex" flex="row" justify="between" p="b-2">
               <span text="gray-500">{date.day}</span>
-              {target && (
-                <span text="sm">{target.duration.toFormat("hh:mm")}</span>
-              )}
+              {target && <Target target={target} auth0={auth0} />}
             </div>
 
             {intervals.map((interval) => (
