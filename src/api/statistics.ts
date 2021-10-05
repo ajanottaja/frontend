@@ -6,7 +6,7 @@ import { useSwrWithAuth0 } from "./fetch";
 import { InternalServerErrorSchema, LuxonDuration } from "./schema";
 
 const SummarySchema = type({
-  unit: enums(["day", "week", "month"]),
+  unit: enums(["day", "week", "month", "all"]),
   target: LuxonDuration,
   tracked: LuxonDuration,
   diff: LuxonDuration,

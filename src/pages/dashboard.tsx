@@ -82,6 +82,7 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     day: data.body.find((d) => d.unit === "day"),
     week: data.body.find((d) => d.unit === "week"),
     month: data.body.find((d) => d.unit === "month"),
+    all: data.body.find((d) => d.unit === "all")
   };
 
   const formatDuration = (
@@ -91,24 +92,28 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
 
   return (
     <div
+      h="full"
       display="grid"
       grid="cols-1 gap-y-1"
-      justify="self-center"
-      align="items-center"
+      justify="self-center items-stretch"
       text="center xl <lg:base"
     >
-      <h2 text="4xl <lg:3xl center dark:gray-300" align="self-start">
+      <h2 text="4xl <lg:3xl center dark:gray-300" m="b-4" align="self-start">
         Time summary
       </h2>
-      <span text="gray-300">
+      <span text="gray-300" m="0">
         Day: {formatDuration(summary.day?.diff, "h 'hours' m 'minutes'")}
       </span>
-      <span text="gray-300">
+      <span text="gray-300" m="0">
         Week:{" "}
         {formatDuration(summary.week?.diff, "d 'days' h 'hours' m 'minutes'")}
       </span>
-      <span text="gray-300">
+      <span text="gray-300" m="0">
         Month:{" "}
+        {formatDuration(summary.month?.diff, "d 'days' h 'hours' m 'minutes'")}
+      </span>
+      <span text="green-300" m="0">
+        All time:{" "}
         {formatDuration(summary.month?.diff, "d 'days' h 'hours' m 'minutes'")}
       </span>
     </div>
