@@ -106,7 +106,7 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
       </span>
       <span text="gray-300" m="0">
         Week:{" "}
-        {formatDuration(summary.week?.diff, "d 'days' h 'hours' m 'minutes'")}
+        {formatDuration(summary.week?.diff, "h 'hours' m 'minutes'")}
       </span>
       <span text="gray-300" m="0">
         Month:{" "}
