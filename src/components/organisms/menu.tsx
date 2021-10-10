@@ -210,7 +210,9 @@ const MobileMenuLink = ({
       {...props}
     >
       <div w="full" display="flex" flex="row" justify="start" m="l-4">
-        <FontAwesomeIcon icon={icon} size="lg" m="r-4" />
+        <span  m="r-4">
+          <FontAwesomeIcon icon={icon} size="lg"/>
+        </span>
         {children}
       </div>
     </Disclosure.Button>
@@ -240,7 +242,9 @@ const MobileMenuButton = ({
         {...props}
       >
         <div w="full" display="flex" flex="row" justify="start" m="l-4">
-          <FontAwesomeIcon icon={icon} size="lg" m="r-4" />
+          <span m="r-4">
+            <FontAwesomeIcon icon={icon} size="lg" />
+          </span>
           {children}
         </div>
       </button>
@@ -311,7 +315,7 @@ export const MobileMenu = () => {
         <FontAwesomeIcon icon={faHamburger} size="lg" />
       </Disclosure.Button>
 
-      <h1 font="italic" tracking="widest" justify="self-center">
+      <h1 font="italic" className="tracking-widest" justify="self-center">
         Ajanottaja
       </h1>
 
