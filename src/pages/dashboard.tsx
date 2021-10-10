@@ -136,7 +136,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div w="full" display="flex" flex="col" justify="center" align="items-center">
+    <div w="full" display="flex" flex="col" justify="center" align="items-center" h="full" m="<sm:t-8">
         <div
           justify="self-center items-center"
           align="self-center items-center"

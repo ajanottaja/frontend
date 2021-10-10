@@ -59,15 +59,16 @@ const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
       justify="items-stretch"
       w="full"
       text="gray-300"
+      p="t-4"
       >
       <div
         z="10"
         display="grid"
-        grid="cols-[auto_1fr_auto] rows-1 gap-8"
+        grid="cols-[auto_1fr_auto] <sm:cols-2 <sm:rows-2 rows-1 gap-x-8 gap-y-2"
         align="items-center"
         justify="start"
         w="full"
-        p="y-8"
+        p="b-8 <sm:b-4"
       >
         <div display="grid" grid="gap-2 cols-[1fr_auto_auto]" w="max-64">
           <Button
@@ -104,7 +105,7 @@ const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
             <span className="icon-chevron-right"></span>
           </Button>
         </div>
-        <h1 text="green-300 2xl">
+        <h1 text="green-300 2xl <sm:lg" grid="<sm:row-start-2 <sm:col-span-2">
           {query.step === "month" && (
             <>
               {" "}
@@ -147,7 +148,7 @@ const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
         ))}
       </div>}
 
-      {query.step === "month" && <div w="min-3xl" bg="dark-800" display="grid" grid="cols-7 col-span-7">
+      {query.step === "month" && <div w="min-3xl" bg="dark-800" display="grid <md:hidden" grid="cols-7 col-span-7">
         {[
           "Monday",
           "Tuesday",
@@ -233,7 +234,7 @@ const Calendar = () => {
       flex="col"
       align="content-center items-center"
       justify="start"
-      h="screen max-screen"
+      h="min-content"
       w="full"
       p="x-6"
     >
@@ -242,7 +243,7 @@ const Calendar = () => {
         flex="col grow"
         align="items-center"
         w="full max-screen-7xl"
-        h="screen max-screen"
+        h="min-content"
       >
         <CalendarHeader query={query} navigate={navigate} />
         <Suspense

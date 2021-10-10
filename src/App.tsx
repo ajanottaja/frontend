@@ -4,7 +4,7 @@ import { Switch, Route } from "react-router-dom";
 import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Calendar from "./pages/calendar";
-import { MainMenu } from "./components/organisms/menu";
+import { MainMenu, MobileMenu } from "./components/organisms/menu";
 
 const ProtectedRoute = ({
   component,
@@ -19,17 +19,19 @@ function App() {
     <div
       className="bg-light-200 dark:bg-dark-800"
       w="max-full"
-      h="min-full"
+      h="min-full full"
       display="flex"
-      flex="row"
+      flex="row <sm:col"
     >
       <MainMenu />
-      <Switch>
-        <Route exact path="/" component={Home}>
-        </Route>
-        <ProtectedRoute path="/dashboard" component={Dashboard} />
-        <ProtectedRoute path="/calendar" component={Calendar} />
-      </Switch>
+      <MobileMenu />
+      <div m="md:t-8" w="full">
+        <Switch>
+          <Route exact path="/" component={Home}></Route>
+          <ProtectedRoute path="/dashboard" component={Dashboard} />
+          <ProtectedRoute path="/calendar" component={Calendar} />
+        </Switch>
+      </div>
     </div>
   );
 }

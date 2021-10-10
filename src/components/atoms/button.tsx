@@ -19,11 +19,11 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
     flex="row"
     justify="center"
     align="items-center"
-    p="2"
+    p="2 <sm:1"
     animate="hover:pulse focus:pulse"
     border="1 dark-50 hover:green-300 focus:green-300 rounded"
     outline="focus:none"
-    text="gray-200"
+    text="gray-200 <sm:sm"
     {...props} />;
 }
 

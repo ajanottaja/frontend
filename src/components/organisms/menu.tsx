@@ -6,7 +6,6 @@ import React, {
 import { Link, LinkProps, useRouteMatch } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowLeft,
   faArrowRight,
   faCalendar,
   faChartLine,
@@ -16,7 +15,8 @@ import {
   faTimes,
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { useAuth0 } from "@auth0/auth0-react";
+import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
+import { Disclosure } from "@headlessui/react";
 
 type MenuLink = Omit<LinkProps, "icon"> & {
   icon: IconDefinition;
@@ -119,7 +119,7 @@ export const MainMenu = () => {
   return (
     <nav
       h="screen"
-      display="flex"
+      display="flex <sm:hidden"
       flex="col"
       justify="items-start"
       align="items-start"
@@ -129,7 +129,15 @@ export const MainMenu = () => {
       border="r-2 dark-400"
       p=""
     >
-      <button h="4" m="b-4" p="x-2" w="full" text="right" animate="wobble duration-1000" onClick={() => setExpanded(!expanded)}>
+      <button
+        h="4"
+        m="b-4"
+        p="x-2"
+        w="full"
+        text="right"
+        animate="wobble duration-1000"
+        onClick={() => setExpanded(!expanded)}
+      >
         <FontAwesomeIcon icon={expanded ? faTimes : faArrowRight} size="xs" />
       </button>
 
@@ -169,5 +177,154 @@ export const MainMenu = () => {
         Sign out
       </MenuButton>
     </nav>
+  );
+};
+
+const MobileMenuLink = ({
+  children,
+  icon,
+  to,
+  activeOnlyWhenExact = false,
+  ...props
+}: Omit<MenuLink, "expanded">) => {
+  const match = useRouteMatch({
+    path: to,
+    exact: activeOnlyWhenExact,
+  });
+
+  return (
+    <Disclosure.Button
+      as={Link}
+      to={to}
+      display="flex"
+      flex="row"
+      w="full"
+      justify="items-start"
+      align="items-center"
+      p="y-2"
+      border="rounded"
+      animate="hover:pulse focus:pulse"
+      outline="focus:none"
+      text="gray-300 no-underline focus:green-300"
+      bg={match ? "dark-300" : ""}
+      {...props}
+    >
+      <div w="full" display="flex" flex="row" justify="start" m="l-4">
+        <FontAwesomeIcon icon={icon} size="lg" m="r-4" />
+        {children}
+      </div>
+    </Disclosure.Button>
+  );
+};
+
+const MobileMenuButton = ({
+  children,
+  icon,
+  onClick,
+  ...props
+}: Omit<MenuButton, "expanded">) => {
+  return (
+    <li>
+      <button
+        display="flex"
+        flex="row"
+        w="full"
+        justify="items-start"
+        align="items-center"
+        p="y-2"
+        border="rounded"
+        animate="hover:pulse focus:pulse"
+        outline="focus:none"
+        text="gray-300 no-underline focus:green-300"
+        onClick={onClick}
+        {...props}
+      >
+        <div w="full" display="flex" flex="row" justify="start" m="l-4">
+          <FontAwesomeIcon icon={icon} size="lg" m="r-4" />
+          {children}
+        </div>
+      </button>
+    </li>
+  );
+};
+
+const MobileMenuInner = ({auth0:{logout}}: {auth0: Auth0ContextInterface<User>}) => {
+  return (
+    <nav display="flex" flex="col" justify="items-center" p="4">
+      <ul>
+        <li display="flex" flex="row" w="full" justify="content-end" m="b-4">
+          <Disclosure.Button
+            text="gray-300 focus:green-300"
+            focus="outline-transparent animate-pulse"
+            justify="self-end"
+          >
+            <FontAwesomeIcon icon={faTimes} size="lg" aria-label="Close menu" />
+          </Disclosure.Button>
+        </li>
+
+        <MobileMenuLink
+          to="/dashboard"
+          title="Dashboard"
+          icon={faTachometerAlt}
+        >
+          Dashboard
+        </MobileMenuLink>
+
+        <MobileMenuLink to="/calendar" title="Calendar" icon={faCalendar}>
+          Calendar
+        </MobileMenuLink>
+
+        <MobileMenuLink to="/statistics" title="Statistics" icon={faChartLine}>
+          Statistics
+        </MobileMenuLink>
+
+        <MobileMenuButton title="Statistics" icon={faSignOutAlt} onClick={() => logout()}>
+          Sign out
+        </MobileMenuButton>
+      </ul>
+    </nav>
+  );
+};
+
+export const MobileMenu = () => {
+  const [expanded, setExpanded] = useState(false);
+  const auth0 = useAuth0();
+  return (
+    <Disclosure
+      as="div"
+      pos="relative"
+      w="full"
+      display="hidden <sm:flex"
+      justify="center"
+      align="items-center"
+      h="12"
+      p="x-4"
+      text="gray-300"
+      bg="dark-500"
+    >
+      <Disclosure.Button
+        pos="absolute inset-0 left-4"
+        text="gray-300 focus:green-300"
+        focus="outline-transparent animate-pulse"
+        grid="col-span-0"
+      >
+        <FontAwesomeIcon icon={faHamburger} size="lg" />
+      </Disclosure.Button>
+
+      <h1 font="italic" tracking="widest" justify="self-center">
+        Ajanottaja
+      </h1>
+
+
+      <Disclosure.Panel
+        as="div"
+        pos="absolute inset-0"
+        z="50"
+        h="screen"
+        bg="dark-500"
+      >
+        <MobileMenuInner auth0={auth0} />
+      </Disclosure.Panel>
+    </Disclosure>
   );
 };

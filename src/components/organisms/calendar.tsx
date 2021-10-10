@@ -171,6 +171,7 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
 
     <Transition
     w="full"
+    h="min-content"
     show
     appear
     enter="ease-out duration-1000 delay-50"
@@ -182,6 +183,7 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
   >
     <div
       w="full"
+      h="min-content"
       flex="grow"
       display="grid"
       grid="gap-1 md:cols-7"
