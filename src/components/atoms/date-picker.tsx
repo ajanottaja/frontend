@@ -62,62 +62,86 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
   );
 };
 
-type DatePicker = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
+type DatePicker = DetailedHTMLProps<
+  HTMLAttributes<HTMLElement>,
+  HTMLElement
+> & {
   currentDate?: DateTime;
   pickDate: (date: DateTime) => void;
-}
+};
 
 export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
   const defaultDate = (currentDate ?? DateTime.now()).startOf("day");
   return (
-    <Popover pos="relative">
-      {({ open, close }) => (
-        <>
-          <Popover.Button
-            as="button"
-            display="flex"
-            flex="row"
-            align="items-center"
-            justify="between"
-            bg="dark-500"
-            border="1 rounded dark-50"
-            p="2"
-            w="full"
-            text="gray-300"
-          >
-            <FontAwesomeIcon icon={faCalendar} />
-            <span m="l-2">
-              {(defaultDate ?? DateTime.now()).toFormat("DDDD")}
-            </span>
-          </Popover.Button>
-          <Transition
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
-          >
-            <Popover.Panel
-              className="absolute z-100"
-              m="t-2"
-              w="min-96"
-              bg="dark-800"
-              shadow="~"
-              border="rounded-lg 1 dark-300"
+    <>
+      <div
+        display="flex"
+        flex="row"
+        align="items-center"
+        justify="between"
+        bg="dark-500"
+        border="1 rounded dark-50"
+        p="2"
+        w="full"
+        text="gray-300 placeholder-gray-300"
+      >
+        <FontAwesomeIcon icon={faCalendar} />
+        <input
+          type="date"
+          bg="dark-500"
+          value={defaultDate.toISODate()}
+          onChange={(e) => pickDate(DateTime.fromISO(e.target.value))}
+        />
+      </div>
+      <Popover pos="relative" display="<sm:hidden">
+        {({ open, close }) => (
+          <>
+            <Popover.Button
+              as="button"
+              display="flex"
+              flex="row"
+              align="items-center"
+              justify="between"
+              bg="dark-500"
+              border="1 rounded dark-50"
+              p="2"
+              w="full"
+              text="gray-300"
             >
-              <DatePickerInner
-                pickDate={(d) => {
-                  pickDate(d);
-                  close();
-                }}
-                activeDate={defaultDate}
-              />
-            </Popover.Panel>
-          </Transition>
-        </>
-      )}
-    </Popover>
+              <FontAwesomeIcon icon={faCalendar} />
+              <span m="l-2">
+                {(defaultDate ?? DateTime.now()).toFormat("DDDD")}
+              </span>
+            </Popover.Button>
+            <Transition
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <Popover.Panel
+                className="absolute z-100"
+                m="t-2"
+                w="min-96"
+                bg="dark-800"
+                shadow="~"
+                border="rounded-lg 1 dark-300"
+              >
+                <DatePickerInner
+                  pickDate={(d) => {
+                    pickDate(d);
+                    close();
+                  }}
+                  activeDate={defaultDate}
+                />
+              </Popover.Panel>
+            </Transition>
+          </>
+        )}
+      </Popover>
+    </>
   );
 };

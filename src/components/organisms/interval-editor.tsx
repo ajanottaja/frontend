@@ -91,6 +91,7 @@ export const IntervalEditor = ({
             <div
               display="flex"
               flex="col"
+              w="min-72"
               p="4"
               m="y-8"
               bg="dark-800"

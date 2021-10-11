@@ -55,12 +55,12 @@ const DigitInput = ({
       text="dark:gray-300 dark:placeholder-gray-500 center"
       font="mono"
       m="x-1"
-      p="y-1 x-1"
+      p="y-2 x-1"
       w="2em"
       className="caret-transparent"
-      border="rounded"
+      border="rounded 1 transparent"
       outline="none"
-      ring="focus:1 focus:green-300"
+      ring="1 transparent focus:green-300"
       animate="focus:pulse"
       name={name}
       ref={inputRef}
@@ -139,7 +139,7 @@ const DurationPicker = ({ duration, setDuration }: DurationPicker) => {
         text="green-300"
         animate="focus:pulse"
         w="2em"
-        p="y-1"
+        p="y-2"
         m="l-2"
         onClick={() => {
           setDuration(numbersToDuration(duration?? Duration.fromMillis(0), time));
@@ -153,7 +153,7 @@ const DurationPicker = ({ duration, setDuration }: DurationPicker) => {
         animate="focus:pulse"
         text="red-300"
         w="2em"
-        p="y-1"
+        p="y-2"
         border="rounded 1 dark-50 focus:red-300"
         m="l-2"
         onClick={() => {

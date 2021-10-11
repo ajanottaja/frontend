@@ -55,10 +55,10 @@ const DigitInput = ({
       text="dark:gray-300 dark:placeholder-gray-500 center"
       font="mono"
       m="x-1"
-      p="y-1 x-1"
+      p="y-2 x-1"
       w="2em"
       className="caret-transparent"
-      border="rounded"
+      border="rounded 1 transparent"
       outline="none"
       ring="focus:1 focus:green-300"
       animate="focus:pulse"
@@ -139,7 +139,7 @@ const TimePicker = ({ dateTime: date, setDateTime: setDate }: TimePicker) => {
         text="green-300"
         animate="focus:pulse"
         w="2em"
-        p="y-1"
+        p="y-2"
         m="l-2"
         onClick={() => {
           setDate(numbersToDateTime(date?? DateTime.now(), time));
@@ -153,7 +153,7 @@ const TimePicker = ({ dateTime: date, setDateTime: setDate }: TimePicker) => {
         animate="focus:pulse"
         text="red-300"
         w="2em"
-        p="y-1"
+        p="y-2"
         border="rounded 1 dark-50 focus:red-300"
         m="l-2"
         onClick={() => {
