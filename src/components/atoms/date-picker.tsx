@@ -5,6 +5,7 @@ import { Popover, Transition } from "@headlessui/react";
 import { DateTime } from "luxon";
 import React, { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
 import { useState } from "react";
+import { useSwipeable } from "react-swipeable";
 import { daysOfMonth, daysOfWeek, next, previous } from "../../utils/date";
 
 interface DatePickerInner {
@@ -16,9 +17,13 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
   const [date, setDate] = useState(activeDate);
   const dates = daysOfMonth(date);
   const days = daysOfWeek(date).map((d) => d.weekdayShort);
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => setDate(previous("month", date)),
+    onSwipedRight: () => setDate(next("month", date)),
+  });
 
   return (
-    <div display="flex" flex="col" w="full" text="gray-300" p="4">
+    <div display="flex" flex="col" w="full" text="gray-300" p="4" {...swipeHandlers}>
       <div display="flex" flex="row" justify="between">
         <button
           aria-label="Go to previous month"
@@ -73,75 +78,54 @@ type DatePicker = DetailedHTMLProps<
 export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
   const defaultDate = (currentDate ?? DateTime.now()).startOf("day");
   return (
-    <>
-      <div
-        display="flex"
-        flex="row"
-        align="items-center"
-        justify="between"
-        bg="dark-500"
-        border="1 rounded dark-50"
-        p="2"
-        w="full"
-        text="gray-300 placeholder-gray-300"
-      >
-        <FontAwesomeIcon icon={faCalendar} />
-        <input
-          type="date"
-          bg="dark-500"
-          value={defaultDate.toISODate()}
-          onChange={(e) => pickDate(DateTime.fromISO(e.target.value))}
-        />
-      </div>
-      <Popover pos="relative" display="<sm:hidden">
-        {({ open, close }) => (
-          <>
-            <Popover.Button
-              as="button"
-              display="flex"
-              flex="row"
-              align="items-center"
-              justify="between"
-              bg="dark-500"
-              border="1 rounded dark-50"
-              p="2"
-              w="full"
-              text="gray-300"
+    <Popover pos="relative">
+      {({ open, close }) => (
+        <>
+          <Popover.Button
+            as="button"
+            display="flex"
+            flex="row"
+            align="items-center"
+            justify="between"
+            bg="dark-500"
+            border="1 rounded dark-50"
+            p="2"
+            w="full"
+            text="gray-300"
+          >
+            <FontAwesomeIcon icon={faCalendar} />
+            <span m="l-2">
+              {(defaultDate ?? DateTime.now()).toFormat("DDDD")}
+            </span>
+          </Popover.Button>
+          <Transition
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 scale-95"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <Popover.Panel
+              pos="absolute z-100"
+              m="t-2"
+              w="min-96 <sm:min-full"
+              bg="dark-800"
+              shadow="~"
+              border="rounded-lg 1 dark-300"
             >
-              <FontAwesomeIcon icon={faCalendar} />
-              <span m="l-2">
-                {(defaultDate ?? DateTime.now()).toFormat("DDDD")}
-              </span>
-            </Popover.Button>
-            <Transition
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Popover.Panel
-                className="absolute z-100"
-                m="t-2"
-                w="min-96"
-                bg="dark-800"
-                shadow="~"
-                border="rounded-lg 1 dark-300"
-              >
-                <DatePickerInner
-                  pickDate={(d) => {
-                    pickDate(d);
-                    close();
-                  }}
-                  activeDate={defaultDate}
-                />
-              </Popover.Panel>
-            </Transition>
-          </>
-        )}
-      </Popover>
-    </>
+              <DatePickerInner
+                pickDate={(d) => {
+                  pickDate(d);
+                  close();
+                }}
+                activeDate={defaultDate}
+              />
+            </Popover.Panel>
+          </Transition>
+        </>
+      )}
+    </Popover>
   );
 };

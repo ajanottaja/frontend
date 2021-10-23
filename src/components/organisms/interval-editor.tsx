@@ -55,7 +55,7 @@ export const IntervalEditor = ({
     <Transition show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-100 overflow-auto"
+        pos="fixed inset-0 z-100 overflow-auto"
         onClose={close}
       >
         <div
@@ -91,9 +91,10 @@ export const IntervalEditor = ({
             <div
               display="flex"
               flex="col"
-              w="min-72"
+              w="min-72 <sm:min-screen"
+              h="<sm:min-screen"
               p="4"
-              m="y-8"
+              m="y-8 <sm:0"
               bg="dark-800"
               border="rounded-lg 1 dark-300"
               overflow="visible"
