@@ -10,7 +10,7 @@
   },
   "jest": {
     "setupFilesAfterEnv": [
-      "jest-extended"
+      "jest-extended/all"
     ]
   },
   "dependencies": {
