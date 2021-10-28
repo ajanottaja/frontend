@@ -137,7 +137,7 @@ const CalendarHeader = ({ query, navigate }: CalendarHeader) => {
         {weekDays.map((day) => (
           <div key={day.weekdayShort} text="center" p="b-2">
             <span display="<md:hidden">{day.weekdayLong}</span>
-            <span display="<sm:hidden">{day.weekdayShort}</span>
+            <span display="<sm:hidden md:hidden">{day.weekdayShort}</span>
             <span display="sm:hidden" text="xs">{day.toFormat("EEEEE")}</span>
           </div>
         ))}
