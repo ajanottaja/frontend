@@ -17,6 +17,7 @@ export type IntervalRecord = Infer<typeof IntervalRecordSchema>;
 const TargetRecordSchema = type({
   id: string(),
   duration: LuxonDuration,
+  date: LuxonDateTime,
 });
 
 export type TargetRecord = Infer<typeof TargetRecordSchema>;

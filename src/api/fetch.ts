@@ -4,7 +4,7 @@ import {
   User,
 } from "@auth0/auth0-react";
 import { create, Struct } from "superstruct";
-import useSWR, { SWRResponse } from "swr";
+import useSWR, { SWRResponse, useSWRConfig } from "swr";
 import { PublicConfiguration } from "swr/dist/types";
 
 
@@ -143,3 +143,27 @@ export const useSwrWithAuth0 = <Path, Query, Body, Response>(
     }
   );
 };
+
+/**
+ * Update all SWR hooks matching the regexp
+ * @returns 
+ */
+export const useMatchMutate = () => {
+  const { cache, mutate } = useSWRConfig()
+  return (matcher: RegExp, ...args: any) => {
+    if (!(cache instanceof Map)) {
+      throw new Error('matchMutate requires the cache provider to be a Map instance')
+    }
+
+    const keys = []
+
+    for (const key of cache.keys()) {
+      if (matcher.test(key)) {
+        keys.push(key)
+      }
+    }
+
+    const mutations = keys.map((key) => mutate(key, ...args))
+    return Promise.all(mutations)
+  }
+}

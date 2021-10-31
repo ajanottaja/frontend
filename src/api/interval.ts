@@ -9,6 +9,8 @@ import {
   union,
   literal,
   array,
+  optional,
+  nullable,
 } from "superstruct";
 import { apiHost } from "../config";
 import { httpPatch, httpPost, httpDelete, useSwrWithAuth0 } from "./fetch";
@@ -110,6 +112,31 @@ export const stopInterval = async ({
 };
 
 
+// Create a new interval
+
+const CreateIntervalBodySchema = type({
+  interval: type({
+    beginning: LuxonDateTime,
+    end: nullable(optional(LuxonDateTime)),
+  })
+});
+
+type CreateIntervalBody = Infer<typeof CreateIntervalBodySchema>;
+
+interface CreateInterval {
+  auth0: Auth0ContextInterface<User>;
+  body: CreateIntervalBody;
+}
+
+export const createInterval = async ({auth0: {getAccessTokenSilently}, body}: CreateInterval) => {
+  return await httpPost<undefined, undefined, CreateIntervalBody, IntervalResponse>({
+    url: `${apiHost}/intervals`,
+    body: {schema: CreateIntervalBodySchema, value: body},
+    getAccessTokenSilently,
+    responseSchema: IntervalResponseSchema,
+  });
+}
+
 
 // Update an interval
 
@@ -120,7 +147,10 @@ const UpdateIntervalPathSchema = type({
 type UpdateIntervalPath = Infer<typeof UpdateIntervalPathSchema>;
 
 const UpdateIntervalBodySchema = type({
-  interval: IntervalSchema
+  interval: type({
+    beginning: LuxonDateTime,
+    end: nullable(optional(LuxonDateTime)),
+  })
 });
 
 type UpdateIntervalBody = Infer<typeof UpdateIntervalBodySchema>;

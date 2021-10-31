@@ -5,7 +5,8 @@ import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
 import { TargetRecord } from "../../api/calendar";
-import { updateTarget, deleteTarget } from "../../api/target";
+import { useMatchMutate } from "../../api/fetch";
+import { updateTarget, deleteTarget, createTarget } from "../../api/target";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import DurationPicker from "../atoms/duration-picker";
@@ -13,7 +14,7 @@ import TimePicker from "../atoms/time-picker";
 import SwrMutateContext from "../providers/swr-mutation-provider";
 
 interface TargetEditor {
-  target: TargetRecord;
+  target?: TargetRecord;
   isOpen: boolean;
   auth0: Auth0ContextInterface<User>;
   close: () => void;
@@ -25,30 +26,63 @@ export const TargetEditor = ({
   auth0,
   close,
 }: TargetEditor) => {
-  const [targetDuration, setTargetDuration] = useState(targetRecord.duration);
+  const [targetDuration, setTargetDuration] = useState(targetRecord?.duration);
+  const [targetDate, setTargetDate] = useState(targetRecord?.date);
   const { mutate } = useContext(SwrMutateContext);
+  const matchMutate = useMatchMutate();
+
+  const refresh = async () => {
+    matchMutate(/\/calendar/);
+    mutate();
+    close();
+  };
+
+  const saveNewTarget = async () => {
+    if (
+      targetDuration &&
+      targetDuration.isValid &&
+      targetDate &&
+      targetDate.isValid
+    ) {
+      const res = await createTarget({
+        auth0,
+        body: { duration: targetDuration, date: targetDate },
+      });
+      if (res.status === 200) {
+        refresh();
+      }
+    }
+  };
 
   const saveTarget = async () => {
-    const res = await updateTarget({
-      auth0,
-      path: { id: targetRecord.id },
-      body: { duration: targetDuration },
-    });
-    if (res.status === 200) {
-      close();
-      mutate();
+    if (
+      targetRecord &&
+      targetDuration &&
+      targetDuration.isValid &&
+      targetDate &&
+      targetDate.isValid
+    ) {
+      const res = await updateTarget({
+        auth0,
+        path: { id: targetRecord.id },
+        body: { duration: targetDuration, date: targetDate },
+      });
+      if (res.status === 200) {
+        refresh();
+      }
     }
   };
 
   const removeTarget = async () => {
-    const res = await deleteTarget({
-      auth0,
-      path: { id: targetRecord.id },
-    });
+    if (targetRecord) {
+      const res = await deleteTarget({
+        auth0,
+        path: { id: targetRecord.id },
+      });
 
-    if (res.status === 200) {
-      close();
-      mutate();
+      if (res.status === 200) {
+        refresh();
+      }
     }
   };
 
@@ -120,29 +154,41 @@ export const TargetEditor = ({
               </Dialog.Title>
 
               <h4 text="sm gray-300" m="b-2">
+                Target date
+              </h4>
+
+              <div m="b-4">
+                <DatePicker currentDate={targetDate} pickDate={setTargetDate} />
+              </div>
+
+              <h4 text="sm gray-300" m="b-2">
                 Duration
               </h4>
 
               <DurationPicker
                 duration={targetDuration}
-                setDuration={d => setTargetDuration(d)}
+                setDuration={(d) => setTargetDuration(d)}
               />
 
-              <div display="flex" flex="row" justify="between" m="t-8">
+              <div display="flex" flex="row" gap="4" m="t-8">
                 <Button
+                  flex="1"
                   text="green-300"
                   border="1 dark-50 hover:green-300 focus:green-300 rounded"
-                  onClick={saveTarget}
+                  onClick={targetRecord ? saveTarget : saveNewTarget}
                 >
-                  Save
+                  {targetRecord ? "Save" : "Save new"}
                 </Button>
-                <Button
-                  text="red-300"
-                  border="1 dark-50 hover:red-300 focus:red-300 rounded"
-                  onClick={removeTarget}
-                >
-                  Delete
-                </Button>
+                {targetRecord && (
+                  <Button
+                    flex="1"
+                    text="red-300"
+                    border="1 dark-50 hover:red-300 focus:red-300 rounded"
+                    onClick={removeTarget}
+                  >
+                    Delete
+                  </Button>
+                )}
               </div>
             </div>
           </Transition.Child>

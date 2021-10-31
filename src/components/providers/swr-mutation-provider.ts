@@ -8,13 +8,14 @@
  * view, and then want to rerun the calendar data request to see our changes reflected.
  */
 import React from "react";
+import { KeyedMutator } from "swr/dist/types";
 
 interface SwrMutateContext {
-  mutate: () => void;
+  mutate: KeyedMutator<any>;
 }
 
-const SwrMutateContext = React.createContext<SwrMutateContext>({mutate: () => { 
-  window.alert("Mutate not provided")
+const SwrMutateContext = React.createContext<SwrMutateContext>({mutate: async () => { 
+  console.warn("Mutate not provided")
 }});
 
 export const SwrMutateProvider = SwrMutateContext.Provider;

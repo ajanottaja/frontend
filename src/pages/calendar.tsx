@@ -184,7 +184,7 @@ const CalendarInner = ({ auth0, query }: CalendarInner) => {
     return <div>Error</div>;
   }
 
-  const provider = {mutate};
+  const provider = { mutate };
 
 
   return (

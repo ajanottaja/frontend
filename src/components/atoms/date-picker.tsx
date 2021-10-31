@@ -76,7 +76,7 @@ type DatePicker = DetailedHTMLProps<
 };
 
 export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
-  const defaultDate = (currentDate ?? DateTime.now()).startOf("day");
+  const defaultDate = currentDate?.startOf("day");
   return (
     <Popover pos="relative">
       {({ open, close }) => (
@@ -94,9 +94,13 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
             text="gray-300"
           >
             <FontAwesomeIcon icon={faCalendar} />
-            <span m="l-2">
-              {(defaultDate ?? DateTime.now()).toFormat("DDDD")}
+            {defaultDate ? <span m="l-2">
+              {defaultDate?.toFormat("DDDD") ?? ""}
+            </span> : <span m="l-2" text="gray-500">
+              {DateTime.now().toFormat("DDDD")}
             </span>
+            }
+            
           </Popover.Button>
           <Transition
             as={Fragment}
@@ -120,7 +124,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
                   pickDate(d);
                   close();
                 }}
-                activeDate={defaultDate}
+                activeDate={defaultDate?? DateTime.now()}
               />
             </Popover.Panel>
           </Transition>

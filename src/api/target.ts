@@ -80,6 +80,7 @@ export const createTarget = async ({
 // Update target
 const UpdateTargetBodySchema = type({
   duration: IsoDuration,
+  date: IsoDate,
 });
 
 type UpdateTargetBody = Infer<typeof UpdateTargetBodySchema>;

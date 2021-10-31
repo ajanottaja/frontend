@@ -5,6 +5,9 @@ import Dashboard from "./pages/dashboard";
 import Home from "./pages/home";
 import Calendar from "./pages/calendar";
 import { MainMenu, MobileMenu } from "./components/organisms/menu";
+import CreateMenu from "./components/molecules/create-menu";
+import { useSWRConfig } from "swr";
+import { SwrMutateProvider } from "./components/providers/swr-mutation-provider";
 
 const ProtectedRoute = ({
   component,
@@ -23,6 +26,9 @@ function App() {
       display="flex"
       flex="row <sm:col"
     >
+      <div pos="fixed bottom-0 right-0" z="50">
+        <CreateMenu />
+      </div>
       <MainMenu />
       <MobileMenu />
       <div m="md:t-8" w="full">

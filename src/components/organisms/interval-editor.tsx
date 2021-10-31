@@ -2,17 +2,23 @@ import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
+import { DateTime } from "luxon";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
 import { IntervalRecord } from "../../api/calendar";
-import { updateInterval, deleteInterval } from "../../api/interval";
+import { useMatchMutate } from "../../api/fetch";
+import {
+  createInterval,
+  updateInterval,
+  deleteInterval,
+} from "../../api/interval";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import TimePicker from "../atoms/time-picker";
 import SwrMutateContext from "../providers/swr-mutation-provider";
 
 interface IntervalEditor {
-  interval: IntervalRecord;
+  interval?: IntervalRecord;
   isOpen: boolean;
   auth0: Auth0ContextInterface<User>;
   close: () => void;
@@ -24,40 +30,58 @@ export const IntervalEditor = ({
   auth0,
   close,
 }: IntervalEditor) => {
-  const [interval, setInterval] = useState(intervalRecord.interval);
+  const [interval, setInterval] = useState<{
+    beginning: DateTime;
+    end?: DateTime;
+  }>(intervalRecord?.interval ?? { beginning: DateTime.now() });
   const { mutate } = useContext(SwrMutateContext);
+  const matchMutate = useMatchMutate();
 
-  const saveInterval = async () => {
-    const res = await updateInterval({
+  const refresh = async () => {
+    matchMutate(/\/calendar/);
+    mutate();
+    close();
+  };
+
+  const saveNewInterval = async () => {
+    const res = await createInterval({
       auth0,
-      path: { id: intervalRecord.id },
       body: { interval },
     });
     if (res.status === 200) {
-      close();
-      mutate();
+      refresh();
+    }
+  };
+
+  const saveInterval = async () => {
+    if (intervalRecord && interval) {
+      const res = await updateInterval({
+        auth0,
+        path: { id: intervalRecord.id },
+        body: { interval },
+      });
+      if (res.status === 200) {
+        refresh();
+      }
     }
   };
 
   const removeInterval = async () => {
-    const res = await deleteInterval({
-      auth0,
-      path: { id: intervalRecord.id },
-    });
+    if (intervalRecord) {
+      const res = await deleteInterval({
+        auth0,
+        path: { id: intervalRecord.id },
+      });
 
-    if(res.status === 200) {
-      close();
-      mutate();
+      if (res.status === 200) {
+        refresh();
+      }
     }
-  }
+  };
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        pos="fixed inset-0 z-100 overflow-auto"
-        onClose={close}
-      >
+      <Dialog as="div" pos="fixed inset-0 z-100 overflow-auto" onClose={close}>
         <div
           h="min-screen"
           w="min-screen"
@@ -111,7 +135,8 @@ export const IntervalEditor = ({
                 outline="focus:none"
                 p="1"
                 focus="animate-pulse"
-                onClick={close}>
+                onClick={close}
+              >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
               <Dialog.Title as="h3" text="lg gray-300 center" m="0 b-4">
@@ -154,11 +179,15 @@ export const IntervalEditor = ({
 
               <div m="b-4">
                 <DatePicker
-                  currentDate={interval.end.isValid ? interval.end : undefined}
+                  currentDate={
+                    interval.end && interval.end.isValid
+                      ? interval.end
+                      : undefined
+                  }
                   pickDate={(d) => {
                     setInterval({
                       ...interval,
-                      end: interval.end.set({
+                      end: (interval?.end ?? DateTime.now()).set({
                         year: d.year,
                         month: d.month,
                         day: d.day,
@@ -169,7 +198,11 @@ export const IntervalEditor = ({
               </div>
 
               <TimePicker
-                dateTime={interval.end.isValid ? interval.end : undefined}
+                dateTime={
+                  interval.end && interval.end.isValid
+                    ? interval.end
+                    : undefined
+                }
                 setDateTime={(d) =>
                   setInterval({
                     ...interval,
@@ -178,21 +211,25 @@ export const IntervalEditor = ({
                 }
               />
 
-              <div display="flex" flex="row" justify="between" m="t-8">
+              <div display="flex" flex="row" gap="4" m="t-8">
                 <Button
+                  flex="1"
                   text="green-300"
                   border="1 dark-50 hover:green-300 focus:green-300 rounded"
-                  onClick={saveInterval}
+                  onClick={intervalRecord ? saveInterval : saveNewInterval}
                 >
-                  Save
+                  {intervalRecord ? "Save" : "Create"}
                 </Button>
-                <Button
-                  text="red-300"
-                  border="1 dark-50 hover:red-300 focus:red-300 rounded"
-                  onClick={removeInterval}
-                >
-                  Delete
-                </Button>
+                {intervalRecord && (
+                  <Button
+                    flex="1"
+                    text="red-300"
+                    border="1 dark-50 hover:red-300 focus:red-300 rounded"
+                    onClick={removeInterval}
+                  >
+                    Delete
+                  </Button>
+                )}
               </div>
             </div>
           </Transition.Child>
