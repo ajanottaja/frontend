@@ -114,7 +114,7 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
       </span>
       <span text="green-300" m="0">
         All time:{" "}
-        {formatDuration(summary.month?.diff, "d 'days' h 'hours' m 'minutes'")}
+        {formatDuration(summary.all?.diff, "d 'days' h 'hours' m 'minutes'")}
       </span>
     </div>
   );
