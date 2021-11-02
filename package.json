@@ -20,6 +20,8 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.4",
     "@fortawesome/react-fontawesome": "^0.1.16",
     "@headlessui/react": "^1.4.1",
+    "@nivo/calendar": "^0.74.0",
+    "@nivo/core": "^0.74.0",
     "@windicss/plugin-icons": "^1.0.2",
     "luxon": "^2.0.2",
     "react": "^17.0.2",
@@ -32,6 +34,9 @@
   "devDependencies": {
     "@babel/preset-env": "^7.15.8",
     "@babel/preset-typescript": "^7.15.0",
+    "@types/d3-scale": "^4.0.2",
+    "@types/d3-scale-chromatic": "^3.0.0",
+    "@types/d3-shape": "^3.0.2",
     "@types/jest": "^27.0.2",
     "@types/luxon": "^2.0.5",
     "@types/react": "^17.0.33",

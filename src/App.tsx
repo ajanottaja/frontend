@@ -1,13 +1,16 @@
 import { withAuthenticationRequired } from "@auth0/auth0-react";
-import React, { ReactNode } from "react";
+import React from "react";
 import { Switch, Route } from "react-router-dom";
-import Dashboard from "./pages/dashboard";
-import Home from "./pages/home";
-import Calendar from "./pages/calendar";
 import { MainMenu, MobileMenu } from "./components/organisms/menu";
 import CreateMenu from "./components/molecules/create-menu";
-import { useSWRConfig } from "swr";
-import { SwrMutateProvider } from "./components/providers/swr-mutation-provider";
+import Loading from "./components/layout/loading-page";
+
+// Lazy load components to enable code splitting
+const Home = React.lazy(() => import('./pages/statistics'));
+const Dashboard = React.lazy(() => import('./pages/dashboard'));
+const Calendar = React.lazy(() => import('./pages/calendar'));
+const Statistics = React.lazy(() => import('./pages/statistics'));
+
 
 const ProtectedRoute = ({
   component,
@@ -32,11 +35,14 @@ function App() {
       <MainMenu />
       <MobileMenu />
       <div m="md:t-8" w="full">
-        <Switch>
-          <Route exact path="/" component={Home}></Route>
-          <ProtectedRoute path="/dashboard" component={Dashboard} />
-          <ProtectedRoute path="/calendar" component={Calendar} />
-        </Switch>
+        <React.Suspense fallback={<Loading />}>
+          <Switch>
+            <Route exact path="/" component={Home}></Route>
+            <ProtectedRoute path="/dashboard" component={Dashboard} />
+            <ProtectedRoute path="/calendar" component={Calendar} />
+            <ProtectedRoute path="/statistics" component={Statistics} />
+          </Switch>
+        </React.Suspense>
       </div>
     </div>
   );
