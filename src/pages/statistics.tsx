@@ -114,7 +114,7 @@ const CumulativeStatistics = ({
       <h2 text="gray-300">Tracked time vs target in hours</h2>
       <ResponsiveLineCanvas
         data={lineData}
-        margin={{ top: 60, left: 60, right: 60, bottom: 60 }}
+        margin={{ top: 60, left: 60, right: 0, bottom: 60 }}
         xScale={{ type: "linear", min: "auto", max: "auto" }}
         yScale={{ type: "linear", stacked: false, min: "auto", max: "auto" }}
         yFormat=" >-.2f"
