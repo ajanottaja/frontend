@@ -62,7 +62,7 @@ const WeekInterval = ({
       .diff(interval.interval.beginning.startOf("day"))
       .as("minutes");
   const length =
-    (interval.interval.end ?? DateTime.now())
+    (interval.interval.end.isValid ? interval.interval.end : DateTime.now())
       .diff(interval.interval.beginning)
       .as("minutes");
   return (
