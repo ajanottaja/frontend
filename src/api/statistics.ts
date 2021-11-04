@@ -88,3 +88,48 @@ export const useStatisticsCalendar = (
     swrOpts
   );
 };
+
+
+
+
+const CumulativeStatisticSchema = type({
+  date: LuxonDateTime,
+  target: LuxonDuration,
+  tracked: LuxonDuration,
+  diff: LuxonDuration,
+  cumulativeDiff: LuxonDuration,
+});
+
+export type CumulativeStatistic = Infer<typeof CumulativeStatisticSchema>;
+
+const CumulativeStatisticsSchema = type({
+  status: literal(200),
+  body: array(CumulativeStatisticSchema),
+});
+
+type CumulativeStatistics = Infer<typeof CumulativeStatisticsSchema>;
+
+const CumulativeStatisticsResponseSchema = union([
+  CumulativeStatisticsSchema,
+  InternalServerErrorSchema,
+]);
+type CumulativeStatisticsResponse = Infer<typeof CumulativeStatisticsResponseSchema>;
+
+export const useCumulativeStatistics = (
+  auth0: Auth0ContextInterface<User>,
+  swrOpts: Partial<PublicConfiguration> | undefined = {}
+) => {
+  return useSwrWithAuth0<
+    undefined,
+    undefined,
+    undefined,
+    CumulativeStatisticsResponse
+  >(
+    {
+      url: `${apiHost}/statistics/cumulative`,
+      auth0,
+      responseSchema: CumulativeStatisticsResponseSchema,
+    },
+    swrOpts
+  );
+};
