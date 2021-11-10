@@ -1,4 +1,4 @@
-import { Auth0ContextInterface, User } from "@auth0/auth0-react";
+import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
@@ -16,16 +16,15 @@ import SwrMutateContext from "../providers/swr-mutation-provider";
 interface TargetEditor {
   target?: TargetRecord;
   isOpen: boolean;
-  auth0: Auth0ContextInterface<User>;
   close: () => void;
 }
 
 export const TargetEditor = ({
   target: targetRecord,
   isOpen,
-  auth0,
   close,
 }: TargetEditor) => {
+  const auth0 = useAuth0();
   const [targetDuration, setTargetDuration] = useState(targetRecord?.duration);
   const [targetDate, setTargetDate] = useState(targetRecord?.date);
   const { mutate } = useContext(SwrMutateContext);

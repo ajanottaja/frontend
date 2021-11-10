@@ -1,4 +1,4 @@
-import { Auth0ContextInterface, User } from "@auth0/auth0-react";
+import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
@@ -20,16 +20,15 @@ import SwrMutateContext from "../providers/swr-mutation-provider";
 interface IntervalEditor {
   interval?: IntervalRecord;
   isOpen: boolean;
-  auth0: Auth0ContextInterface<User>;
   close: () => void;
 }
 
 export const IntervalEditor = ({
   interval: intervalRecord,
   isOpen,
-  auth0,
   close,
 }: IntervalEditor) => {
+  const auth0 = useAuth0();
   const [interval, setInterval] = useState<{
     beginning: DateTime;
     end?: DateTime;

@@ -28,6 +28,8 @@ export const IntervalSchema = type({
   end: LuxonDateTime,
 });
 
+export type Interval = Infer<typeof IntervalSchema>;
+
 const IntervalRecordSchema = type({
   id: string(),
   account: string(),

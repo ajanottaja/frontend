@@ -14,20 +14,17 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { TargetEditor } from "../organisms/target-editor";
 
 const CreateMenu = () => {
-  const auth0 = useAuth0();
   const [isEditingInterval, setIsEditingInterval] = useState(false);
   const [isEditingTarget, setIsEditingTarget] = useState(false);
 
   return (
     <div>
       <IntervalEditor
-        auth0={auth0}
         isOpen={isEditingInterval}
         close={() => setIsEditingInterval(false)}
       />
 
       <TargetEditor
-        auth0={auth0}
         isOpen={isEditingTarget}
         close={() => setIsEditingTarget(false)}
       />

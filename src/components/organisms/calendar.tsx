@@ -12,15 +12,12 @@ import { TargetEditor } from "./target-editor";
 interface Calendar {
   dates?: CalendarDate[];
   date: DateTime;
-  auth0: Auth0ContextInterface<User>;
 }
 
 const WeekTarget = ({
   target,
-  auth0,
 }: {
   target: TargetRecord;
-  auth0: Auth0ContextInterface<User>;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -39,7 +36,6 @@ const WeekTarget = ({
       <span display="<md:hidden">{target.duration.toFormat("hh:mm")}</span>
       <span display="md:hidden">{target.duration.toFormat("hh")}</span>
       <TargetEditor
-        auth0={auth0}
         target={target}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
@@ -51,10 +47,8 @@ const WeekTarget = ({
 
 const WeekInterval = ({
   interval,
-  auth0,
 }: {
   interval: IntervalRecord;
-  auth0: Auth0ContextInterface<User>;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const minutesPastMidnight =
@@ -99,7 +93,6 @@ const WeekInterval = ({
           : "now"}
        </span>
         <IntervalEditor
-          auth0={auth0}
           interval={interval}
           isOpen={isEditing}
           close={() => setIsEditing(false)}
@@ -109,7 +102,7 @@ const WeekInterval = ({
   );
 };
 
-export const WeekCalendar = ({ dates, date, auth0 }: Calendar) => {
+export const WeekCalendar = ({ dates, date }: Calendar) => {
   const fallbackDates = daysOfWeek(date);
   return (
     <div
@@ -131,7 +124,7 @@ export const WeekCalendar = ({ dates, date, auth0 }: Calendar) => {
         <div text="center" display="md:hidden"><FontAwesomeIcon icon={faBullseye} /></div>
         {dates &&
           dates.map(({ target }) =>
-            target ? <WeekTarget auth0={auth0} target={target} /> : <div />
+            target ? <WeekTarget target={target} /> : <div />
           )}
         <div display="grid" grid="rows-24 gap-1">
           {[
@@ -160,7 +153,7 @@ export const WeekCalendar = ({ dates, date, auth0 }: Calendar) => {
           dates.map(({ date, target, intervals }, i) => (
             <div display="grid" grid="rows-24 gap-1" h="[1440px]" pos="relative">
               {intervals.map((interval) => (
-                <WeekInterval auth0={auth0} interval={interval} />
+                <WeekInterval interval={interval} />
               ))}
               {[
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -177,10 +170,8 @@ export const WeekCalendar = ({ dates, date, auth0 }: Calendar) => {
 
 const MonthTarget = ({
   target,
-  auth0,
 }: {
   target: TargetRecord;
-  auth0: Auth0ContextInterface<User>;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -198,7 +189,6 @@ const MonthTarget = ({
     >
       {target.duration.toFormat("hh:mm")}
       <TargetEditor
-        auth0={auth0}
         target={target}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
@@ -210,10 +200,8 @@ const MonthTarget = ({
 
 const MonthInterval = ({
   interval,
-  auth0,
 }: {
   interval: IntervalRecord;
-  auth0: Auth0ContextInterface<User>;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -235,7 +223,6 @@ const MonthInterval = ({
         ? interval.interval.end.toFormat("HH:mm")
         : "now"}
       <IntervalEditor
-        auth0={auth0}
         interval={interval}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
@@ -244,23 +231,11 @@ const MonthInterval = ({
   );
 };
 
-export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
+export const MonthCalendar = ({ dates, date }: Calendar) => {
   // While loading, display skeleton for number of dates
   const fallbackDates = daysOfMonth(date);
 
   return (
-    <Transition
-      w="full"
-      h="min-content"
-      show
-      appear
-      enter="ease-out duration-1000 delay-50"
-      enterFrom="opacity-0 scale-95"
-      enterTo="opacity-100 scale-100"
-      leave="ease-in duration-200"
-      leaveFrom="opacity-100 scale-100"
-      leaveTo="opacity-0 scale-95"
-    >
       <div
         w="full"
         h="min-content"
@@ -286,22 +261,11 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
             >
               <div display="flex" flex="row" justify="between" p="b-2">
                 <span text="gray-500">{date.day}</span>
-                {target && <MonthTarget target={target} auth0={auth0} />}
+                {target && <MonthTarget target={target} />}
               </div>
 
               {intervals.map((interval) => (
-                <Transition.Child
-                  key={interval.id}
-                  appear
-                  enter="ease-out duration-1000"
-                  enterFrom="opacity-0 scale-95"
-                  enterTo="opacity-100 scale-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100 scale-100"
-                  leaveTo="opacity-0 scale-95"
-                >
-                  <MonthInterval interval={interval} auth0={auth0} />
-                </Transition.Child>
+                <MonthInterval interval={interval} />
               ))}
             </div>
           ))}
@@ -313,10 +277,9 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
               display="flex"
               bg="dark-500"
               flex="col"
-              h="min-32"
+              h="min-28"
               w="min-24"
               p="1"
-              animate="pulse"
               className={
                 i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
               }
@@ -327,6 +290,5 @@ export const MonthCalendar = ({ dates, date, auth0 }: Calendar) => {
             </div>
           ))}
       </div>
-    </Transition>
   );
 };

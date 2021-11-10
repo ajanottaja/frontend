@@ -1,3 +1,5 @@
+import { IconDefinition } from '@fortawesome/fontawesome-common-types';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { ButtonHTMLAttributes, DetailedHTMLProps, useEffect, useRef } from 'react';
 
 type Button = DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> & {
@@ -27,8 +29,8 @@ export const Button = ({hasFocus = false, ...props}: Button) => {
     {...props} />;
 }
 
-type IconButton = Button & {
-  icon: string;
+type IconButton = Omit<Button, 'icon'> & {
+  icon: IconDefinition;
   ariaLabel: string;
 }
 
@@ -45,16 +47,18 @@ export const IconButton = ({hasFocus = false, icon, ariaLabel, children, ...prop
     {...props}
     ref={buttonRef}
     display="flex"
-    flex="row"
+    flex={`row ${props.flex?? ''}`}
     justify="content-center"
     align="items-center"
     p="2"
     animate="hover:pulse focus:pulse"
     border="dark-50 1 hover:green-300 focus:green-300 rounded"
     outline="focus:none"
-    text="gray-200"
+    text={`gray-200 ${props.text?? ''}`}
     >
-      <span className={icon} m="r-1 -l-1"></span>
+      <span m="r-2">
+        <FontAwesomeIcon icon={icon} />
+      </span>
       {children}
     </button>;
 };

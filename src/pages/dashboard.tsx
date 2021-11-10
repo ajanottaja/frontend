@@ -4,7 +4,6 @@ import {
   useAuth0,
   User,
 } from "@auth0/auth0-react";
-import DurationInput from "../components/atoms/duration-form";
 import Timer from "../components/atoms/timer";
 import { DateTime, Duration } from "luxon";
 import {
@@ -12,22 +11,32 @@ import {
   stopInterval,
   useActiveInterval,
 } from "../api/interval";
-import { createTarget, useActiveTarget } from "../api/target";
+import { createTarget, updateTarget, useActiveTarget } from "../api/target";
 import { useStatisticsSummary } from "../api/statistics";
 import { absDuration, isNegativeDuration } from "../utils/date";
+import DurationPickerDashboard from "../components/atoms/duration-picker-dashboard";
 
 const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
   const { data, error, mutate } = useActiveTarget(auth0);
 
   return (
-    <DurationInput
-      activeTarget={data?.status === 200 ? data.body.duration : undefined}
-      setActiveTarget={async (duration: Duration) => {
+    <DurationPickerDashboard
+      title="Todays target"
+      duration={data?.status === 200 ? data.body.duration : undefined}
+      setDuration={async (duration: Duration) => {
         const date = DateTime.now();
-        const res = await createTarget({
-          auth0,
-          body: { duration, date },
-        });
+        if(data?.status === 200) {
+          const res = await updateTarget({
+            auth0,
+            path: { id: data.body.id },
+            body: { duration, date: data.body.date }
+          });
+        } else {
+          const res = await createTarget({
+            auth0,
+            body: { duration, date },
+          });
+        }
         mutate();
       }}
     />
@@ -39,19 +48,20 @@ const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
 
   if (data) {
     return (
-      <Timer
-        beginning={
-          data?.status === 200 ? data.body.interval.beginning : undefined
-        }
-        startInterval={async () => {
-          await startInterval({ auth0 });
-          mutate();
-        }}
-        stopInterval={async () => {
-          await stopInterval({ auth0 });
-          mutate();
-        }}
-      />
+        <Timer
+          title="Timer"
+          beginning={
+            data?.status === 200 ? data.body.interval.beginning : undefined
+          }
+          startInterval={async () => {
+            await startInterval({ auth0 });
+            mutate();
+          }}
+          stopInterval={async () => {
+            await stopInterval({ auth0 });
+            mutate();
+          }}
+        />
     );
   }
 

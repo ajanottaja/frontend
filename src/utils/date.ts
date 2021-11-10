@@ -1,5 +1,7 @@
 import { DateTime, Duration } from "luxon";
+import { Interval } from "../api/interval";
 import { Step } from "../api/schema";
+import { randomInt } from "./functions";
 
 /**
  * Check if duration is negative
@@ -32,6 +34,27 @@ const daysOfPeriod = (period: Step) => (date: DateTime) => {
     cursor = cursor.plus({ days: 1});
   }
   return dates;
+}
+
+/**
+ * Returns length number of intervals on date.
+ * @param date
+ * @param length
+ */
+export const intervalsOnDate = (date: DateTime, length: number) => {
+  const intervals: Required<Interval>[] = [];
+  let previous = date;
+  while(intervals.length < length) {
+    const beginning = previous.plus({minutes: randomInt(15, 60 * 2)});
+    const end = beginning.plus({minutes: randomInt(60, 60 * 8)})
+    intervals.push({
+      beginning,
+      end,
+    });
+    previous = end;
+  }
+
+  return intervals;
 }
 
 /**

@@ -3,7 +3,7 @@ import React, {
   DetailedHTMLProps,
   useState,
 } from "react";
-import { Link, LinkProps, useRouteMatch } from "react-router-dom";
+import { Link, LinkProps, useMatch } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -33,9 +33,9 @@ const MenuLink = ({
   expanded,
   ...props
 }: MenuLink) => {
-  const match = useRouteMatch({
+  const match = useMatch({
     path: to,
-    exact: activeOnlyWhenExact,
+    end: activeOnlyWhenExact,
   });
 
   return (
@@ -187,9 +187,9 @@ const MobileMenuLink = ({
   activeOnlyWhenExact = false,
   ...props
 }: Omit<MenuLink, "expanded">) => {
-  const match = useRouteMatch({
+  const match = useMatch({
     path: to,
-    exact: activeOnlyWhenExact,
+    end: activeOnlyWhenExact,
   });
 
   return (
