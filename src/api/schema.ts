@@ -1,5 +1,59 @@
 import { DateTime, Duration } from "luxon";
-import { coerce, define, literal, string, type, nullable, enums, Infer } from "superstruct";
+import { coerce, define, literal, string, type, nullable, enums, Infer, Struct, unknown } from "superstruct";
+
+/**
+ * Given object checks if value is a plain javascript object 
+ * @returns bool
+ */
+const isPlainObject = (value: unknown): value is Record<string, unknown> => {
+    if (typeof value !== "object" || value === null) {
+        return false;
+    }
+    return Object.getPrototypeOf(value) === Object.prototype;
+};
+
+/**
+ * Same as superstruct's defaulted, but also defaults if value is null.
+ * Accepts the same parameters.
+ * @param struct
+ * @param fallback
+ * @param options
+ * @returns
+ */
+export const defaultedNull = <T, S>(
+  struct: Struct<T, S>,
+  fallback: any,
+  options: {
+    strict?: boolean
+  } = {}
+): Struct<T, S> => {
+  return coerce(struct, unknown(), (x) => {
+    const f = typeof fallback === 'function' ? fallback() : fallback
+
+    if (x === undefined || x === null) {
+      return f
+    }
+
+    if (!options.strict && isPlainObject(x) && isPlainObject(f)) {
+      const ret = { ...x }
+      let changed = false
+
+      // eslint-disable-next-line no-restricted-syntax
+      for (const key in f) {
+        if (ret[key] === undefined || ret[key] === null) {
+          ret[key] = f[key]
+          changed = true
+        }
+      }
+
+      if (changed) {
+        return ret
+      }
+    }
+
+    return x
+  })
+}
 
 const isDateTime = (value: unknown) => {
   return DateTime.isDateTime(value as object);

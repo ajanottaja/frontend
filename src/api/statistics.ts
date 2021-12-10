@@ -1,9 +1,11 @@
 import { Auth0ContextInterface, User } from "@auth0/auth0-react";
+import { Duration } from "luxon";
 import { type, Infer, union, literal, array, enums } from "superstruct";
 import { PublicConfiguration } from "swr/dist/types";
 import { apiHost } from "../config";
 import { useSwrWithAuth0 } from "./fetch";
 import {
+  defaultedNull,
   InternalServerErrorSchema,
   LuxonDateTime,
   LuxonDuration,
@@ -50,9 +52,9 @@ export const useStatisticsSummary = (
 
 const CalendarStatisticSchema = type({
   date: LuxonDateTime,
-  target: LuxonDuration,
-  tracked: LuxonDuration,
-  diff: LuxonDuration,
+  target: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
+  tracked: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
+  diff: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
 });
 
 export type CalendarStatistic = Infer<typeof CalendarStatisticSchema>;
@@ -94,10 +96,10 @@ export const useStatisticsCalendar = (
 
 const CumulativeStatisticSchema = type({
   date: LuxonDateTime,
-  target: LuxonDuration,
-  tracked: LuxonDuration,
-  diff: LuxonDuration,
-  cumulativeDiff: LuxonDuration,
+  target: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
+  tracked: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
+  diff: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
+  cumulativeDiff: defaultedNull(LuxonDuration, Duration.fromMillis(0)),
 });
 
 export type CumulativeStatistic = Infer<typeof CumulativeStatisticSchema>;
@@ -106,8 +108,6 @@ const CumulativeStatisticsSchema = type({
   status: literal(200),
   body: array(CumulativeStatisticSchema),
 });
-
-type CumulativeStatistics = Infer<typeof CumulativeStatisticsSchema>;
 
 const CumulativeStatisticsResponseSchema = union([
   CumulativeStatisticsSchema,
