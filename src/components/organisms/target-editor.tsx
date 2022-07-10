@@ -1,11 +1,9 @@
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
 import { TargetRecord } from "../../api/calendar";
-import { useMatchMutate } from "../../api/fetch";
 import { updateTarget, deleteTarget, createTarget } from "../../api/target";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
@@ -24,14 +22,13 @@ export const TargetEditor = ({
   isOpen,
   close,
 }: TargetEditor) => {
-  const auth0 = useAuth0();
   const [targetDuration, setTargetDuration] = useState(targetRecord?.duration);
   const [targetDate, setTargetDate] = useState(targetRecord?.date);
   const { mutate } = useContext(SwrMutateContext);
-  const matchMutate = useMatchMutate();
+  //const matchMutate = useMatchMutate();
 
   const refresh = async () => {
-    matchMutate(/\/calendar/);
+    //matchMutate(/\/calendar/);
     mutate();
     close();
   };
@@ -43,13 +40,7 @@ export const TargetEditor = ({
       targetDate &&
       targetDate.isValid
     ) {
-      const res = await createTarget({
-        auth0,
-        body: { duration: targetDuration, date: targetDate },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
+
     }
   };
 
@@ -61,27 +52,13 @@ export const TargetEditor = ({
       targetDate &&
       targetDate.isValid
     ) {
-      const res = await updateTarget({
-        auth0,
-        path: { id: targetRecord.id },
-        body: { duration: targetDuration, date: targetDate },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
+      
     }
   };
 
   const removeTarget = async () => {
     if (targetRecord) {
-      const res = await deleteTarget({
-        auth0,
-        path: { id: targetRecord.id },
-      });
-
-      if (res.status === 200) {
-        refresh();
-      }
+      
     }
   };
 

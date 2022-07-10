@@ -1,4 +1,3 @@
-import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { type, string, date, Infer, union, literal, array, enums, optional, nullable } from "superstruct";
 import { PublicConfiguration } from "swr/dist/types";
 import { apiHost } from "../config";
@@ -47,7 +46,7 @@ const CalendarParamsSchema = type({
 type CalendarParams = Infer<typeof CalendarParamsSchema>;
 
 interface UseCalendar {
-  auth0: Auth0ContextInterface<User>;
+  auth0: any;
   swrOpts?: Partial<PublicConfiguration>;
   query: CalendarParams;
 }

@@ -15,8 +15,8 @@ import {
   faTimes,
   IconDefinition,
 } from "@fortawesome/free-solid-svg-icons";
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { Disclosure } from "@headlessui/react";
+import { useClient } from "../../supabase/use-client";
 
 type MenuLink = Omit<LinkProps, "icon"> & {
   icon: IconDefinition;
@@ -115,7 +115,7 @@ const MenuButton = ({
 
 export const MainMenu = () => {
   const [expanded, setExpanded] = useState(false);
-  const { logout } = useAuth0();
+  const client = useClient();
   return (
     <nav
       h="screen"
@@ -170,7 +170,7 @@ export const MainMenu = () => {
 
       <MenuButton
         expanded={expanded}
-        onClick={() => logout()}
+        onClick={() => client.auth.signOut()}
         icon={faSignOutAlt}
         title={!expanded ? "Sign out" : ""}
       >
@@ -210,8 +210,8 @@ const MobileMenuLink = ({
       {...props}
     >
       <div w="full" display="flex" flex="row" justify="start" m="l-4">
-        <span  m="r-4">
-          <FontAwesomeIcon icon={icon} size="lg"/>
+        <span m="r-4">
+          <FontAwesomeIcon icon={icon} size="lg" />
         </span>
         {children}
       </div>
@@ -252,7 +252,8 @@ const MobileMenuButton = ({
   );
 };
 
-const MobileMenuInner = ({auth0:{logout}}: {auth0: Auth0ContextInterface<User>}) => {
+const MobileMenuInner = () => {
+  const client = useClient();
   return (
     <nav display="flex" flex="col" justify="items-center" p="4">
       <ul>
@@ -282,7 +283,11 @@ const MobileMenuInner = ({auth0:{logout}}: {auth0: Auth0ContextInterface<User>})
           Statistics
         </MobileMenuLink>
 
-        <MobileMenuButton title="Statistics" icon={faSignOutAlt} onClick={() => logout()}>
+        <MobileMenuButton
+          title="Statistics"
+          icon={faSignOutAlt}
+          onClick={() => client.auth.signOut()}
+        >
           Sign out
         </MobileMenuButton>
       </ul>
@@ -292,7 +297,6 @@ const MobileMenuInner = ({auth0:{logout}}: {auth0: Auth0ContextInterface<User>})
 
 export const MobileMenu = () => {
   const [expanded, setExpanded] = useState(false);
-  const auth0 = useAuth0();
   return (
     <Disclosure
       as="div"
@@ -319,7 +323,6 @@ export const MobileMenu = () => {
         Ajanottaja
       </h1>
 
-
       <Disclosure.Panel
         as="div"
         pos="absolute inset-0"
@@ -327,7 +330,7 @@ export const MobileMenu = () => {
         h="screen"
         bg="dark-500"
       >
-        <MobileMenuInner auth0={auth0} />
+        <MobileMenuInner />
       </Disclosure.Panel>
     </Disclosure>
   );
