@@ -1,4 +1,3 @@
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
@@ -6,12 +5,7 @@ import { DateTime } from "luxon";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
 import { IntervalRecord } from "../../api/calendar";
-import { useMatchMutate } from "../../api/fetch";
-import {
-  createInterval,
-  updateInterval,
-  deleteInterval,
-} from "../../api/interval";
+
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import TimePicker from "../atoms/time-picker";
@@ -28,53 +22,30 @@ export const IntervalEditor = ({
   isOpen,
   close,
 }: IntervalEditor) => {
-  const auth0 = useAuth0();
   const [interval, setInterval] = useState<{
     beginning: DateTime;
     end?: DateTime;
   }>(intervalRecord?.interval ?? { beginning: DateTime.now() });
   const { mutate } = useContext(SwrMutateContext);
-  const matchMutate = useMatchMutate();
 
   const refresh = async () => {
-    matchMutate(/\/calendar/);
-    mutate();
+
     close();
   };
 
   const saveNewInterval = async () => {
-    const res = await createInterval({
-      auth0,
-      body: { interval },
-    });
-    if (res.status === 200) {
-      refresh();
-    }
+
   };
 
   const saveInterval = async () => {
     if (intervalRecord && interval) {
-      const res = await updateInterval({
-        auth0,
-        path: { id: intervalRecord.id },
-        body: { interval },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
+
     }
   };
 
   const removeInterval = async () => {
     if (intervalRecord) {
-      const res = await deleteInterval({
-        auth0,
-        path: { id: intervalRecord.id },
-      });
 
-      if (res.status === 200) {
-        refresh();
-      }
     }
   };
 

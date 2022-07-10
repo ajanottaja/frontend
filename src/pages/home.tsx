@@ -1,4 +1,3 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { DateTime, Duration } from "luxon";
 import React, { useEffect, useState, Suspense } from "react";
 import { useNavigate } from "react-router";
@@ -106,93 +105,75 @@ const Row = ({ direction, title, description, demo }: Row) => (
 
 const Home = () => {
   const [target, setTarget] = useState<Duration>();
-  const { isAuthenticated } = useAuth0();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated]);
 
   return (
     <div
-      display="flex"
-      flex="col"
-      w="full"
-      justify="items-center"
-      align="items-center"
-    >
-      <div
-        display="flex"
-        flex="col"
-        align="center"
-        justify="start"
-        w="max-screen-lg full"
-        p="<sm:x-8"
-      >
-        <h1 text="green-300 5xl uppercase" font="tracking-widest" p="t-16 b-24">
-          Ajanottaja
-        </h1>
+    display="flex"
+    flex="col"
+    align="center"
+    justify="start"
+    w="max-screen-lg full"
+    p="<sm:x-8"
+  >
+      <h1 text="green-300 5xl uppercase" font="tracking-widest" p="t-16 b-24">
+        Ajanottaja
+      </h1>
 
-        <Row
-          direction="left"
-          title="An intuitive timer"
-          description={`
+      <Row
+        direction="left"
+        title="An intuitive timer"
+        description={`
             Just like your grandfather's stop watch, a simple click and away you go!
             Watch as the seconds tick away as time slowly accumulates.
             Ajanottaja will faitfully keep track of time until you stop the watch.`}
-          demo={<TimerDemo />}
-        />
+        demo={<TimerDemo />}
+      />
 
-        <Row
-          direction="right"
-          title="Choose your targets"
-          description={`
+      <Row
+        direction="right"
+        title="Choose your targets"
+        description={`
             Aim high, but not so high as to burn yourself out.
             Ajanottaja will help you keep track of your daily goals.
             This way you know when to take a few hours off your day. Or if you need to put in a few extra hours.
           `}
-          demo={
-            <DurationPickerDashboard
-              duration={target}
-              setDuration={setTarget}
-            />
-          }
-        />
+        demo={
+          <DurationPickerDashboard duration={target} setDuration={setTarget} />
+        }
+      />
 
-        <div
-          w="min-full"
-          display="flex"
-          flex="col"
-          align="items-center"
-          justify="center"
-          m="b-16"
+      <div
+        w="min-full"
+        display="flex"
+        flex="col"
+        align="items-center"
+        justify="center"
+        m="b-16"
+      >
+        <h2 text="gray-300 4xl <sm:3xl" p="b-2" w="full">
+          A calendar for the ages
+        </h2>
+        <p text="gray-400" m="b-16">
+          Don't worry, your logged time and targets are a fingertip away.
+          Ajanottaja's digital calendar will help you housekeep your logged time
+          and targets. Should you wish to you can edit or delete your tracked
+          time and targets.
+        </p>
+        <CalendarDemo />
+      </div>
+
+      <div display="flex" justify="center" m="b-16">
+        <a
+          w="max-content"
+          gradient="to-l from-green-800 to-teal-800"
+          border="rounded-md"
+          p="4"
+          text="gray-300"
+          href="/register"
         >
-          <h2 text="gray-300 4xl <sm:3xl" p="b-2" w="full">
-            A calendar for the ages
-          </h2>
-          <p text="gray-400" m="b-16">
-            Don't worry, your logged time and targets are a fingertip away.
-            Ajanottaja's digital calendar will help you housekeep your logged
-            time and targets. Should you wish to you can edit or delete your
-            tracked time and targets.
-          </p>
-          <CalendarDemo />
-        </div>
-
-        <div display="flex" justify="center" m="b-16">
-          <a
-            w="max-content"
-            gradient="to-l from-green-800 to-teal-800"
-            border="rounded-md"
-            p="4"
-            text="gray-300"
-            href="/dashboard"
-          >
-            Log in now!
-          </a>
-        </div>
+          Register now!
+        </a>
       </div>
     </div>
   );
