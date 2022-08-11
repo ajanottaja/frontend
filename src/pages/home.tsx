@@ -1,14 +1,12 @@
 import { DateTime, Duration } from "luxon";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { date } from "superstruct";
-import { IntervalRecord, TargetRecord } from "../api/calendar";
 import DurationPickerDashboard from "../components/atoms/duration-picker-dashboard";
 import Timer from "../components/atoms/timer";
 import { MonthHeader } from "../components/layout/calendar/headers";
-import Header from "../components/layout/header";
 import { MonthCalendar } from "../components/organisms/calendar";
-import { daysOfMonth, intervalsOnDate } from "../utils/date";
+import { Target, Track } from "../schema/calendar";
+import { daysOfMonth, tracksOnDate } from "../utils/date";
 import { randomInt } from "../utils/functions";
 
 const TimerDemo = () => {
@@ -25,24 +23,28 @@ const TimerDemo = () => {
 const CalendarDemo = () => {
   const today = DateTime.now().startOf("day").plus({ hours: 6 });
   const dates = daysOfMonth(today).map((date) => {
-    const numIntervals = randomInt(0, 3);
-    const intervals = intervalsOnDate(today, numIntervals).map((i) => ({
-      id: i.beginning.toISODate(),
-      interval: i,
+    const numTracks = randomInt(0, 3);
+    const tracks = tracksOnDate(date, numTracks).map((i) => ({
+      id: i.lower.toMillis().toString(),
+      tracked: i,
     }));
-    const target: TargetRecord | null =
-      numIntervals > 0
+    const target: Target =
+      numTracks > 0
         ? {
             date,
             id: date.toISODate(),
             duration: Duration.fromObject({ hours: randomInt(5, 8) }),
           }
-        : null;
+        : {
+          date,
+          id: date.toISODate(),
+          duration: Duration.fromObject({ hours: 0 }),
+        };
 
     return {
       date,
       target,
-      intervals: intervals,
+      tracks,
     };
   });
   return (
@@ -105,7 +107,6 @@ const Row = ({ direction, title, description, demo }: Row) => (
 
 const Home = () => {
   const [target, setTarget] = useState<Duration>();
-  const navigate = useNavigate();
 
   return (
     <div

@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: AuthProvider) => {
 
   useEffect(() => {
     const { data } = client.auth.onAuthStateChange((event, session) => {
+      console.log('Supabase auth event', event)
       setState({ session, user: session?.user ?? null, loading: false });
     });
     return () => data?.unsubscribe();

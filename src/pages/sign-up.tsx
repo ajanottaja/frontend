@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { useSignUp } from "react-supabase";
-import { isError, useMutation } from "react-query";
+import React, { FormEvent, useState } from "react";
+import { isError, useMutation } from "@tanstack/react-query";
 import { Button } from "../components/atoms/button";
 import { useClient } from "../supabase/use-client";
 import { UserCredentials } from "@supabase/supabase-js";
@@ -10,7 +9,8 @@ const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   const data = useMutation(async (user: UserCredentials) => {
-    await client.auth.signUp(user, { redirectTo: "/dashboard" });
+    const { error } = await client.auth.signUp(user);
+    if (error) return error;
     navigate("/dashboard");
   });
   return data;
@@ -20,10 +20,10 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { data, isLoading, error, mutate, isError } = useSignupMutation();
-  const handleLogin = () => mutate({ email, password });
-
-  console.log("Error", error);
-  console.log("Is error", isError);
+  const handleSignup = (e: any) => {
+    e.preventDefault();
+    mutate({ email, password });
+  }
 
   return (
     <div
@@ -63,7 +63,7 @@ const SignUp = () => {
       {isLoading && "Creating user"}
 
       {!error && !isLoading && (
-        <form onSubmit={handleLogin} display="flex" flex="col" gap="4">
+        <form onSubmit={handleSignup} display="flex" flex="col" gap="4">
           <label htmlFor="email" text="left gray-300" m="b-2">
             Email
             <input

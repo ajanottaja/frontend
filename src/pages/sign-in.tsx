@@ -1,6 +1,6 @@
 import { UserCredentials } from "@supabase/supabase-js";
 import React, { useState } from "react";
-import { useMutation } from "react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { Button } from "../components/atoms/button";
 import { useClient } from "../supabase/use-client";
@@ -9,7 +9,8 @@ const useSigninMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   const data = useMutation(async (user: UserCredentials) => {
-    await client.auth.signIn(user, { redirectTo: "/dashboard" });
+    console.log("Signing in...");
+    await client.auth.signIn(user);
     navigate("/dashboard");
   });
   return data;
@@ -49,7 +50,10 @@ const SignIn = () => {
       </p>
       {isLoading && "Logging in"}
       {!error && !isLoading && (
-        <form onSubmit={handleLogin} display="flex" flex="col" gap="4">
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          handleLogin();
+        }} display="flex" flex="col" gap="4">
           <label htmlFor="email" text="left gray-300" m="b-2">
             Email
             <input

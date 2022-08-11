@@ -1,7 +1,7 @@
 import "virtual:windi.css";
 import "virtual:windi-devtools";
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { supabaseConfig } from "./config";
@@ -9,8 +9,8 @@ import { AuthProvider, Provider as SupabaseProvider } from "./supabase";
 import "./index.css";
 import App from "./App";
 import { createClient } from "@supabase/supabase-js";
-import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from 'react-query/devtools'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const history = createBrowserHistory();
 
@@ -22,10 +22,12 @@ const queryClient = new QueryClient({
   },
 });
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container!);
+root.render(
   <React.StrictMode>
     <SupabaseProvider
-      value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
+     value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
     >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
@@ -38,6 +40,5 @@ ReactDOM.render(
         </AuthProvider>
       </QueryClientProvider>
     </SupabaseProvider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

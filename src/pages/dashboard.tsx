@@ -1,11 +1,11 @@
 import React, { Suspense } from "react";
-import { useMutation, useQuery } from "react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { DateTime, Duration } from "luxon";
 import { z } from "zod";
 import Timer from "../components/atoms/timer";
 import { absDuration, isNegativeDuration } from "../utils/date";
 import DurationPickerDashboard from "../components/atoms/duration-picker-dashboard";
-import { dateTimeToIso8601, durationToIso8601, iso8601ToDateTime, iso8601ToDuration, tsRangeJson } from "../schema/custom";
+import { dateTimeToIso8601, durationToIso8601, iso8601ToDateTime, iso8601ToDuration, tsRangeToObject } from "../schema/custom";
 import { useClient } from "../supabase/use-client";
 
 /**
@@ -94,31 +94,31 @@ const DashboardTarget = () => {
 
 const intervalSchema = z.object({
   id: z.string().uuid(),
-  interval: tsRangeJson,
+  tracked: tsRangeToObject,
 });
 
-const useActiveInterval = () => {
+const useActiveTrack = () => {
   const client = useClient();
-  return useQuery(["activeInterval"], async () => {
+  return useQuery(["activeTrack"], async () => {
     const { data, error } = await client
-      .from("intervals_active")
-      .select("id,interval::json")
+      .from("tracks_active")
+      .select("id,tracked::json")
       .limit(1);
     if (error) throw error;
     return z.array(intervalSchema).parse(data);
   });
 };
 
-const startIntervalSchema = z.object({
+const startTrackSchema = z.object({
   multiplier: z.number().optional().default(1.0),
 });
 
-const useStartActiveInterval = () => {
+const useStartActiveTrack = () => {
   const client = useClient();
   return useMutation(async () => {
-    const upsertData = startIntervalSchema.parse({});
+    const upsertData = startTrackSchema.parse({});
     const { data, error } = await client
-      .rpc("interval_start", upsertData);
+      .rpc("track_start", upsertData);
 
   if(error) {
     console.error(error); 
@@ -127,15 +127,15 @@ const useStartActiveInterval = () => {
   })
 }
 
-const stopIntervalSchema = z.object({
+const stopTrackSchema = z.object({
   id: z.string().uuid(),
 });
 
-const useStopActiveInterval = () => {
+const useStopActiveTrack = () => {
   const client = useClient();
-  return useMutation(async (args: z.infer<typeof stopIntervalSchema>) => {
+  return useMutation(async (args: z.infer<typeof stopTrackSchema>) => {
     const { data, error } = await client
-      .rpc("interval_stop", args);
+      .rpc("track_stop", args);
 
   if(error) {
     console.error(error); 
@@ -146,9 +146,9 @@ const useStopActiveInterval = () => {
 
 
 const DashboardTimer = () => {
-  const { data, error, refetch } = useActiveInterval();
-  const { mutateAsync: startInterval } = useStartActiveInterval();
-  const { mutateAsync: stopInterval } = useStopActiveInterval();
+  const { data, error, refetch } = useActiveTrack();
+  const { mutateAsync: startTrack } = useStartActiveTrack();
+  const { mutateAsync: stopTrack } = useStopActiveTrack();
 
   console.log('Data', data)
 
@@ -163,18 +163,18 @@ const DashboardTimer = () => {
     );
   }
 
-  const interval = data?.[0];
+  const track = data?.[0];
 
   return (
     <Timer
       title="Timer"
-      beginning={interval?.interval.lower}
+      beginning={track?.tracked.lower}
       startInterval={async () => {
-        await startInterval();
+        await startTrack();
         refetch();
       }}
       stopInterval={async () => {
-        if(interval) await stopInterval({id: interval.id});
+        if(track) await stopTrack({id: track.id});
         refetch();
       }}
     />

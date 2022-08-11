@@ -8,8 +8,8 @@ import Loading from "./components/layout/loading-page";
 // Lazy load components to enable code splitting
 const Home = React.lazy(() => import("./pages/home"));
 const Dashboard = React.lazy(() => import("./pages/dashboard"));
-// const Calendar = React.lazy(() => import("./pages/calendar"));
-// const Statistics = React.lazy(() => import("./pages/statistics"));
+const Calendar = React.lazy(() => import("./pages/calendar"));
+const Statistics = React.lazy(() => import("./pages/statistics"));
 const SignUp = React.lazy(() => import("./pages/sign-up"));
 const SignIn = React.lazy(() => import("./pages/sign-in"));
 
@@ -67,8 +67,8 @@ function App() {
       </Route>
       <Route element={<AuthorizedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* <Route path="/calendar" element={<Calendar />} />
-          <Route path="/statistics" element={<Statistics />} /> */}
+          <Route path="/calendar" element={<Calendar />} />
+          <Route path="/statistics" element={<Statistics />} />
       </Route>
     </Routes>
   </React.Suspense>

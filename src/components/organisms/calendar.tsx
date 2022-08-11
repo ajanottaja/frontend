@@ -1,23 +1,22 @@
-import { Auth0ContextInterface, User } from "@auth0/auth0-react";
 import { faBullseye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Transition } from "@headlessui/react";
 import { DateTime } from "luxon";
-import React, { Fragment, useState } from "react";
-import { CalendarDate, IntervalRecord, TargetRecord } from "../../api/calendar";
+import React, { useState } from "react";
+import { CalendarDate, Target, Track } from "../../schema/calendar";
 import { daysOfMonth, daysOfWeek } from "../../utils/date";
-import { IntervalEditor } from "./interval-editor";
+import { TrackEditor } from "./track-editor";
 import { TargetEditor } from "./target-editor";
 
-interface Calendar {
-  dates?: CalendarDate[];
-  date: DateTime;
+interface CalendarInput {
+  date: DateTime,
+  dates?: CalendarDate[]
 }
+
 
 const WeekTarget = ({
   target,
 }: {
-  target: TargetRecord;
+  target: Target;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -45,19 +44,19 @@ const WeekTarget = ({
 };
 
 
-const WeekInterval = ({
-  interval,
+const WeekTrack = ({
+  track,
 }: {
-  interval: IntervalRecord;
+  track: Track;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const minutesPastMidnight =
-    interval.interval.beginning
-      .diff(interval.interval.beginning.startOf("day"))
+    track.tracked.lower
+      .diff(track.tracked.lower.startOf("day"))
       .as("minutes");
   const length =
-    (interval.interval.end.isValid ? interval.interval.end : DateTime.now())
-      .diff(interval.interval.beginning)
+    (track.tracked.upper?.isValid ? track.tracked.upper : DateTime.now())
+      .diff(track.tracked.lower)
       .as("minutes");
   return (
     <div
@@ -70,7 +69,7 @@ const WeekInterval = ({
       onClick={() => setIsEditing(true)}
     >
       <button
-        key={interval.interval.beginning.toISODate()}
+        key={track.tracked.lower.toISODate()}
         display="flex"
         align="items-start"
         bg="green-900 focus:green-800"
@@ -87,13 +86,13 @@ const WeekInterval = ({
         }}
       >
        <span display="<md:hidden">
-       {interval.interval.beginning.toFormat("HH:mm")} -{" "}
-        {interval.interval.end.isValid
-          ? interval.interval.end.toFormat("HH:mm")
+       {track.tracked.lower.toFormat("HH:mm")} -{" "}
+        {track.tracked.upper?.isValid
+          ? track.tracked.upper.toFormat("HH:mm")
           : "now"}
        </span>
-        <IntervalEditor
-          interval={interval}
+        <TrackEditor
+          track={track}
           isOpen={isEditing}
           close={() => setIsEditing(false)}
         />
@@ -102,7 +101,7 @@ const WeekInterval = ({
   );
 };
 
-export const WeekCalendar = ({ dates, date }: Calendar) => {
+export const WeekCalendar = ({ dates, date }: CalendarInput) => {
   const fallbackDates = daysOfWeek(date);
   return (
     <div
@@ -150,10 +149,10 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
           })}
         </div>
         {dates &&
-          dates.map(({ date, target, intervals }, i) => (
+          dates.map(({ date, target, tracks }, i) => (
             <div display="grid" grid="rows-24 gap-1" h="[1440px]" pos="relative">
-              {intervals.map((interval) => (
-                <WeekInterval interval={interval} />
+              {tracks.map((track) => (
+                <WeekTrack track={track} />
               ))}
               {[
                 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
@@ -171,7 +170,7 @@ export const WeekCalendar = ({ dates, date }: Calendar) => {
 const MonthTarget = ({
   target,
 }: {
-  target: TargetRecord;
+  target: Target;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
@@ -198,15 +197,15 @@ const MonthTarget = ({
 };
 
 
-const MonthInterval = ({
-  interval,
+const MonthTrack = ({
+  track,
 }: {
-  interval: IntervalRecord;
+  track: Track;
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <button
-      key={interval.id}
+      key={track.id}
       role="button"
       bg="green-900 focus:green-800"
       border="rounded"
@@ -218,12 +217,12 @@ const MonthInterval = ({
       m="b-1"
       onClick={() => setIsEditing(true)}
     >
-      {interval.interval.beginning.toFormat("HH:mm")} -{" "}
-      {interval.interval.end.isValid
-        ? interval.interval.end.toFormat("HH:mm")
+      {track.tracked.lower.toFormat("HH:mm")} -{" "}
+      {track.tracked.upper?.isValid
+        ? track.tracked.upper.toFormat("HH:mm")
         : "now"}
-      <IntervalEditor
-        interval={interval}
+      <TrackEditor
+        track={track}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
       />
@@ -231,7 +230,7 @@ const MonthInterval = ({
   );
 };
 
-export const MonthCalendar = ({ dates, date }: Calendar) => {
+export const MonthCalendar = ({ dates, date }: CalendarInput) => {
   // While loading, display skeleton for number of dates
   const fallbackDates = daysOfMonth(date);
 
@@ -246,7 +245,7 @@ export const MonthCalendar = ({ dates, date }: Calendar) => {
         className="grid-auto-fit"
       >
         {dates &&
-          dates.map(({ date, target, intervals }, i) => (
+          dates.map(({ date, target, tracks }, i) => (
             <div
               key={date.toISODate()}
               display="flex"
@@ -264,8 +263,8 @@ export const MonthCalendar = ({ dates, date }: Calendar) => {
                 {target && <MonthTarget target={target} />}
               </div>
 
-              {intervals.map((interval) => (
-                <MonthInterval interval={interval} />
+              {tracks.map((track) => (
+                <MonthTrack key={track.id} track={track} />
               ))}
             </div>
           ))}
