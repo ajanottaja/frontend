@@ -171,9 +171,9 @@ const Home = () => {
           border="rounded-md"
           p="4"
           text="gray-300"
-          href="/register"
+          href="/signup"
         >
-          Register now!
+          Sign up now!
         </a>
       </div>
     </div>

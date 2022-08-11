@@ -9,7 +9,7 @@ const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   const data = useMutation(async (user: UserCredentials) => {
-    const { error } = await client.auth.signUp(user);
+    const { error } = await client.auth.signUp(user, { redirectTo: window.location.host + "/signin" });
     if (error) return error;
     navigate("/dashboard");
   });
