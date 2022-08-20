@@ -34,7 +34,7 @@ const useCalendar = (query: CalendarQuery) => {
   const params = calendarParams.parse(query);
   // Call supabase rpc calendar function to get calendar rows
   return useQuery(["calendar", params], async () => {
-    const { data, error } = await client.rpc("calendar", params);
+    const { data, error } = await client.rpc("calendar", params).select("date,target::json,tracks");
     if (error) throw error;
     return z.array(calendarDateSchema).parse(data);
   });

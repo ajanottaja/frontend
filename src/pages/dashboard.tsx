@@ -22,15 +22,17 @@ const targetSchema = z.object({
 const useActiveTarget = () => {
   const client = useClient();
   return useQuery(["activeTarget"], async () => {
+
     const { data, error } = await client
       .from("targets")
-      .select("id,date,duration")
+      .select("id,date,duration::json")
       .eq("date", DateTime.now().toISODate())
       .limit(1);
     if (error) throw error;
     return z.array(targetSchema).parse(data);
   });
 };
+
 
 const targetUpdateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -197,7 +199,7 @@ const summarySchema = z.object({
 const useSummary = () => {
   const client = useClient();
   return useQuery(["summary"], async () => {
-    const { data, error } = await client.from("summary").select("*");
+    const { data, error } = await client.from("summary").select("title,period,target::json,tracked::json,diff::json");
     if (error) throw error;
     return z.array(summarySchema).parse(data);
   });

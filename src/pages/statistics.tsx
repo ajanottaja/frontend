@@ -130,7 +130,7 @@ const useAccumulatedStatistics = (filter: z.input<typeof cumulativeStatsFilterSc
     const queryFilter = cumulativeStatsFilterSchema.parse(filter);
     const { data, error } = await client
       .from("accumulated_stats")
-      .select("date,target,tracked,diff,cumulative_diff")
+      .select("date,target::json,tracked::json,diff::json,cumulative_diff::json")
       .filter("date", "lte", filter.date)
       .order("date", { ascending: true });
     if (error) throw error;
