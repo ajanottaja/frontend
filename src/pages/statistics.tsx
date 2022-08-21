@@ -46,7 +46,7 @@ const useStatisticsCalendar = (params: z.input<typeof statsParamsSchema>) => {
   // Call supabase rpc calendar function to get calendar rows
   return useQuery(["statistics-calendar"], async () => {
     const statsParams = statsParamsSchema.parse(params);
-    const { data, error } = await client.rpc("stats", statsParams);
+    const { data, error } = await client.rpc("stats", statsParams).select("date,target::json,tracked::json,diff::json");
     if (error) throw error;
     return z.array(statisticsCalendarSchema).parse(data);
   });
