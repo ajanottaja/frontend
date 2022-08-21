@@ -117,7 +117,20 @@ const Home = () => {
     w="max-screen-lg full"
     p="<sm:x-8"
   >
-      <h1 text="green-300 5xl uppercase" font="tracking-widest" p="t-16 b-24">
+      <div display="flex" justify="end" m="t-8">
+        <a
+          w="max-content"
+          gradient="to-l from-green-800 to-teal-800"
+          border="rounded-md"
+          p="2"
+          text="gray-300"
+          href="/signin"
+        >
+          Sign in
+        </a>
+      </div>
+      
+      <h1 text="green-300 5xl uppercase" font="tracking-widest" p="t-8 b-24">
         Ajanottaja
       </h1>
 

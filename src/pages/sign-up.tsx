@@ -43,8 +43,8 @@ const SignUp = () => {
         Fill out the form to sign up as a user of Ajanottaja.
         <br />
         Already have an account?{" "}
-        <a href="/login" text="green-300">
-          Login here
+        <a href="/signin" text="green-300">
+          Sign in here
         </a>
         .<br />
         Forgot your password?{" "}
