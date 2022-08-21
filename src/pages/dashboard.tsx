@@ -1,84 +1,217 @@
-import React, { useEffect, useState, Suspense } from "react";
-import {
-  Auth0ContextInterface,
-  useAuth0,
-  User,
-} from "@auth0/auth0-react";
-import Timer from "../components/atoms/timer";
+import React, { Suspense } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { DateTime, Duration } from "luxon";
-import {
-  startInterval,
-  stopInterval,
-  useActiveInterval,
-} from "../api/interval";
-import { createTarget, updateTarget, useActiveTarget } from "../api/target";
-import { useStatisticsSummary } from "../api/statistics";
+import { z } from "zod";
+import Timer from "../components/atoms/timer";
 import { absDuration, isNegativeDuration } from "../utils/date";
 import DurationPickerDashboard from "../components/atoms/duration-picker-dashboard";
+import { dateTimeToIso8601, durationToIso8601, iso8601ToDateTime, iso8601ToDuration, tsRangeToObject } from "../schema/custom";
+import { useClient } from "../supabase/use-client";
 
-const DashboardTarget = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  const { data, error, mutate } = useActiveTarget(auth0);
+/**
+ * Target measures the time you want to work on a given day.
+ * Specifies hooks to query and mutate the active target (today).
+ */
+
+const targetSchema = z.object({
+  id: z.string().uuid().optional(),
+  date: iso8601ToDateTime,
+  duration: iso8601ToDuration,
+});
+
+const useActiveTarget = () => {
+  const client = useClient();
+  return useQuery(["activeTarget"], async () => {
+
+    const { data, error } = await client
+      .from("targets")
+      .select("id,date,duration::json")
+      .eq("date", DateTime.now().toISODate())
+      .limit(1);
+    if (error) throw error;
+    return z.array(targetSchema).parse(data);
+  });
+};
+
+
+const targetUpdateSchema = z.object({
+  id: z.string().uuid().optional(),
+  account: z.string().uuid(),
+  date: dateTimeToIso8601,
+  duration: durationToIso8601,
+});
+
+const useUpsertActiveTarget = () => {
+  const client = useClient();
+  return useMutation(async (args: z.infer<typeof targetSchema>) => {
+    const upsertData = targetUpdateSchema.parse({...args, account: client.auth.user()?.id});
+    const { data, error } = await client
+      .from("targets")
+      .upsert(upsertData, { onConflict: 'date,account'})
+      .match({date: upsertData.date});
+
+  if(error) {
+    console.error(error); 
+  }
+  return {data, error};
+  })
+}
+
+const DashboardTarget = () => {
+  const { data, error, refetch }  = useActiveTarget();
+  const { mutateAsync } = useUpsertActiveTarget();
+
+  if (error) {
+    console.error(error);
+    return (
+      <div display="grid" grid="cols-1" align="self-center">
+        <span className="text-red-300 text-2xl font-mono pb-8">
+          Could not get target time.
+        </span>
+      </div>
+    );
+  }
+
+  const target = data?.[0];
+
 
   return (
     <DurationPickerDashboard
       title="Todays target"
-      duration={data?.status === 200 ? data.body.duration : undefined}
+      duration={target?.duration}
       setDuration={async (duration: Duration) => {
-        const date = DateTime.now();
-        if(data?.status === 200) {
-          const res = await updateTarget({
-            auth0,
-            path: { id: data.body.id },
-            body: { duration, date: data.body.date }
-          });
-        } else {
-          const res = await createTarget({
-            auth0,
-            body: { duration, date },
-          });
-        }
-        mutate();
+        const res = await mutateAsync({id: target?.id, duration, date: target?.date?? DateTime.now()});
+        refetch();
       }}
     />
   );
 };
 
-const DashboardTimer = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  const { data, error, mutate } = useActiveInterval(auth0);
 
-  if (data) {
+
+/**
+ * Interval measures the time you have worked on a given day.
+ * Specifies hooks to query and mutate the active interval (today).
+ */
+
+const intervalSchema = z.object({
+  id: z.string().uuid(),
+  tracked: tsRangeToObject,
+});
+
+const useActiveTrack = () => {
+  const client = useClient();
+  return useQuery(["activeTrack"], async () => {
+    const { data, error } = await client
+      .from("tracks_active")
+      .select("id,tracked::json")
+      .limit(1);
+    if (error) throw error;
+    return z.array(intervalSchema).parse(data);
+  });
+};
+
+const startTrackSchema = z.object({
+  multiplier: z.number().optional().default(1.0),
+});
+
+const useStartActiveTrack = () => {
+  const client = useClient();
+  return useMutation(async () => {
+    const upsertData = startTrackSchema.parse({});
+    const { data, error } = await client
+      .rpc("track_start", upsertData);
+
+  if(error) {
+    console.error(error); 
+  }
+  return {data, error};
+  })
+}
+
+const stopTrackSchema = z.object({
+  id: z.string().uuid(),
+});
+
+const useStopActiveTrack = () => {
+  const client = useClient();
+  return useMutation(async (args: z.infer<typeof stopTrackSchema>) => {
+    const { data, error } = await client
+      .rpc("track_stop", args);
+
+  if(error) {
+    console.error(error); 
+  }
+  return {data, error};
+  })
+}
+
+
+const DashboardTimer = () => {
+  const { data, error, refetch } = useActiveTrack();
+  const { mutateAsync: startTrack } = useStartActiveTrack();
+  const { mutateAsync: stopTrack } = useStopActiveTrack();
+
+  console.log('Data', data)
+
+  if (error) {
+    console.error(error);
     return (
-        <Timer
-          title="Timer"
-          beginning={
-            data?.status === 200 ? data.body.interval.beginning : undefined
-          }
-          startInterval={async () => {
-            await startInterval({ auth0 });
-            mutate();
-          }}
-          stopInterval={async () => {
-            await stopInterval({ auth0 });
-            mutate();
-          }}
-        />
+      <div display="grid" grid="cols-1" align="self-center">
+        <span className="text-red-300 text-2xl font-mono pb-8">
+          Could not get target time.
+        </span>
+      </div>
     );
   }
 
+  const track = data?.[0];
+
   return (
-    <span className="text-red-300 text-2xl font-mono pb-8">
-      Could not check for active time intervals
-    </span>
+    <Timer
+      title="Timer"
+      beginning={track?.tracked.lower}
+      startInterval={async () => {
+        await startTrack();
+        refetch();
+      }}
+      stopInterval={async () => {
+        if(track) await stopTrack({id: track.id});
+        refetch();
+      }}
+    />
   );
 };
 
-const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
-  // Get statistics summary and refresh every minute
-  const { data, error } = useStatisticsSummary(auth0, {
-    refreshInterval: 60 * 1000,
-  });
 
-  if (error || data?.status !== 200) {
+/**
+ * Summary displays statistics about your tracked time.
+ * Uses the summary view to get relevant data.
+ */
+
+const summarySchema = z.object({
+  title: z.string(),
+  target: iso8601ToDuration,
+  tracked: iso8601ToDuration,
+  diff: iso8601ToDuration,
+});
+
+const useSummary = () => {
+  const client = useClient();
+  return useQuery(["summary"], async () => {
+    const { data, error } = await client.from("summary").select("title,period,target::json,tracked::json,diff::json");
+    if (error) throw error;
+    return z.array(summarySchema).parse(data);
+  });
+};
+
+const DashboardStats = () => {
+  // Get statistics summary and refresh every minute
+  const { data, isLoading, error } = useSummary();
+
+  if (error) console.error(error);
+
+  if (error) {
     return (
       <div display="grid" grid="cols-1" align="self-center">
         <span className="text-red-300 text-2xl font-mono pb-8">
@@ -88,104 +221,110 @@ const DashboardStats = ({ auth0 }: { auth0: Auth0ContextInterface<User> }) => {
     );
   }
 
-  const summary = {
-    day: data.body.find((d) => d.unit === "day"),
-    week: data.body.find((d) => d.unit === "week"),
-    month: data.body.find((d) => d.unit === "month"),
-    all: data.body.find((d) => d.unit === "all")
-  };
+  if (data) {
+    const summary = {
+      day: data.find((d) => d.title === "day"),
+      week: data.find((d) => d.title === "week"),
+      month: data.find((d) => d.title === "month"),
+      year: data.find((d) => d.title === "year"),
+      all: data.find((d) => d.title === "all"),
+    };
 
-  const formatDuration = (
-    d: Duration | undefined = Duration.fromMillis(0),
-    format: string
-  ) => `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
+    const formatDuration = (
+      d: Duration | undefined = Duration.fromMillis(0),
+      format: string
+    ) =>
+      `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
 
-  return (
-    <div
-      h="full"
-      display="grid"
-      grid="cols-1 gap-y-1"
-      justify="self-center items-stretch"
-      text="center xl <lg:base"
-    >
-      <h2 text="4xl <lg:3xl center dark:gray-300" m="b-4" align="self-start">
-        Time summary
-      </h2>
-      <span text="gray-300" m="0">
-        Day: {formatDuration(summary.day?.diff, "h 'hours' m 'minutes'")}
-      </span>
-      <span text="gray-300" m="0">
-        Week:{" "}
-        {formatDuration(summary.week?.diff, "h 'hours' m 'minutes'")}
-      </span>
-      <span text="gray-300" m="0">
-        Month:{" "}
-        {formatDuration(summary.month?.diff, "d 'days' h 'hours' m 'minutes'")}
-      </span>
-      <span text="green-300" m="0">
-        All time:{" "}
-        {formatDuration(summary.all?.diff, "d 'days' h 'hours' m 'minutes'")}
-      </span>
-    </div>
-  );
+    return (
+      <div
+        h="full"
+        display="grid"
+        grid="cols-1 gap-y-1"
+        justify="self-center items-stretch"
+        text="center xl <lg:base"
+      >
+        <h2 text="4xl <lg:3xl center dark:gray-300" m="b-4" align="self-start">
+          Time summary
+        </h2>
+        <span text="gray-300" m="0">
+          Day: {formatDuration(summary.day?.diff, "h 'hours' m 'minutes'")}
+        </span>
+        <span text="gray-300" m="0">
+          Week: {formatDuration(summary.week?.diff, "h 'hours' m 'minutes'")}
+        </span>
+        <span text="gray-300" m="0">
+          Month:{" "}
+          {formatDuration(
+            summary.month?.diff,
+            "d 'days' h 'hours' m 'minutes'"
+          )}
+        </span>
+        <span text="green-300" m="0">
+          Year:{" "}
+          {formatDuration(summary.year?.diff, "d 'days' h 'hours' m 'minutes'")}
+        </span>
+        <span text="green-300" m="0">
+          All:{" "}
+          {formatDuration(summary.all?.diff, "d 'days' h 'hours' m 'minutes'")}
+        </span>
+      </div>
+    );
+  }
+
+  return <div>Fetching</div>;
 };
 
 const Dashboard = () => {
-  const auth0 = useAuth0();
-
-  if (auth0.isLoading) {
-    return <div>Is loading</div>;
-  }
-
-  if (auth0.error) {
-    return <div>Authentication error</div>;
-  }
-
-  if (!auth0.isAuthenticated) {
-    return <div>Not authenticated</div>;
-  }
-
   return (
-    <div w="full" display="flex" flex="col" justify="center" align="items-center" h="full" m="<sm:t-8">
-        <div
-          justify="self-center items-center"
-          align="self-center items-center"
-          display="grid"
-          grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-8"
-          p="<lg:x-4"
+    <div
+      w="full"
+      display="flex"
+      flex="col"
+      justify="center"
+      align="items-center"
+      h="full"
+      m="<sm:t-8"
+    >
+      <div
+        justify="self-center items-center"
+        align="self-center items-center"
+        display="grid"
+        grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-8"
+        p="<lg:x-4"
+      >
+        <Suspense
+            fallback={
+              <div className="flex flex-col items-center text-green-300 text-4xl">
+                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+                <div>Loading</div>
+              </div>
+            }
+          >
+            <DashboardTarget />
+          </Suspense>
+          <Suspense
+            fallback={
+              <div className="flex flex-col items-center text-green-300 text-4xl">
+                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+                <div>Loading</div>
+              </div>
+            }
+          >
+          <DashboardTimer />
+        </Suspense>
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center text-green-300 text-4xl">
+              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+              <div>Loading</div>
+            </div>
+          }
         >
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center text-green-300 text-4xl">
-                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-                <div>Loading</div>
-              </div>
-            }
-          >
-            <DashboardTarget auth0={auth0} />
-          </Suspense>
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center text-green-300 text-4xl">
-                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-                <div>Loading</div>
-              </div>
-            }
-          >
-            <DashboardTimer auth0={auth0} />
-          </Suspense>
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center text-green-300 text-4xl">
-                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-                <div>Loading</div>
-              </div>
-            }
-          >
-            <DashboardStats auth0={auth0} />
-          </Suspense>
-        </div>
+          <DashboardStats />
+        </Suspense>
       </div>
+    </div>
   );
 };
 

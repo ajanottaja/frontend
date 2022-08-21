@@ -1,107 +1,123 @@
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
 import { DateTime } from "luxon";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
-import { IntervalRecord } from "../../api/calendar";
-import { useMatchMutate } from "../../api/fetch";
-import {
-  createInterval,
-  updateInterval,
-  deleteInterval,
-} from "../../api/interval";
+
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import TimePicker from "../atoms/time-picker";
 import SwrMutateContext from "../providers/swr-mutation-provider";
+import { Track } from "../../schema/calendar";
+import { useClient } from "../../supabase/use-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+import { tsRangeObjectToString } from "../../schema/custom";
 
-interface IntervalEditor {
-  interval?: IntervalRecord;
+
+const upsertTrackSchema = z.object({
+  id: z.string().uuid().optional(),
+  tracked: tsRangeObjectToString,
+});
+
+const useUpsertTrack = () => {
+  const client = useClient();
+  const queryClient = useQueryClient();
+  return useMutation(async (trackData: z.input<typeof upsertTrackSchema>) => {
+    const upsertData = upsertTrackSchema.parse(trackData);
+    const { data, error } = await client
+      .from("tracks")
+      .upsert([{ ...upsertData }]);
+
+  if(error) {
+    console.error(error); 
+  }
+
+  queryClient.refetchQueries(["calendar"]);
+
+  return {data, error};
+  })
+}
+
+const deleteTrackSchema = z.object({
+  id: z.string().uuid()
+})
+
+const useDeleteTrack = () => {
+  const client = useClient();
+  const queryClient = useQueryClient();
+  return useMutation(async (params: z.input<typeof deleteTrackSchema>) => {
+    const deleteFilter = deleteTrackSchema.parse(params);
+    const { data, error } = await client
+      .from("tracks")
+      .delete()
+      .match(deleteFilter);
+
+    if(error) {
+      console.error(error); 
+    }
+
+    queryClient.refetchQueries(["calendar"]);
+
+    return {data, error};
+  })
+}
+
+
+interface TrackEditor {
+  track?: Track;
   isOpen: boolean;
   close: () => void;
 }
 
-export const IntervalEditor = ({
-  interval: intervalRecord,
-  isOpen,
-  close,
-}: IntervalEditor) => {
-  const auth0 = useAuth0();
-  const [interval, setInterval] = useState<{
-    beginning: DateTime;
-    end?: DateTime;
-  }>(intervalRecord?.interval ?? { beginning: DateTime.now() });
-  const { mutate } = useContext(SwrMutateContext);
-  const matchMutate = useMatchMutate();
+export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
+  const [currTrack, setCurrTrack] = useState<Track["tracked"]>(
+    track?.tracked ?? {
+      lower: DateTime.now(),
+      lowerInclusive: true,
+      upperInclusive: false,
+    }
+  );
 
-  const refresh = async () => {
-    matchMutate(/\/calendar/);
-    mutate();
+  const { mutateAsync: upsertTrack } = useUpsertTrack();
+  const { mutateAsync: deleteTrack } = useDeleteTrack();
+  
+
+  const updateTrack = async () => {
+    await upsertTrack({id: track?.id, tracked: currTrack});
     close();
   };
 
-  const saveNewInterval = async () => {
-    const res = await createInterval({
-      auth0,
-      body: { interval },
-    });
-    if (res.status === 200) {
-      refresh();
-    }
-  };
-
-  const saveInterval = async () => {
-    if (intervalRecord && interval) {
-      const res = await updateInterval({
-        auth0,
-        path: { id: intervalRecord.id },
-        body: { interval },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
-    }
-  };
-
   const removeInterval = async () => {
-    if (intervalRecord) {
-      const res = await deleteInterval({
-        auth0,
-        path: { id: intervalRecord.id },
-      });
-
-      if (res.status === 200) {
-        refresh();
-      }
+    if (track) {
+      await deleteTrack(track);
+      close();
     }
   };
 
   return (
-    <Transition show={isOpen} as={Fragment}>
-      <Dialog as="div" pos="fixed inset-0 z-100 overflow-auto" onClose={close}>
+    <Transition.Root appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-10" open={isOpen} onClose={close}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div pos="inset-0 fixed" bg="dark-400" opacity="bg-70" />
+        </Transition.Child>
+
         <div
-          h="min-screen"
-          w="min-screen"
-          pos="relative"
+          pos="fixed inset-0"
           display="flex"
           flex="col"
           justify="center"
           align="items-center"
         >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-70"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-70"
-            leaveTo="opacity-0"
-          >
-            <Dialog.Overlay pos="fixed inset-0" bg="dark-400" opacity="70" />
-          </Transition.Child>
-
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -111,7 +127,7 @@ export const IntervalEditor = ({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <div
+            <Dialog.Panel
               display="flex"
               flex="col"
               w="min-72 <sm:min-screen"
@@ -148,11 +164,11 @@ export const IntervalEditor = ({
 
               <div m="b-4">
                 <DatePicker
-                  currentDate={interval.beginning}
+                  currentDate={currTrack.lower}
                   pickDate={(d) => {
-                    setInterval({
-                      ...interval,
-                      beginning: interval.beginning.set({
+                    setCurrTrack({
+                      ...currTrack,
+                      lower: currTrack.lower.set({
                         year: d.year,
                         month: d.month,
                         day: d.day,
@@ -163,11 +179,11 @@ export const IntervalEditor = ({
               </div>
 
               <TimePicker
-                dateTime={interval.beginning}
+                dateTime={currTrack.lower}
                 setDateTime={(d) =>
-                  setInterval({
-                    ...interval,
-                    beginning: d,
+                  setCurrTrack({
+                    ...currTrack,
+                    lower: d,
                   })
                 }
               />
@@ -179,14 +195,14 @@ export const IntervalEditor = ({
               <div m="b-4">
                 <DatePicker
                   currentDate={
-                    interval.end && interval.end.isValid
-                      ? interval.end
+                    currTrack.upper && currTrack.upper.isValid
+                      ? currTrack.upper
                       : undefined
                   }
                   pickDate={(d) => {
-                    setInterval({
-                      ...interval,
-                      end: (interval?.end ?? DateTime.now()).set({
+                    setCurrTrack({
+                      ...currTrack,
+                      upper: (currTrack?.upper ?? DateTime.now()).set({
                         year: d.year,
                         month: d.month,
                         day: d.day,
@@ -198,14 +214,14 @@ export const IntervalEditor = ({
 
               <TimePicker
                 dateTime={
-                  interval.end && interval.end.isValid
-                    ? interval.end
+                  currTrack.upper && currTrack.upper.isValid
+                    ? currTrack.upper
                     : undefined
                 }
                 setDateTime={(d) =>
-                  setInterval({
-                    ...interval,
-                    end: d,
+                  setCurrTrack({
+                    ...currTrack,
+                    upper: d,
                   })
                 }
               />
@@ -215,11 +231,11 @@ export const IntervalEditor = ({
                   flex="1"
                   text="green-300"
                   border="1 dark-50 hover:green-300 focus:green-300 rounded"
-                  onClick={intervalRecord ? saveInterval : saveNewInterval}
+                  onClick={updateTrack}
                 >
-                  {intervalRecord ? "Save" : "Create"}
+                  {track ? "Save" : "Create"}
                 </Button>
-                {intervalRecord && (
+                {track && (
                   <Button
                     flex="1"
                     text="red-300"
@@ -230,10 +246,10 @@ export const IntervalEditor = ({
                   </Button>
                 )}
               </div>
-            </div>
+            </Dialog.Panel>
           </Transition.Child>
         </div>
       </Dialog>
-    </Transition>
+    </Transition.Root>
   );
 };

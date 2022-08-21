@@ -1,20 +1,69 @@
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dialog, Transition } from "@headlessui/react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { Fragment, useContext } from "react";
 import { useState } from "react";
-import { TargetRecord } from "../../api/calendar";
-import { useMatchMutate } from "../../api/fetch";
-import { updateTarget, deleteTarget, createTarget } from "../../api/target";
+import { z } from "zod";
+import { Target } from "../../schema/calendar";
+import { dateTimeToIso8601, durationToIso8601 } from "../../schema/custom";
+import { useClient } from "../../supabase/use-client";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import DurationPicker from "../atoms/duration-picker";
-import TimePicker from "../atoms/time-picker";
-import SwrMutateContext from "../providers/swr-mutation-provider";
+
+
+const upsertTargetSchema = z.object({
+  id: z.string().uuid().optional(),
+  date: dateTimeToIso8601,
+  duration: durationToIso8601,
+});
+
+const useUpsertTarget = () => {
+  const client = useClient();
+  const queryClient = useQueryClient();
+  return useMutation(async (trackData: z.input<typeof upsertTargetSchema>) => {
+    const upsertData = upsertTargetSchema.parse(trackData);
+    const { data, error } = await client
+      .from("targets")
+      .upsert([{ ...upsertData }]);
+
+  if(error) {
+    console.error(error); 
+  }
+
+  queryClient.refetchQueries(["calendar"]);
+
+  return {data, error};
+  })
+}
+
+const deleteTargetSchema = z.object({
+  id: z.string().uuid()
+})
+
+const useDeleteTarget = () => {
+  const client = useClient();
+  const queryClient = useQueryClient();
+  return useMutation(async (params: z.input<typeof deleteTargetSchema>) => {
+    const deleteFilter = deleteTargetSchema.parse(params);
+    const { data, error } = await client
+      .from("targets")
+      .delete()
+      .match(deleteFilter);
+
+  if(error) {
+    console.error(error); 
+  }
+
+  queryClient.refetchQueries(["calendar"]);
+
+  return {data, error};
+  })
+}
 
 interface TargetEditor {
-  target?: TargetRecord;
+  target?: Target;
   isOpen: boolean;
   close: () => void;
 }
@@ -24,75 +73,40 @@ export const TargetEditor = ({
   isOpen,
   close,
 }: TargetEditor) => {
-  const auth0 = useAuth0();
   const [targetDuration, setTargetDuration] = useState(targetRecord?.duration);
   const [targetDate, setTargetDate] = useState(targetRecord?.date);
-  const { mutate } = useContext(SwrMutateContext);
-  const matchMutate = useMatchMutate();
 
-  const refresh = async () => {
-    matchMutate(/\/calendar/);
-    mutate();
-    close();
-  };
+  const { mutateAsync: upsertTarget } = useUpsertTarget();
+  const { mutateAsync: deleteTarget } = useDeleteTarget();
 
-  const saveNewTarget = async () => {
+  const updateTarget = async () => {
     if (
       targetDuration &&
       targetDuration.isValid &&
       targetDate &&
       targetDate.isValid
     ) {
-      const res = await createTarget({
-        auth0,
-        body: { duration: targetDuration, date: targetDate },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
-    }
-  };
-
-  const saveTarget = async () => {
-    if (
-      targetRecord &&
-      targetDuration &&
-      targetDuration.isValid &&
-      targetDate &&
-      targetDate.isValid
-    ) {
-      const res = await updateTarget({
-        auth0,
-        path: { id: targetRecord.id },
-        body: { duration: targetDuration, date: targetDate },
-      });
-      if (res.status === 200) {
-        refresh();
-      }
+      await upsertTarget({id: targetRecord?.id, date: targetDate, duration: targetDuration});
+      close();
     }
   };
 
   const removeTarget = async () => {
     if (targetRecord) {
-      const res = await deleteTarget({
-        auth0,
-        path: { id: targetRecord.id },
-      });
-
-      if (res.status === 200) {
-        refresh();
-      }
+      await deleteTarget(targetRecord);
+      close();
     }
   };
 
   return (
-    <Transition show={isOpen} as={Fragment}>
+    <Transition.Root show={isOpen} as={Fragment}>
       <Dialog
         as="div"
         className="fixed inset-0 z-100 overflow-auto"
+        open={isOpen}
         onClose={close}
       >
-        <div
+        <Dialog.Panel
           h="min-screen"
           w="min-screen"
           pos="relative"
@@ -110,7 +124,7 @@ export const TargetEditor = ({
             leaveFrom="opacity-70"
             leaveTo="opacity-0"
           >
-            <Dialog.Overlay pos="fixed inset-0" bg="dark-400" opacity="70" />
+            <div pos="fixed inset-0" bg="dark-400" opacity="70" />
           </Transition.Child>
 
           <Transition.Child
@@ -174,7 +188,7 @@ export const TargetEditor = ({
                   flex="1"
                   text="green-300"
                   border="1 dark-50 hover:green-300 focus:green-300 rounded"
-                  onClick={targetRecord ? saveTarget : saveNewTarget}
+                  onClick={updateTarget}
                 >
                   {targetRecord ? "Save" : "Save new"}
                 </Button>
@@ -191,8 +205,8 @@ export const TargetEditor = ({
               </div>
             </div>
           </Transition.Child>
-        </div>
+        </Dialog.Panel>
       </Dialog>
-    </Transition>
+    </Transition.Root>
   );
 };

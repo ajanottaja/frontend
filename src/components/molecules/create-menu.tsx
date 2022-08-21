@@ -9,8 +9,7 @@ import React, {
 import { Listbox, Menu, Transition } from "@headlessui/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { IntervalEditor } from "../organisms/interval-editor";
-import { useAuth0 } from "@auth0/auth0-react";
+import { TrackEditor } from "../organisms/track-editor";
 import { TargetEditor } from "../organisms/target-editor";
 
 const CreateMenu = () => {
@@ -19,7 +18,7 @@ const CreateMenu = () => {
 
   return (
     <div>
-      <IntervalEditor
+      <TrackEditor
         isOpen={isEditingInterval}
         close={() => setIsEditingInterval(false)}
       />

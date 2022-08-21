@@ -1,33 +1,44 @@
 import "virtual:windi.css";
 import "virtual:windi-devtools";
 import React from "react";
-import ReactDOM from "react-dom";
-import { AppState, Auth0Provider } from "@auth0/auth0-react";
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from "react-router-dom";
-import { createBrowserHistory } from 'history';
-import { auth0 as auth0Config } from "./config";
+import { createBrowserHistory } from "history";
+import { supabaseConfig } from "./config";
+import { AuthProvider, Provider as SupabaseProvider } from "./supabase";
 import "./index.css";
 import App from "./App";
+import { createClient } from "@supabase/supabase-js";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 export const history = createBrowserHistory();
 
-const onRedirectCallback = (appState: AppState) => {
-  // Use the router's history module to replace the url
-  history.replace(appState?.returnTo || window.location.pathname);
-};
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      suspense: true,
+    },
+  },
+});
 
-ReactDOM.render(
+const container = document.getElementById('root');
+const root = createRoot(container!);
+root.render(
   <React.StrictMode>
-    <Auth0Provider
-      {...auth0Config}
-      onRedirectCallback={onRedirectCallback}
+    <SupabaseProvider
+     value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
     >
-      <Router>
-        <div className="dark" h="min-full" w="max-full">
-          <App />
-        </div>
-      </Router>
-    </Auth0Provider>
-  </React.StrictMode>,
-  document.getElementById("root")
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+            <Router>
+              <div className="dark" h="min-full" w="max-full">
+                <App />
+              </div>
+            </Router>
+        </AuthProvider>
+      </QueryClientProvider>
+    </SupabaseProvider>
+  </React.StrictMode>
 );

@@ -1,6 +1,5 @@
 import { DateTime, Duration } from "luxon";
-import { Interval } from "../api/interval";
-import { Step } from "../api/schema";
+import { CalendarDuration, Track } from "../schema/calendar";
 import { randomInt } from "./functions";
 
 /**
@@ -24,7 +23,7 @@ export const absDuration = (duration: Duration) => isNegativeDuration(duration) 
  * @param period, i.e. day, week, month, or year
  * @returns function
  */
-const daysOfPeriod = (period: Step) => (date: DateTime) => {
+const daysOfPeriod = (period: CalendarDuration) => (date: DateTime) => {
   const start = date.startOf(period);
   const end = date.endOf(period);
   const dates = [];
@@ -41,20 +40,22 @@ const daysOfPeriod = (period: Step) => (date: DateTime) => {
  * @param date
  * @param length
  */
-export const intervalsOnDate = (date: DateTime, length: number) => {
-  const intervals: Required<Interval>[] = [];
+export const tracksOnDate = (date: DateTime, length: number) => {
+  const tracks: Required<Track["tracked"]>[] = [];
   let previous = date;
-  while(intervals.length < length) {
-    const beginning = previous.plus({minutes: randomInt(15, 60 * 2)});
-    const end = beginning.plus({minutes: randomInt(60, 60 * 8)})
-    intervals.push({
-      beginning,
-      end,
+  while(tracks.length < length) {
+    const lower = previous.plus({minutes: randomInt(15, 60 * 2)});
+    const upper = lower.plus({minutes: randomInt(60, 60 * 8)})
+    tracks.push({
+      lower,
+      upper,
+      lowerInclusive: true,
+      upperInclusive: false,
     });
-    previous = end;
+    previous = upper;
   }
 
-  return intervals;
+  return tracks;
 }
 
 /**
@@ -98,7 +99,7 @@ export const quartersOfDay = () => {
  * @param date the date from which to calculate previous date
  * @returns 
  */
-export const previous = (unit: Step, date: DateTime) => {
+export const previous = (unit: CalendarDuration, date: DateTime) => {
   const start = date.startOf(unit);
   switch(unit) {
     case "day":
@@ -120,7 +121,7 @@ export const previous = (unit: Step, date: DateTime) => {
  * @param date the date from which to calculate next date
  * @returns 
  */
-export const next = (unit: Step, date: DateTime) => {
+export const next = (unit: CalendarDuration, date: DateTime) => {
   const start = date.startOf(unit);
   switch(unit) {
     case "day":
@@ -139,7 +140,7 @@ export const next = (unit: Step, date: DateTime) => {
  * @param unit day, week, month, or year
  * @returns date for current unit
  */
-export const current = (unit: Step) => DateTime.now().startOf(unit);
+export const current = (unit: CalendarDuration) => DateTime.now().startOf(unit);
 
 
 

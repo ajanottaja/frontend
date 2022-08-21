@@ -1,26 +1,26 @@
 import { useLocation } from "react-router-dom";
-import { create, Struct } from "superstruct";
+import { z } from "zod";
 
 /**
  * Gets query parameters, turns it into object, and validates and coerces according
  * to querySchema.
- * @param querySchema the superstruct schema to use for validation
+ * @param querySchema the zod schema to use for validation
  * @returns 
  */
-export function useQuery<T>(querySchema: Struct<T>) {
+export function useQueryParams<T extends z.ZodTypeAny>(querySchema: T): z.infer<T> {
   const query = new URLSearchParams(useLocation().search);
   const value = Object.fromEntries(query);
-  return create(value, querySchema);
+  return querySchema.parse(value);
 }
 
 /**
  * Validates and coerces an object of query params before
  * turning object into a query search string
  * @param queryParams Object of query params
- * @param querySchema Schema describing query params
+ * @param querySchema zod schema describing query params
  * @returns 
  */
-export function queryToSearchString<T>(queryParams: T, querySchema: Struct<T>) {
-  const coerced = create(queryParams, querySchema);
+export function queryParamsToSearchString<T extends z.ZodTypeAny>(queryParams: Record<string, unknown>, querySchema: T) {
+  const coerced = querySchema.parse(queryParams);
   return new URLSearchParams(coerced as any).toString();
 }

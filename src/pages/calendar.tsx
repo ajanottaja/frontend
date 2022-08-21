@@ -1,110 +1,82 @@
 import React, { Suspense, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import { Auth0ContextInterface, useAuth0, User } from "@auth0/auth0-react";
-import { useCalendar } from "../api/calendar";
 import { DateTime, Duration } from "luxon";
 import { MonthCalendar, WeekCalendar } from "../components/organisms/calendar";
-import { Button } from "../components/atoms/button";
-import { Select } from "../components/atoms/select";
-import { queryToSearchString, useQuery } from "../utils/router";
-import { date, defaulted, Infer, optional, type } from "superstruct";
-import { IsoDate, LuxonDateTime, StepSchema } from "../api/schema";
-import { current, daysOfWeek, next, previous } from "../utils/date";
-import { SwrMutateProvider } from "../components/providers/swr-mutation-provider";
-import { Query, QuerySchema } from "../schema/calendar";
+import { queryParamsToSearchString, useQueryParams } from "../utils/router";
 import CalendarNav from "../components/layout/calendar/calendar-nav";
 import { MonthHeader, WeekHeader } from "../components/layout/calendar/headers";
+import { useClient } from "../supabase/use-client";
+import { useQuery } from "@tanstack/react-query";
+import { z } from "zod";
+import { calendarDateSchema, CalendarParams, calendarParamsSchema, CalendarQuery, calendarQuerySchema, calendarDurationSchema, CalendarDuration } from "../schema/calendar";
+import { dateTimeToIso8601Date, durationToIso8601 } from "../schema/custom";
 
-const SearchSchema = type({
-  date: IsoDate,
-  step: StepSchema,
-});
 
-interface Step {
-  id: "day" | "week" | "month";
-  label: "Day" | "Week" | "Month";
-  selected?: boolean;
-  disabled?: boolean;
+const transformDuration = (duration: CalendarDuration) => {
+  switch (duration) {
+    case "week":
+      return Duration.fromObject({ weeks: 1 });
+    case "month":
+      return Duration.fromObject({ months: 1 });
+    default:
+      return Duration.fromObject({ days: 1 });
+  }
 }
 
-interface CalendarState {
-  date: DateTime;
-  steps: Step[];
-  selectedStep: Step;
+const calendarParams = z.object({
+  startDate: dateTimeToIso8601Date,
+  step: z.string().default("1 day"),
+  duration: calendarDurationSchema.transform(transformDuration),
+}).transform(({ startDate, duration, step }) => ({date_start: startDate, duration, step}));
+
+const useCalendar = (query: CalendarQuery) => {
+  const client = useClient();
+  const params = calendarParams.parse(query);
+  // Call supabase rpc calendar function to get calendar rows
+  return useQuery(["calendar", params], async () => {
+    const { data, error } = await client.rpc("calendar", params).select("date,target::json,tracks");
+    if (error) throw error;
+    return z.array(calendarDateSchema).parse(data);
+  });
 }
 
-const steps: Step[] = [
-  { id: "day", label: "Day" },
-  { id: "week", label: "Week" },
-  { id: "month", label: "Month" },
-];
-
-interface CalendarHeader {
-  query: Query;
-  navigate: (newQuery: Query) => void;
-}
 
 interface CalendarInner {
-  auth0: Auth0ContextInterface<User>;
-  query: Query;
+  query: CalendarQuery;
 }
 
-const CalendarInner = ({ auth0, query }: CalendarInner) => {
-  const { data, error, mutate } = useCalendar({
-    auth0,
-    query: {
-      date: query.date.startOf(query.step),
-      step: query.step,
-    },
-    swrOpts: {
-      revalidateOnMount: false,
-    },
-  });
+const CalendarInner = ({ query }: CalendarInner) => {
 
-  if (error || data?.status !== 200) {
-    return <div>Error</div>;
+  const { data, error, refetch } = useCalendar(query);
+
+  if(error) {
+    return <div>Error</div>
   }
 
-  const provider = { mutate };
-
-  return (
-    <SwrMutateProvider value={provider}>
-      {query.step === "month" && (
-        <MonthCalendar date={query.date} dates={data.body} />
-      )}
-      {query.step === "week" && (
-        <WeekCalendar date={query.date} dates={data.body} />
-      )}
-    </SwrMutateProvider>
-  );
+  return (<>
+    {query.duration === "month" && (
+      <MonthCalendar date={query.startDate} dates={data} />
+    )}
+    {query.duration === "week" && (
+      <WeekCalendar date={query.startDate} dates={data} />
+    )}
+  </>);
 };
 
+/**
+ * Page component to render the calendar.
+ * Handles navigation and pagination and leaves data fetching to inner calendar component.
+ * This allows us to use React suspense to show loading indicator for calendar data.
+ */
 const Calendar = () => {
-  const auth0 = useAuth0();
   const navigate = useNavigate();
-  const query = useQuery(QuerySchema);
+  const query = useQueryParams(calendarQuerySchema);
 
-  const navigateCalendar = (query: Query) => {
+  const navigateCalendar = (query: CalendarQuery) => {
     navigate(
-      `${location.pathname}?${queryToSearchString(query, SearchSchema)}`
+      `${location.pathname}?${queryParamsToSearchString(query, calendarParamsSchema)}`
     );
-    // push({
-    //   ...location,
-    //   search: queryToSearchString(query, SearchSchema),
-    // });
   };
-
-  if (auth0.isLoading) {
-    return <div>Is loading</div>;
-  }
-
-  if (auth0.error) {
-    return <div>Authentication error</div>;
-  }
-
-  if (!auth0.isAuthenticated) {
-    return <div>Not authenticated</div>;
-  }
 
   return (
     <div
@@ -135,16 +107,16 @@ const Calendar = () => {
           p="t-4"
         >
           <CalendarNav query={query} navigate={navigateCalendar} />
-          {query.step === "week" && <WeekHeader />}
-          {query.step === "month" && <MonthHeader />}
+          {query.duration === "week" && <WeekHeader />}
+          {query.duration === "month" && <MonthHeader />}
         </div>
 
         <Suspense
           fallback={
-            <>{query.step === "month" && <MonthCalendar date={query.date} />}</>
+            <>{query.duration === "month" && <MonthCalendar date={query.startDate} />}</>
           }
         >
-          <CalendarInner auth0={auth0} query={query} />
+          <CalendarInner query={query} />
         </Suspense>
       </div>
     </div>
