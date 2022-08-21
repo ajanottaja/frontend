@@ -8,10 +8,11 @@ import { useNavigate } from "react-router";
 const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
-  const data = useMutation(async (user: UserCredentials) => {
-    const { error } = await client.auth.signUp(user, { redirectTo: window.location.host + "/signin" });
+  const data = useMutation(async (credentials: UserCredentials) => {
+    const { error, session, user } = await client.auth.signUp(credentials, { redirectTo: window.location.host + "/signin" });
     if (error) return error;
-    navigate("/dashboard");
+    navigate("/email-verification")
+
   });
   return data;
 };
@@ -20,6 +21,7 @@ const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { data, isLoading, error, mutate, isError } = useSignupMutation();
+
   const handleSignup = (e: any) => {
     e.preventDefault();
     mutate({ email, password });

@@ -12,6 +12,7 @@ const Calendar = React.lazy(() => import("./pages/calendar"));
 const Statistics = React.lazy(() => import("./pages/statistics"));
 const SignUp = React.lazy(() => import("./pages/sign-up"));
 const SignIn = React.lazy(() => import("./pages/sign-in"));
+const EmailVerification = React.lazy(() => import("./pages/email-verification"));
 
 
 const AuthorizedLayout = ({
@@ -64,6 +65,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={ <SignIn />} />
+        <Route path="/email-verification" element={<EmailVerification />} />
       </Route>
       <Route element={<AuthorizedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
