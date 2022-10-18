@@ -1,4 +1,10 @@
-import React, { DetailedHTMLProps, Fragment, HTMLAttributes, SelectHTMLAttributes, useRef } from "react";
+import React, {
+  DetailedHTMLProps,
+  Fragment,
+  HTMLAttributes,
+  SelectHTMLAttributes,
+  useRef,
+} from "react";
 import { Listbox, Transition } from "@headlessui/react";
 
 interface SelectValue {
@@ -7,12 +13,14 @@ interface SelectValue {
   disabled?: boolean;
 }
 
-type Select<T extends SelectValue> = DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement> & {
+type Select<T extends SelectValue> = DetailedHTMLProps<
+  HTMLAttributes<HTMLDivElement>,
+  HTMLDivElement
+> & {
   selected: T;
   values: T[];
   setSelected: (selected: T) => void;
-}
-
+};
 
 // interface Select<T extends SelectValue> {
 //   selected: T;
@@ -46,7 +54,9 @@ export function Select<T extends SelectValue>({
             <div pos="absolute left-1 top-auto bottom-auto">
               <span className="icon-sm icon-select text-gray-300"></span>
             </div>
-            <span text="truncate" m="l-6">{selected.label}</span>
+            <span text="truncate" m="l-6">
+              {selected.label}
+            </span>
           </Listbox.Button>
           <Transition
             enter="transition duration-100 ease-out"
@@ -84,7 +94,11 @@ export function Select<T extends SelectValue>({
                 >
                   {({ active, selected }) => (
                     <>
-                      {selected && <div pos="absolute left-1"><span className="icon-check"></span></div>}
+                      {selected && (
+                        <div pos="absolute left-1">
+                          <span className="icon-check"></span>
+                        </div>
+                      )}
                       <span
                         display="block"
                         text={`center ${active ? "green-300" : ""}`}

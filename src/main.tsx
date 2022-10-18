@@ -1,7 +1,7 @@
 import "virtual:windi.css";
 import "virtual:windi-devtools";
 import React from "react";
-import { createRoot } from 'react-dom/client';
+import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import { supabaseConfig } from "./config";
@@ -22,21 +22,21 @@ const queryClient = new QueryClient({
   },
 });
 
-const container = document.getElementById('root');
+const container = document.getElementById("root");
 const root = createRoot(container!);
 root.render(
   <React.StrictMode>
     <SupabaseProvider
-     value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
+      value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
     >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ReactQueryDevtools initialIsOpen={false} />
-            <Router>
-              <div className="dark" h="min-full" w="max-full">
-                <App />
-              </div>
-            </Router>
+          <Router>
+            <div className="dark" h="min-full" w="max-full">
+              <App />
+            </div>
+          </Router>
         </AuthProvider>
       </QueryClientProvider>
     </SupabaseProvider>

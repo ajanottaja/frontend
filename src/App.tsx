@@ -12,68 +12,68 @@ const Calendar = React.lazy(() => import("./pages/calendar"));
 const Statistics = React.lazy(() => import("./pages/statistics"));
 const SignUp = React.lazy(() => import("./pages/sign-up"));
 const SignIn = React.lazy(() => import("./pages/sign-in"));
-const EmailVerification = React.lazy(() => import("./pages/email-verification"));
+const EmailVerification = React.lazy(
+  () => import("./pages/email-verification")
+);
 
-
-const AuthorizedLayout = ({
-  redirectPath = "/signin"
-}) => {
+const AuthorizedLayout = ({ redirectPath = "/signin" }) => {
   const { session, user, loading } = useAuth();
   if (!loading && !session) {
-    console.log('Session', session)
-    console.log('User', user)
+    console.log("Session", session);
+    console.log("User", user);
     return <Navigate to={redirectPath} replace />;
   }
 
-  return <div
-    className="bg-light-200 dark:bg-dark-800"
-    w="max-full"
-    h="min-full full"
-    display="flex"
-    flex="row <sm:col"
-  >
-    <div pos="fixed bottom-0 right-0" z="50">
-      <CreateMenu />
-    </div>
-    <MainMenu />
-    <MobileMenu />
-    <div m="md:t-8" w="full">
+  return (
+    <div
+      className="bg-light-200 dark:bg-dark-800"
+      w="max-full"
+      h="min-full full"
+      display="flex"
+      flex="row <sm:col"
+    >
+      <div pos="fixed bottom-0 right-0" z="50">
+        <CreateMenu />
+      </div>
+      <MainMenu />
+      <MobileMenu />
+      <div m="md:t-8" w="full">
         <Outlet />
+      </div>
     </div>
-  </div>
-}
+  );
+};
 
 const PublicLayout = () => (
   <div
-      display="flex"
-      flex="col"
-      w="full"
-      justify="items-center"
-      align="items-center"
-    >
-      <Outlet />
-    </div>
-)
+    display="flex"
+    flex="col"
+    w="full"
+    justify="items-center"
+    align="items-center"
+  >
+    <Outlet />
+  </div>
+);
 
 function App() {
   console.log("Render app");
   return (
-
-  <React.Suspense fallback={<Loading />}>
-    <Routes>
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/signin" element={ <SignIn />} />
-        <Route path="/email-verification" element={<EmailVerification />} />
-      </Route>
-      <Route element={<AuthorizedLayout />}>
+    <React.Suspense fallback={<Loading />}>
+      <Routes>
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/email-verification" element={<EmailVerification />} />
+        </Route>
+        <Route element={<AuthorizedLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/statistics" element={<Statistics />} />
-      </Route>
-    </Routes>
-  </React.Suspense>
+        </Route>
+      </Routes>
+    </React.Suspense>
   );
 }
 

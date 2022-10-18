@@ -36,10 +36,10 @@ const CalendarDemo = () => {
             duration: Duration.fromObject({ hours: randomInt(5, 8) }),
           }
         : {
-          date,
-          id: date.toISODate(),
-          duration: Duration.fromObject({ hours: 0 }),
-        };
+            date,
+            id: date.toISODate(),
+            duration: Duration.fromObject({ hours: 0 }),
+          };
 
     return {
       date,
@@ -110,13 +110,13 @@ const Home = () => {
 
   return (
     <div
-    display="flex"
-    flex="col"
-    align="center"
-    justify="start"
-    w="max-screen-lg full"
-    p="<sm:x-8"
-  >
+      display="flex"
+      flex="col"
+      align="center"
+      justify="start"
+      w="max-screen-lg full"
+      p="<sm:x-8"
+    >
       <div display="flex" justify="end" m="t-8">
         <a
           w="max-content"
@@ -129,7 +129,7 @@ const Home = () => {
           Sign in
         </a>
       </div>
-      
+
       <h1 text="green-300 5xl uppercase" font="tracking-widest" p="t-8 b-24">
         Ajanottaja
       </h1>

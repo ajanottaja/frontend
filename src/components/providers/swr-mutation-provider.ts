@@ -3,7 +3,7 @@
  * that is bound to a specific useSWR request/key to be passed down to and
  * called by arbitrary child components. This allows us to send the function
  * down without having to explicitly pass it down the component tree.
- * 
+ *
  * Useful for cases like when we modify intervals or duration targets in the calendar
  * view, and then want to rerun the calendar data request to see our changes reflected.
  */
@@ -14,9 +14,11 @@ interface SwrMutateContext {
   mutate: KeyedMutator<any>;
 }
 
-const SwrMutateContext = React.createContext<SwrMutateContext>({mutate: async () => { 
-  console.warn("Mutate not provided")
-}});
+const SwrMutateContext = React.createContext<SwrMutateContext>({
+  mutate: async () => {
+    console.warn("Mutate not provided");
+  },
+});
 
 export const SwrMutateProvider = SwrMutateContext.Provider;
 export default SwrMutateContext;

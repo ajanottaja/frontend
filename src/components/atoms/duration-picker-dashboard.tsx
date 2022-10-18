@@ -187,7 +187,11 @@ interface DurationPicker {
   title?: string;
 }
 
-const DurationPickerDashboard = ({ duration, setDuration, title }: DurationPicker) => {
+const DurationPickerDashboard = ({
+  duration,
+  setDuration,
+  title,
+}: DurationPicker) => {
   const [active, setActive] = useState(false);
 
   const updateDuration = (duration: Duration) => {

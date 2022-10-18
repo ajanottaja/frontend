@@ -14,8 +14,10 @@ describe("tsRangeObjectToString", () => {
     };
     const result = tsRangeObjectToString.safeParse(tsRangeObject);
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toBe("[2020-01-01 00:00:00.000Z,2020-01-01 12:00:00.000Z)");
-  })
+    expect(result.success && result.data).toBe(
+      "[2020-01-01 00:00:00.000Z,2020-01-01 12:00:00.000Z)"
+    );
+  });
 
   it("should transform a tsRangeObject to a valid postgres tsrange string with no upper bound", () => {
     const tsRangeObject = {
@@ -25,7 +27,7 @@ describe("tsRangeObjectToString", () => {
     const result = tsRangeObjectToString.safeParse(tsRangeObject);
     expect(result.success).toBe(true);
     expect(result.success && result.data).toBe("[2020-01-01 00:00:00.000Z,)");
-  })
+  });
 
   it("should transform a tsRangeObject to a valid postgres tsrange string with no lower bound", () => {
     const tsRangeObject = {
@@ -35,5 +37,5 @@ describe("tsRangeObjectToString", () => {
     const result = tsRangeObjectToString.safeParse(tsRangeObject);
     expect(result.success).toBe(true);
     expect(result.success && result.data).toBe("[,2020-01-01 00:00:00.000Z]");
-  })
-})
+  });
+});

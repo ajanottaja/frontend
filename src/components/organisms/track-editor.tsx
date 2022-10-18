@@ -15,7 +15,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { tsRangeObjectToString } from "../../schema/custom";
 
-
 const upsertTrackSchema = z.object({
   id: z.string().uuid().optional(),
   tracked: tsRangeObjectToString,
@@ -30,19 +29,19 @@ const useUpsertTrack = () => {
       .from("tracks")
       .upsert([{ ...upsertData }]);
 
-  if(error) {
-    console.error(error); 
-  }
+    if (error) {
+      console.error(error);
+    }
 
-  queryClient.refetchQueries(["calendar"]);
+    queryClient.refetchQueries(["calendar"]);
 
-  return {data, error};
-  })
-}
+    return { data, error };
+  });
+};
 
 const deleteTrackSchema = z.object({
-  id: z.string().uuid()
-})
+  id: z.string().uuid(),
+});
 
 const useDeleteTrack = () => {
   const client = useClient();
@@ -54,16 +53,15 @@ const useDeleteTrack = () => {
       .delete()
       .match(deleteFilter);
 
-    if(error) {
-      console.error(error); 
+    if (error) {
+      console.error(error);
     }
 
     queryClient.refetchQueries(["calendar"]);
 
-    return {data, error};
-  })
-}
-
+    return { data, error };
+  });
+};
 
 interface TrackEditor {
   track?: Track;
@@ -82,10 +80,9 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
 
   const { mutateAsync: upsertTrack } = useUpsertTrack();
   const { mutateAsync: deleteTrack } = useDeleteTrack();
-  
 
   const updateTrack = async () => {
-    await upsertTrack({id: track?.id, tracked: currTrack});
+    await upsertTrack({ id: track?.id, tracked: currTrack });
     close();
   };
 

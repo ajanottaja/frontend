@@ -23,7 +23,14 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
   });
 
   return (
-    <div display="flex" flex="col" w="full" text="gray-300" p="4" {...swipeHandlers}>
+    <div
+      display="flex"
+      flex="col"
+      w="full"
+      text="gray-300"
+      p="4"
+      {...swipeHandlers}
+    >
       <div display="flex" flex="row" justify="between">
         <button
           aria-label="Go to previous month"
@@ -94,13 +101,13 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
             text="gray-300"
           >
             <FontAwesomeIcon icon={faCalendar} />
-            {defaultDate ? <span m="l-2">
-              {defaultDate?.toFormat("DDDD") ?? ""}
-            </span> : <span m="l-2" text="gray-500">
-              {DateTime.now().toFormat("DDDD")}
-            </span>
-            }
-            
+            {defaultDate ? (
+              <span m="l-2">{defaultDate?.toFormat("DDDD") ?? ""}</span>
+            ) : (
+              <span m="l-2" text="gray-500">
+                {DateTime.now().toFormat("DDDD")}
+              </span>
+            )}
           </Popover.Button>
           <Transition
             as={Fragment}
@@ -124,7 +131,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
                   pickDate(d);
                   close();
                 }}
-                activeDate={defaultDate?? DateTime.now()}
+                activeDate={defaultDate ?? DateTime.now()}
               />
             </Popover.Panel>
           </Transition>

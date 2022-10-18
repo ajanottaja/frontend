@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { DateTime, Duration } from "luxon";
-import { dateTimeToIso8601, dateTimeToIso8601Date, iso8601ToDateTime, iso8601ToDuration, tsRangeToObject } from "./custom";
+import {
+  dateTimeToIso8601,
+  dateTimeToIso8601Date,
+  iso8601ToDateTime,
+  iso8601ToDuration,
+  tsRangeToObject,
+} from "./custom";
 
 export const calendarDurationSchema = z.enum(["day", "week", "month", "year"]);
 
@@ -37,7 +43,9 @@ export const calendarParamsSchema = z.object({
 export type CalendarParams = z.infer<typeof calendarParamsSchema>;
 
 export const calendarQuerySchema = z.object({
-  startDate: iso8601ToDateTime.default(() => DateTime.now().startOf("month").toISODate()),
+  startDate: iso8601ToDateTime.default(() =>
+    DateTime.now().startOf("month").toISODate()
+  ),
   duration: calendarDurationSchema.default("month"),
 });
 

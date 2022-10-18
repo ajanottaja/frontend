@@ -50,10 +50,15 @@ const SignIn = () => {
       </p>
       {isLoading && "Logging in"}
       {!error && !isLoading && (
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleLogin();
-        }} display="flex" flex="col" gap="4">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleLogin();
+          }}
+          display="flex"
+          flex="col"
+          gap="4"
+        >
           <label htmlFor="email" text="left gray-300" m="b-2">
             Email
             <input

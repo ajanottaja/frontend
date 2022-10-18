@@ -8,9 +8,16 @@ import { MonthHeader, WeekHeader } from "../components/layout/calendar/headers";
 import { useClient } from "../supabase/use-client";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { calendarDateSchema, CalendarParams, calendarParamsSchema, CalendarQuery, calendarQuerySchema, calendarDurationSchema, CalendarDuration } from "../schema/calendar";
+import {
+  calendarDateSchema,
+  CalendarParams,
+  calendarParamsSchema,
+  CalendarQuery,
+  calendarQuerySchema,
+  calendarDurationSchema,
+  CalendarDuration,
+} from "../schema/calendar";
 import { dateTimeToIso8601Date, durationToIso8601 } from "../schema/custom";
-
 
 const transformDuration = (duration: CalendarDuration) => {
   switch (duration) {
@@ -21,46 +28,54 @@ const transformDuration = (duration: CalendarDuration) => {
     default:
       return Duration.fromObject({ days: 1 });
   }
-}
+};
 
-const calendarParams = z.object({
-  startDate: dateTimeToIso8601Date,
-  step: z.string().default("1 day"),
-  duration: calendarDurationSchema.transform(transformDuration),
-}).transform(({ startDate, duration, step }) => ({date_start: startDate, duration, step}));
+const calendarParams = z
+  .object({
+    startDate: dateTimeToIso8601Date,
+    step: z.string().default("1 day"),
+    duration: calendarDurationSchema.transform(transformDuration),
+  })
+  .transform(({ startDate, duration, step }) => ({
+    date_start: startDate,
+    duration,
+    step,
+  }));
 
 const useCalendar = (query: CalendarQuery) => {
   const client = useClient();
   const params = calendarParams.parse(query);
   // Call supabase rpc calendar function to get calendar rows
   return useQuery(["calendar", params], async () => {
-    const { data, error } = await client.rpc("calendar", params).select("date,target::json,tracks");
+    const { data, error } = await client
+      .rpc("calendar", params)
+      .select("date,target::json,tracks");
     if (error) throw error;
     return z.array(calendarDateSchema).parse(data);
   });
-}
-
+};
 
 interface CalendarInner {
   query: CalendarQuery;
 }
 
 const CalendarInner = ({ query }: CalendarInner) => {
-
   const { data, error, refetch } = useCalendar(query);
 
-  if(error) {
-    return <div>Error</div>
+  if (error) {
+    return <div>Error</div>;
   }
 
-  return (<>
-    {query.duration === "month" && (
-      <MonthCalendar date={query.startDate} dates={data} />
-    )}
-    {query.duration === "week" && (
-      <WeekCalendar date={query.startDate} dates={data} />
-    )}
-  </>);
+  return (
+    <>
+      {query.duration === "month" && (
+        <MonthCalendar date={query.startDate} dates={data} />
+      )}
+      {query.duration === "week" && (
+        <WeekCalendar date={query.startDate} dates={data} />
+      )}
+    </>
+  );
 };
 
 /**
@@ -74,7 +89,10 @@ const Calendar = () => {
 
   const navigateCalendar = (query: CalendarQuery) => {
     navigate(
-      `${location.pathname}?${queryParamsToSearchString(query, calendarParamsSchema)}`
+      `${location.pathname}?${queryParamsToSearchString(
+        query,
+        calendarParamsSchema
+      )}`
     );
   };
 
@@ -113,7 +131,11 @@ const Calendar = () => {
 
         <Suspense
           fallback={
-            <>{query.duration === "month" && <MonthCalendar date={query.startDate} />}</>
+            <>
+              {query.duration === "month" && (
+                <MonthCalendar date={query.startDate} />
+              )}
+            </>
           }
         >
           <CalendarInner query={query} />
