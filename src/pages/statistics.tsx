@@ -107,6 +107,7 @@ const StatisticsCalendar = () => {
         monthBorderColor="#ffffff"
         dayBorderWidth={1}
         dayBorderColor={colors.dark[800]}
+        valueFormat=">-.2s"
         legends={[
           {
             anchor: "bottom-right",
