@@ -8,16 +8,11 @@ import { TrackEditor } from "./track-editor";
 import { TargetEditor } from "./target-editor";
 
 interface CalendarInput {
-  date: DateTime,
-  dates?: CalendarDate[]
+  date: DateTime;
+  dates?: CalendarDate[];
 }
 
-
-const WeekTarget = ({
-  target,
-}: {
-  target: Target;
-}) => {
+const WeekTarget = ({ target }: { target: Target }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <button
@@ -43,21 +38,16 @@ const WeekTarget = ({
   );
 };
 
-
-const WeekTrack = ({
-  track,
-}: {
-  track: Track;
-}) => {
+const WeekTrack = ({ track }: { track: Track }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const minutesPastMidnight =
-    track.tracked.lower
-      .diff(track.tracked.lower.startOf("day"))
-      .as("minutes");
-  const length =
-    (track.tracked.upper?.isValid ? track.tracked.upper : DateTime.now())
-      .diff(track.tracked.lower)
-      .as("minutes");
+  const minutesPastMidnight = track.tracked.lower
+    .diff(track.tracked.lower.startOf("day"))
+    .as("minutes");
+  const length = (
+    track.tracked.upper?.isValid ? track.tracked.upper : DateTime.now()
+  )
+    .diff(track.tracked.lower)
+    .as("minutes");
   return (
     <div
       pos="absolute"
@@ -85,12 +75,12 @@ const WeekTrack = ({
           height: `${length}px`,
         }}
       >
-       <span display="<md:hidden">
-       {track.tracked.lower.toFormat("HH:mm")} -{" "}
-        {track.tracked.upper?.isValid
-          ? track.tracked.upper.toFormat("HH:mm")
-          : "now"}
-       </span>
+        <span display="<md:hidden">
+          {track.tracked.lower.toFormat("HH:mm")} -{" "}
+          {track.tracked.upper?.isValid
+            ? track.tracked.upper.toFormat("HH:mm")
+            : "now"}
+        </span>
         <TrackEditor
           track={track}
           isOpen={isEditing}
@@ -119,8 +109,12 @@ export const WeekCalendar = ({ dates, date }: CalendarInput) => {
         grid="gap-1 cols-[4rem_1fr_1fr_1fr_1fr_1fr_1fr_1fr]"
         text="gray-400"
       >
-        <div text="center" display="<md:hidden">Target</div>
-        <div text="center" display="md:hidden"><FontAwesomeIcon icon={faBullseye} /></div>
+        <div text="center" display="<md:hidden">
+          Target
+        </div>
+        <div text="center" display="md:hidden">
+          <FontAwesomeIcon icon={faBullseye} />
+        </div>
         {dates &&
           dates.map(({ target }) =>
             target ? <WeekTarget target={target} /> : <div />
@@ -150,7 +144,12 @@ export const WeekCalendar = ({ dates, date }: CalendarInput) => {
         </div>
         {dates &&
           dates.map(({ date, target, tracks }, i) => (
-            <div display="grid" grid="rows-24 gap-1" h="[1440px]" pos="relative">
+            <div
+              display="grid"
+              grid="rows-24 gap-1"
+              h="[1440px]"
+              pos="relative"
+            >
               {tracks.map((track) => (
                 <WeekTrack track={track} />
               ))}
@@ -167,11 +166,7 @@ export const WeekCalendar = ({ dates, date }: CalendarInput) => {
   );
 };
 
-const MonthTarget = ({
-  target,
-}: {
-  target: Target;
-}) => {
+const MonthTarget = ({ target }: { target: Target }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <button
@@ -196,12 +191,7 @@ const MonthTarget = ({
   );
 };
 
-
-const MonthTrack = ({
-  track,
-}: {
-  track: Track;
-}) => {
+const MonthTrack = ({ track }: { track: Track }) => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <button
@@ -235,59 +225,59 @@ export const MonthCalendar = ({ dates, date }: CalendarInput) => {
   const fallbackDates = daysOfMonth(date);
 
   return (
-      <div
-        w="full"
-        h="min-content"
-        flex="grow"
-        display="grid"
-        grid="gap-1 md:cols-7"
-        text="gray-400"
-        className="grid-auto-fit"
-      >
-        {dates &&
-          dates.map(({ date, target, tracks }, i) => (
-            <div
-              key={date.toISODate()}
-              display="flex"
-              bg="dark-500"
-              flex="col"
-              h="min-28"
-              w="min-24"
-              p="1"
-              className={
-                i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
-              }
-            >
-              <div display="flex" flex="row" justify="between" p="b-2">
-                <span text="gray-500">{date.day}</span>
-                {target && <MonthTarget target={target} />}
-              </div>
-
-              {tracks.map((track) => (
-                <MonthTrack key={track.id} track={track} />
-              ))}
+    <div
+      w="full"
+      h="min-content"
+      flex="grow"
+      display="grid"
+      grid="gap-1 md:cols-7"
+      text="gray-400"
+      className="grid-auto-fit"
+    >
+      {dates &&
+        dates.map(({ date, target, tracks }, i) => (
+          <div
+            key={date.toISODate()}
+            display="flex"
+            bg="dark-500"
+            flex="col"
+            h="min-28"
+            w="min-24"
+            p="1"
+            className={
+              i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
+            }
+          >
+            <div display="flex" flex="row" justify="between" p="b-2">
+              <span text="gray-500">{date.day}</span>
+              {target && <MonthTarget target={target} />}
             </div>
-          ))}
 
-        {!dates &&
-          fallbackDates.map((date, i) => (
-            <div
-              key={date.toISODate()}
-              display="flex"
-              bg="dark-500"
-              flex="col"
-              h="min-28"
-              w="min-24"
-              p="1"
-              className={
-                i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
-              }
-            >
-              <div display="flex" flex="row" justify="between" p="b-2">
-                <span text="gray-500">{date.day}</span>
-              </div>
+            {tracks.map((track) => (
+              <MonthTrack key={track.id} track={track} />
+            ))}
+          </div>
+        ))}
+
+      {!dates &&
+        fallbackDates.map((date, i) => (
+          <div
+            key={date.toISODate()}
+            display="flex"
+            bg="dark-500"
+            flex="col"
+            h="min-28"
+            w="min-24"
+            p="1"
+            className={
+              i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
+            }
+          >
+            <div display="flex" flex="row" justify="between" p="b-2">
+              <span text="gray-500">{date.day}</span>
             </div>
-          ))}
-      </div>
+          </div>
+        ))}
+    </div>
   );
 };

@@ -12,7 +12,6 @@ import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import DurationPicker from "../atoms/duration-picker";
 
-
 const upsertTargetSchema = z.object({
   id: z.string().uuid().optional(),
   date: dateTimeToIso8601,
@@ -28,19 +27,19 @@ const useUpsertTarget = () => {
       .from("targets")
       .upsert([{ ...upsertData }]);
 
-  if(error) {
-    console.error(error); 
-  }
+    if (error) {
+      console.error(error);
+    }
 
-  queryClient.refetchQueries(["calendar"]);
+    queryClient.refetchQueries(["calendar"]);
 
-  return {data, error};
-  })
-}
+    return { data, error };
+  });
+};
 
 const deleteTargetSchema = z.object({
-  id: z.string().uuid()
-})
+  id: z.string().uuid(),
+});
 
 const useDeleteTarget = () => {
   const client = useClient();
@@ -52,15 +51,15 @@ const useDeleteTarget = () => {
       .delete()
       .match(deleteFilter);
 
-  if(error) {
-    console.error(error); 
-  }
+    if (error) {
+      console.error(error);
+    }
 
-  queryClient.refetchQueries(["calendar"]);
+    queryClient.refetchQueries(["calendar"]);
 
-  return {data, error};
-  })
-}
+    return { data, error };
+  });
+};
 
 interface TargetEditor {
   target?: Target;
@@ -86,7 +85,11 @@ export const TargetEditor = ({
       targetDate &&
       targetDate.isValid
     ) {
-      await upsertTarget({id: targetRecord?.id, date: targetDate, duration: targetDuration});
+      await upsertTarget({
+        id: targetRecord?.id,
+        date: targetDate,
+        duration: targetDuration,
+      });
       close();
     }
   };

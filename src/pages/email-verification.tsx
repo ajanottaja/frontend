@@ -4,8 +4,7 @@ import { useClient } from "../supabase/use-client";
 import { UserCredentials } from "@supabase/supabase-js";
 import { useNavigate } from "react-router";
 
-const EmailVerification = () => {;
-
+const EmailVerification = () => {
   return (
     <div
       h="min-screen"
@@ -19,8 +18,8 @@ const EmailVerification = () => {;
         Email verification
       </h1>
       <p text="gray-300">
-        An email verification request has been sent to your email address.
-        To complete the sign up process, please click the link in the email.
+        An email verification request has been sent to your email address. To
+        complete the sign up process, please click the link in the email.
       </p>
     </div>
   );

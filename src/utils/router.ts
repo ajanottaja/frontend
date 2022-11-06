@@ -5,9 +5,11 @@ import { z } from "zod";
  * Gets query parameters, turns it into object, and validates and coerces according
  * to querySchema.
  * @param querySchema the zod schema to use for validation
- * @returns 
+ * @returns
  */
-export function useQueryParams<T extends z.ZodTypeAny>(querySchema: T): z.infer<T> {
+export function useQueryParams<T extends z.ZodTypeAny>(
+  querySchema: T
+): z.infer<T> {
   const query = new URLSearchParams(useLocation().search);
   const value = Object.fromEntries(query);
   return querySchema.parse(value);
@@ -18,9 +20,12 @@ export function useQueryParams<T extends z.ZodTypeAny>(querySchema: T): z.infer<
  * turning object into a query search string
  * @param queryParams Object of query params
  * @param querySchema zod schema describing query params
- * @returns 
+ * @returns
  */
-export function queryParamsToSearchString<T extends z.ZodTypeAny>(queryParams: Record<string, unknown>, querySchema: T) {
+export function queryParamsToSearchString<T extends z.ZodTypeAny>(
+  queryParams: Record<string, unknown>,
+  querySchema: T
+) {
   const coerced = querySchema.parse(queryParams);
   return new URLSearchParams(coerced as any).toString();
 }

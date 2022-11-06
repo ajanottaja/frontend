@@ -6,11 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DateTime, Duration } from "luxon";
-import React, {
-  useState,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useRef, useEffect } from "react";
 
 const dateTimeToNumbers = (date: DateTime) => {
   return [...date.toFormat("HHmm")].map((x) => Number.parseInt(x, 10));
@@ -18,9 +14,9 @@ const dateTimeToNumbers = (date: DateTime) => {
 
 const numbersToDateTime = (dateTime: DateTime, numbers: number[]) => {
   const hour = Number.parseInt(`${numbers[0]}${numbers[1]}`, 10);
-  const minute = Number.parseInt(`${numbers[2]}${numbers[3]}`, 10)
-  return dateTime.set({hour, minute})
-}
+  const minute = Number.parseInt(`${numbers[2]}${numbers[3]}`, 10);
+  return dateTime.set({ hour, minute });
+};
 
 interface DurationInput {
   value?: number;
@@ -91,7 +87,7 @@ const TimePicker = ({ dateTime: date, setDateTime: setDate }: TimePicker) => {
   const focus = () => {
     setActive(true);
     setPosition(0);
-  }
+  };
 
   const updateTime = (newVal: string) => {
     setPosition(position + 1);
@@ -142,7 +138,7 @@ const TimePicker = ({ dateTime: date, setDateTime: setDate }: TimePicker) => {
         p="y-2"
         m="l-2"
         onClick={() => {
-          setDate(numbersToDateTime(date?? DateTime.now(), time));
+          setDate(numbersToDateTime(date ?? DateTime.now(), time));
           setActive(false);
         }}
       >

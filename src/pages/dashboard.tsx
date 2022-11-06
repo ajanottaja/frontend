@@ -5,7 +5,13 @@ import { z } from "zod";
 import Timer from "../components/atoms/timer";
 import { absDuration, isNegativeDuration } from "../utils/date";
 import DurationPickerDashboard from "../components/atoms/duration-picker-dashboard";
-import { dateTimeToIso8601, durationToIso8601, iso8601ToDateTime, iso8601ToDuration, tsRangeToObject } from "../schema/custom";
+import {
+  dateTimeToIso8601,
+  durationToIso8601,
+  iso8601ToDateTime,
+  iso8601ToDuration,
+  tsRangeToObject,
+} from "../schema/custom";
 import { useClient } from "../supabase/use-client";
 
 /**
@@ -22,7 +28,6 @@ const targetSchema = z.object({
 const useActiveTarget = () => {
   const client = useClient();
   return useQuery(["activeTarget"], async () => {
-
     const { data, error } = await client
       .from("targets")
       .select("id,date,duration::json")
@@ -32,7 +37,6 @@ const useActiveTarget = () => {
     return z.array(targetSchema).parse(data);
   });
 };
-
 
 const targetUpdateSchema = z.object({
   id: z.string().uuid().optional(),
@@ -44,21 +48,24 @@ const targetUpdateSchema = z.object({
 const useUpsertActiveTarget = () => {
   const client = useClient();
   return useMutation(async (args: z.infer<typeof targetSchema>) => {
-    const upsertData = targetUpdateSchema.parse({...args, account: client.auth.user()?.id});
+    const upsertData = targetUpdateSchema.parse({
+      ...args,
+      account: client.auth.user()?.id,
+    });
     const { data, error } = await client
       .from("targets")
-      .upsert(upsertData, { onConflict: 'date,account'})
-      .match({date: upsertData.date});
+      .upsert(upsertData, { onConflict: "date,account" })
+      .match({ date: upsertData.date });
 
-  if(error) {
-    console.error(error); 
-  }
-  return {data, error};
-  })
-}
+    if (error) {
+      console.error(error);
+    }
+    return { data, error };
+  });
+};
 
 const DashboardTarget = () => {
-  const { data, error, refetch }  = useActiveTarget();
+  const { data, error, refetch } = useActiveTarget();
   const { mutateAsync } = useUpsertActiveTarget();
 
   if (error) {
@@ -74,20 +81,21 @@ const DashboardTarget = () => {
 
   const target = data?.[0];
 
-
   return (
     <DurationPickerDashboard
       title="Todays target"
       duration={target?.duration}
       setDuration={async (duration: Duration) => {
-        const res = await mutateAsync({id: target?.id, duration, date: target?.date?? DateTime.now()});
+        const res = await mutateAsync({
+          id: target?.id,
+          duration,
+          date: target?.date ?? DateTime.now(),
+        });
         refetch();
       }}
     />
   );
 };
-
-
 
 /**
  * Interval measures the time you have worked on a given day.
@@ -119,15 +127,14 @@ const useStartActiveTrack = () => {
   const client = useClient();
   return useMutation(async () => {
     const upsertData = startTrackSchema.parse({});
-    const { data, error } = await client
-      .rpc("track_start", upsertData);
+    const { data, error } = await client.rpc("track_start", upsertData);
 
-  if(error) {
-    console.error(error); 
-  }
-  return {data, error};
-  })
-}
+    if (error) {
+      console.error(error);
+    }
+    return { data, error };
+  });
+};
 
 const stopTrackSchema = z.object({
   id: z.string().uuid(),
@@ -136,23 +143,21 @@ const stopTrackSchema = z.object({
 const useStopActiveTrack = () => {
   const client = useClient();
   return useMutation(async (args: z.infer<typeof stopTrackSchema>) => {
-    const { data, error } = await client
-      .rpc("track_stop", args);
+    const { data, error } = await client.rpc("track_stop", args);
 
-  if(error) {
-    console.error(error); 
-  }
-  return {data, error};
-  })
-}
-
+    if (error) {
+      console.error(error);
+    }
+    return { data, error };
+  });
+};
 
 const DashboardTimer = () => {
   const { data, error, refetch } = useActiveTrack();
   const { mutateAsync: startTrack } = useStartActiveTrack();
   const { mutateAsync: stopTrack } = useStopActiveTrack();
 
-  console.log('Data', data)
+  console.log("Data", data);
 
   if (error) {
     console.error(error);
@@ -176,13 +181,12 @@ const DashboardTimer = () => {
         refetch();
       }}
       stopInterval={async () => {
-        if(track) await stopTrack({id: track.id});
+        if (track) await stopTrack({ id: track.id });
         refetch();
       }}
     />
   );
 };
-
 
 /**
  * Summary displays statistics about your tracked time.
@@ -199,7 +203,9 @@ const summarySchema = z.object({
 const useSummary = () => {
   const client = useClient();
   return useQuery(["summary"], async () => {
-    const { data, error } = await client.from("summary").select("title,period,target::json,tracked::json,diff::json");
+    const { data, error } = await client
+      .from("summary")
+      .select("title,period,target::json,tracked::json,diff::json");
     if (error) throw error;
     return z.array(summarySchema).parse(data);
   });
@@ -294,23 +300,23 @@ const Dashboard = () => {
         p="<lg:x-4"
       >
         <Suspense
-            fallback={
-              <div className="flex flex-col items-center text-green-300 text-4xl">
-                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-                <div>Loading</div>
-              </div>
-            }
-          >
-            <DashboardTarget />
-          </Suspense>
-          <Suspense
-            fallback={
-              <div className="flex flex-col items-center text-green-300 text-4xl">
-                <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-                <div>Loading</div>
-              </div>
-            }
-          >
+          fallback={
+            <div className="flex flex-col items-center text-green-300 text-4xl">
+              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+              <div>Loading</div>
+            </div>
+          }
+        >
+          <DashboardTarget />
+        </Suspense>
+        <Suspense
+          fallback={
+            <div className="flex flex-col items-center text-green-300 text-4xl">
+              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+              <div>Loading</div>
+            </div>
+          }
+        >
           <DashboardTimer />
         </Suspense>
         <Suspense

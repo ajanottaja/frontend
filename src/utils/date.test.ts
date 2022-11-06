@@ -62,41 +62,74 @@ describe("isNegativeDuration", () => {
   });
 });
 
-
 describe("previous (day, week, month, year)", () => {
   test("Returns previous day", () => {
-    expect(previous("day", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe("2021-08-22");
-    expect(previous("day", DateTime.fromISO("2021-08-01"))?.toISODate()).toBe("2021-07-31");
-    expect(previous("day", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe("2020-12-31");
-
+    expect(previous("day", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe(
+      "2021-08-22"
+    );
+    expect(previous("day", DateTime.fromISO("2021-08-01"))?.toISODate()).toBe(
+      "2021-07-31"
+    );
+    expect(previous("day", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe(
+      "2020-12-31"
+    );
   });
   test("Returns previous week", () => {
-    expect(previous("week", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe("2021-08-16");
-    expect(previous("week", DateTime.fromISO("2021-08-27"))?.toISODate()).toBe("2021-08-16");
-    expect(previous("week", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe("2020-12-21");
+    expect(previous("week", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe(
+      "2021-08-16"
+    );
+    expect(previous("week", DateTime.fromISO("2021-08-27"))?.toISODate()).toBe(
+      "2021-08-16"
+    );
+    expect(previous("week", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe(
+      "2020-12-21"
+    );
   });
   test("Returns previous month", () => {
-    expect(previous("month", DateTime.fromISO("2021-08-31"))?.toISODate()).toBe("2021-07-01");
-    expect(previous("month", DateTime.fromISO("2021-08-01"))?.toISODate()).toBe("2021-07-01");
-    expect(previous("month", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe("2020-12-01");
+    expect(previous("month", DateTime.fromISO("2021-08-31"))?.toISODate()).toBe(
+      "2021-07-01"
+    );
+    expect(previous("month", DateTime.fromISO("2021-08-01"))?.toISODate()).toBe(
+      "2021-07-01"
+    );
+    expect(previous("month", DateTime.fromISO("2021-01-01"))?.toISODate()).toBe(
+      "2020-12-01"
+    );
   });
 });
 
 describe("next (day, week, month, year)", () => {
   test("Returns next day", () => {
-    expect(next("day", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe("2021-08-24");
-    expect(next("day", DateTime.fromISO("2021-07-31"))?.toISODate()).toBe("2021-08-01");
-    expect(next("day", DateTime.fromISO("2020-12-31"))?.toISODate()).toBe("2021-01-01");
-
+    expect(next("day", DateTime.fromISO("2021-08-23"))?.toISODate()).toBe(
+      "2021-08-24"
+    );
+    expect(next("day", DateTime.fromISO("2021-07-31"))?.toISODate()).toBe(
+      "2021-08-01"
+    );
+    expect(next("day", DateTime.fromISO("2020-12-31"))?.toISODate()).toBe(
+      "2021-01-01"
+    );
   });
   test("Returns next week", () => {
-    expect(next("week", DateTime.fromISO("2021-08-16"))?.toISODate()).toBe("2021-08-23");
-    expect(next("week", DateTime.fromISO("2021-08-22"))?.toISODate()).toBe("2021-08-23");
-    expect(next("week", DateTime.fromISO("2020-12-28"))?.toISODate()).toBe("2021-01-04");
+    expect(next("week", DateTime.fromISO("2021-08-16"))?.toISODate()).toBe(
+      "2021-08-23"
+    );
+    expect(next("week", DateTime.fromISO("2021-08-22"))?.toISODate()).toBe(
+      "2021-08-23"
+    );
+    expect(next("week", DateTime.fromISO("2020-12-28"))?.toISODate()).toBe(
+      "2021-01-04"
+    );
   });
   test("Returns next month", () => {
-    expect(next("month", DateTime.fromISO("2021-07-01"))?.toISODate()).toBe("2021-08-01");
-    expect(next("month", DateTime.fromISO("2021-07-31"))?.toISODate()).toBe("2021-08-01");
-    expect(next("month", DateTime.fromISO("2020-12-01"))?.toISODate()).toBe("2021-01-01");
+    expect(next("month", DateTime.fromISO("2021-07-01"))?.toISODate()).toBe(
+      "2021-08-01"
+    );
+    expect(next("month", DateTime.fromISO("2021-07-31"))?.toISODate()).toBe(
+      "2021-08-01"
+    );
+    expect(next("month", DateTime.fromISO("2020-12-01"))?.toISODate()).toBe(
+      "2021-01-01"
+    );
   });
 });

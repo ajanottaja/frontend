@@ -9,10 +9,11 @@ const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   const data = useMutation(async (credentials: UserCredentials) => {
-    const { error, session, user } = await client.auth.signUp(credentials, { redirectTo: window.location.host + "/signin" });
+    const { error, session, user } = await client.auth.signUp(credentials, {
+      redirectTo: window.location.host + "/signin",
+    });
     if (error) return error;
-    navigate("/email-verification")
-
+    navigate("/email-verification");
   });
   return data;
 };
@@ -25,7 +26,7 @@ const SignUp = () => {
   const handleSignup = (e: any) => {
     e.preventDefault();
     mutate({ email, password });
-  }
+  };
 
   return (
     <div

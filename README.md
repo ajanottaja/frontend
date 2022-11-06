@@ -14,7 +14,7 @@ VITE_AUTH0_CLIENT_ID=<your-auth0-client-id>
 VITE_AUTH0_AUDIENCE=<your-auth0-audience-identifier>
 ```
 
-Then install dependencies and run the development script: 
+Then install dependencies and run the development script:
 
 ```
 npm install
@@ -65,15 +65,14 @@ Another great edge network hosting option is [Vercel](https://vercel.com/docs).
 
 You can build the static files and stick the `/dist` folder behind a reverse proxy.
 A few good options include:
+
 - [Traefik](https://traefik.io/traefik/)
 - [Nginx](https://docs.nginx.com/nginx/admin-guide/installing-nginx/installing-nginx-open-source/)
 - [Caddy](https://caddyserver.com/)
 
-
 # License
 
 Licensed under AGPLv3, see [License](/LICENSE).
-
 
 In short this means you can:
 
@@ -98,7 +97,7 @@ The end result is a slightly smaller bundle size and access to the latest functi
 The code is built with a few main goals in mind:
 
 ### Validate and coerce or transform values at the edges.
-   
+
 Using the [superstruct](https://github.com/ianstormtaylor/superstruct) library it is possible to validate and coerce values.
 When done at the edges, i.e. were you receive responses from the API, the rest of the app can use the values safely.
 

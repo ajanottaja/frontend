@@ -10,7 +10,12 @@ import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 import Loading from "../components/layout/loading-page";
-import { dateTimeToIso8601, durationToIso8601, iso8601ToDateTime, iso8601ToDuration } from "../schema/custom";
+import {
+  dateTimeToIso8601,
+  durationToIso8601,
+  iso8601ToDateTime,
+  iso8601ToDuration,
+} from "../schema/custom";
 
 const colorScale = [
   "#7f1d1d",
@@ -35,22 +40,30 @@ const statisticsCalendarSchema = z.object({
   diff: iso8601ToDuration,
 });
 
-const statsParamsSchema = z.object({
-  dateStart: dateTimeToIso8601,
-  duration: durationToIso8601,
-  step: durationToIso8601,
-}).transform(({ dateStart, duration, step }) => ({date_start: dateStart, duration, step}));
+const statsParamsSchema = z
+  .object({
+    dateStart: dateTimeToIso8601,
+    duration: durationToIso8601,
+    step: durationToIso8601,
+  })
+  .transform(({ dateStart, duration, step }) => ({
+    date_start: dateStart,
+    duration,
+    step,
+  }));
 
 const useStatisticsCalendar = (params: z.input<typeof statsParamsSchema>) => {
   const client = useClient();
   // Call supabase rpc calendar function to get calendar rows
   return useQuery(["statistics-calendar"], async () => {
     const statsParams = statsParamsSchema.parse(params);
-    const { data, error } = await client.rpc("stats", statsParams).select("date,target::json,tracked::json,diff::json");
+    const { data, error } = await client
+      .rpc("stats", statsParams)
+      .select("date,target::json,tracked::json,diff::json");
     if (error) throw error;
     return z.array(statisticsCalendarSchema).parse(data);
   });
-}
+};
 
 const StatisticsCalendar = () => {
   const { data, error } = useStatisticsCalendar({
@@ -62,7 +75,7 @@ const StatisticsCalendar = () => {
   let calendarData: CalendarDatum[] = [];
 
   if (error) {
-    return <div>Error</div>
+    return <div>Error</div>;
   }
 
   if (data) {
@@ -112,32 +125,44 @@ const StatisticsCalendar = () => {
   );
 };
 
-const cumulativeStatisticsSchema = z.object({
-  date: iso8601ToDateTime,
-  target: iso8601ToDuration,
-  tracked: iso8601ToDuration,
-  diff: iso8601ToDuration,
-  cumulative_diff: iso8601ToDuration,
-}).transform(({ date, target, tracked, diff, cumulative_diff }) => ({ date, target, tracked, diff, cumulativeDiff: cumulative_diff }));
+const cumulativeStatisticsSchema = z
+  .object({
+    date: iso8601ToDateTime,
+    target: iso8601ToDuration,
+    tracked: iso8601ToDuration,
+    diff: iso8601ToDuration,
+    cumulative_diff: iso8601ToDuration,
+  })
+  .transform(({ date, target, tracked, diff, cumulative_diff }) => ({
+    date,
+    target,
+    tracked,
+    diff,
+    cumulativeDiff: cumulative_diff,
+  }));
 
 const cumulativeStatsFilterSchema = z.object({
   date: dateTimeToIso8601,
-})
+});
 
-const useAccumulatedStatistics = (filter: z.input<typeof cumulativeStatsFilterSchema>) => {
+const useAccumulatedStatistics = (
+  filter: z.input<typeof cumulativeStatsFilterSchema>
+) => {
   const client = useClient();
   // Call supabase rpc calendar function to get calendar rows
   return useQuery(["accumulated-stats"], async () => {
     const queryFilter = cumulativeStatsFilterSchema.parse(filter);
     const { data, error } = await client
       .from("accumulated_stats")
-      .select("date,target::json,tracked::json,diff::json,cumulative_diff::json")
+      .select(
+        "date,target::json,tracked::json,diff::json,cumulative_diff::json"
+      )
       .filter("date", "lte", filter.date)
       .order("date", { ascending: true });
     if (error) throw error;
     return z.array(cumulativeStatisticsSchema).parse(data);
   });
-}
+};
 
 const CumulativeStatistics = () => {
   const { data, error } = useAccumulatedStatistics({ date: DateTime.local() });
@@ -153,9 +178,7 @@ const CumulativeStatistics = () => {
     min = Math.min(...data.map((d) => d.cumulativeDiff.as("hours")));
   }
 
-  const ticks = scaleLinear()
-    .domain([min, max])
-    .ticks(5);
+  const ticks = scaleLinear().domain([min, max]).ticks(5);
 
   const lineData: Serie[] = [
     { id: "Cumulative difference", data: calendarData },
@@ -170,12 +193,13 @@ const CumulativeStatistics = () => {
         xScale={{ type: "linear", min: "auto", max: "auto" }}
         yScale={{ type: "linear", stacked: false, min: "auto", max: "auto" }}
         yFormat=" >-.2f"
-        xFormat={(v: DatumValue) => DateTime.fromSeconds(v as number).toFormat("yyyy-MM-dd")}
+        xFormat={(v: DatumValue) =>
+          DateTime.fromSeconds(v as number).toFormat("yyyy-MM-dd")
+        }
         colors={[colors.green[800]]}
         theme={{
           textColor: colors.gray[300],
           fontSize: 14,
-        
         }}
         curve="monotoneX"
         axisBottom={{
@@ -197,7 +221,6 @@ const CumulativeStatistics = () => {
           legendOffset: -40,
           legendPosition: "middle",
         }}
-
         gridYValues={ticks}
         enableGridX={false}
         lineWidth={4}
@@ -216,7 +239,6 @@ const CumulativeStatistics = () => {
             itemDirection: "right-to-left",
           },
         ]}
-        
       />
     </div>
   );
