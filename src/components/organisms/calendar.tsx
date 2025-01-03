@@ -1,9 +1,9 @@
 import { faBullseye } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { DateTime } from "luxon";
+import { DateTime, Duration } from "luxon";
 import React, { useState } from "react";
 import { CalendarDate, Target, Track } from "../../schema/calendar";
-import { daysOfMonth, daysOfWeek } from "../../utils/date";
+import { absDuration, daysOfMonth, daysOfWeek, getDurationFromTracks, isNegativeDuration } from "../../utils/date";
 import { TrackEditor } from "./track-editor";
 import { TargetEditor } from "./target-editor";
 
@@ -166,8 +166,17 @@ export const WeekCalendar = ({ dates, date }: CalendarInput) => {
   );
 };
 
-const MonthTarget = ({ target }: { target: Target }) => {
+const MonthTarget = ({ target, tracks }: { target: Target, tracks: Track[] }) => {
   const [isEditing, setIsEditing] = useState(false);
+
+  const duration = getDurationFromTracks(tracks);
+
+  const formatDuration = (
+    d: Duration | undefined = Duration.fromMillis(0),
+    format: string
+  ) => absDuration(d).toFormat(format);
+
+  const isOverTarget = target.duration < duration;
   return (
     <button
       key={target.id}
@@ -181,7 +190,8 @@ const MonthTarget = ({ target }: { target: Target }) => {
       m="b-1"
       onClick={() => setIsEditing(true)}
     >
-      {target.duration.toFormat("hh:mm")}
+      <span text={isOverTarget ? "green-300" : "red-300"}>{formatDuration(duration, "hh:mm")} </span>
+      <span>/ {target.duration.toFormat("hh:mm")}</span>
       <TargetEditor
         target={target}
         isOpen={isEditing}
@@ -250,7 +260,7 @@ export const MonthCalendar = ({ dates, date }: CalendarInput) => {
           >
             <div display="flex" flex="row" justify="between" p="b-2">
               <span text="gray-500">{date.day}</span>
-              {target && <MonthTarget target={target} />}
+              {target && <MonthTarget target={target} tracks={tracks} />}
             </div>
 
             {tracks.map((track) => (
