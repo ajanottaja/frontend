@@ -150,3 +150,22 @@ export const weekdays = [
   "Saturday",
   "Sunday",
 ];
+
+/**
+ * For a given list of tracks (typically a single day). Return the total duration
+ * of all tracks. 
+ * @param tracks list of tracks
+ * @returns total duration of all tracks
+ */
+export const getDurationFromTracks = (tracks: Track[]) => {
+  const totalMillisecondsTracked = tracks.reduce((duration, track) => {
+    const start = track.tracked.lower;
+    const end = track.tracked.upper;
+    if (start && end) {
+      return duration + end.diff(start).milliseconds
+    }
+    return duration;
+  }, 0)
+
+  return Duration.fromMillis(totalMillisecondsTracked);
+}
