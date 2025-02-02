@@ -98,8 +98,10 @@ const StatisticsCalendar = () => {
         maxValue={2}
         emptyColor={colors.dark[500]}
         theme={{
-          textColor: colors.gray[300],
-          fontSize: 14,
+          text: {
+            fill: colors.gray[300],
+            fontSize: 14,
+          },
         }}
         colors={colorScale}
         margin={{ top: 0, right: 0, bottom: 20 }}
@@ -198,8 +200,22 @@ const CumulativeStatistics = () => {
         }
         colors={[colors.green[800]]}
         theme={{
-          textColor: colors.gray[300],
-          fontSize: 14,
+          text: {
+            fill: colors.gray[300],
+            fontSize: 14,
+          },
+          axis: {
+            ticks: {
+              text: {
+                fill: colors.gray[300]
+              }
+            },
+            legend: {
+              text: {
+                fill: colors.gray[300]
+              }
+            }
+          }
         }}
         curve="monotoneX"
         axisBottom={{

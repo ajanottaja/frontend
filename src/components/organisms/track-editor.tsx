@@ -1,14 +1,12 @@
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { DateTime } from "luxon";
-import React, { Fragment, useContext } from "react";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import TimePicker from "../atoms/time-picker";
-import SwrMutateContext from "../providers/swr-mutation-provider";
 import { Track } from "../../schema/calendar";
 import { useClient } from "../../supabase/use-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -94,9 +92,9 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
   };
 
   return (
-    <Transition.Root appear show={isOpen} as={Fragment}>
+    <Transition show={isOpen} as={Fragment} appear>
       <Dialog as="div" className="relative z-10" open={isOpen} onClose={close}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -106,7 +104,7 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
           leaveTo="opacity-0"
         >
           <div pos="inset-0 fixed" bg="dark-400" opacity="bg-70" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div
           pos="fixed inset-0"
@@ -115,7 +113,7 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
           justify="center"
           align="items-center"
         >
-          <Transition.Child
+          <TransitionChild
             as={Fragment}
             enter="ease-out duration-300"
             enterFrom="opacity-0 scale-95"
@@ -124,7 +122,7 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel
+            <DialogPanel
               display="flex"
               flex="col"
               w="min-72 <sm:min-screen"
@@ -151,9 +149,9 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
               >
                 <FontAwesomeIcon icon={faTimes} />
               </button>
-              <Dialog.Title as="h3" text="lg gray-300 center" m="0 b-4">
+              <DialogTitle as="h3" text="lg gray-300 center" m="0 b-4">
                 Interval editor
-              </Dialog.Title>
+              </DialogTitle>
 
               <h4 text="sm gray-300" m="b-2">
                 Beginning
@@ -243,10 +241,10 @@ export const TrackEditor = ({ track, isOpen, close }: TrackEditor) => {
                   </Button>
                 )}
               </div>
-            </Dialog.Panel>
-          </Transition.Child>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
-    </Transition.Root>
+    </Transition>
   );
 };
