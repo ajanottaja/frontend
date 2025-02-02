@@ -1,7 +1,7 @@
 import React, { Suspense, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
 import { DateTime, Duration } from "luxon";
-import { MonthCalendar, WeekCalendar } from "../components/organisms/calendar";
+import { MonthCalendar, WeekCalendar, DayCalendar } from "../components/organisms/calendar";
 import { queryParamsToSearchString, useQueryParams } from "../utils/router";
 import CalendarNav from "../components/layout/calendar/calendar-nav";
 import { MonthHeader, WeekHeader } from "../components/layout/calendar/headers";
@@ -46,12 +46,15 @@ const useCalendar = (query: CalendarQuery) => {
   const client = useClient();
   const params = calendarParams.parse(query);
   // Call supabase rpc calendar function to get calendar rows
-  return useQuery(["calendar", params], async () => {
-    const { data, error } = await client
-      .rpc("calendar", params)
-      .select("date,target::json,tracks");
-    if (error) throw error;
-    return z.array(calendarDateSchema).parse(data);
+  return useQuery({
+    queryKey: ["calendar", params],
+    queryFn: async () => {
+      const { data, error } = await client
+        .rpc("calendar", params)
+        .select("date,target::json,tracks");
+      if (error) throw error;
+      return z.array(calendarDateSchema).parse(data);
+    },
   });
 };
 
@@ -73,6 +76,9 @@ const CalendarInner = ({ query }: CalendarInner) => {
       )}
       {query.duration === "week" && (
         <WeekCalendar date={query.startDate} dates={data} />
+      )}
+      {query.duration === "day" && (
+        <DayCalendar date={query.startDate} dates={data} />
       )}
     </>
   );

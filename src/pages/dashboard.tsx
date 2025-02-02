@@ -27,14 +27,17 @@ const targetSchema = z.object({
 
 const useActiveTarget = () => {
   const client = useClient();
-  return useQuery(["activeTarget"], async () => {
-    const { data, error } = await client
-      .from("targets")
-      .select("id,date,duration::json")
-      .eq("date", DateTime.now().toISODate())
-      .limit(1);
+  return useQuery({
+    queryKey: ["activeTarget"],
+    queryFn: async () => {
+      const { data, error } = await client
+        .from("targets")
+        .select("id,date,duration::json")
+        .eq("date", DateTime.now().toISODate())
+        .limit(1);
     if (error) throw error;
-    return z.array(targetSchema).parse(data);
+      return z.array(targetSchema).parse(data);
+    },
   });
 };
 
@@ -47,20 +50,22 @@ const targetUpdateSchema = z.object({
 
 const useUpsertActiveTarget = () => {
   const client = useClient();
-  return useMutation(async (args: z.infer<typeof targetSchema>) => {
-    const upsertData = targetUpdateSchema.parse({
-      ...args,
-      account: client.auth.user()?.id,
-    });
+  return useMutation({
+    mutationFn: async (args: z.infer<typeof targetSchema>) => {
+      const upsertData = targetUpdateSchema.parse({
+        ...args,
+        account: client.auth.user()?.id,
+      });
     const { data, error } = await client
       .from("targets")
       .upsert(upsertData, { onConflict: "date,account" })
       .match({ date: upsertData.date });
 
     if (error) {
-      console.error(error);
-    }
-    return { data, error };
+        console.error(error);
+      }
+      return { data, error };
+    },
   });
 };
 
@@ -109,13 +114,16 @@ const intervalSchema = z.object({
 
 const useActiveTrack = () => {
   const client = useClient();
-  return useQuery(["activeTrack"], async () => {
-    const { data, error } = await client
-      .from("tracks_active")
-      .select("id,tracked::json")
-      .limit(1);
+  return useQuery({
+    queryKey: ["activeTrack"],
+    queryFn: async () => {
+      const { data, error } = await client
+        .from("tracks_active")
+        .select("id,tracked::json")
+        .limit(1);
     if (error) throw error;
-    return z.array(intervalSchema).parse(data);
+      return z.array(intervalSchema).parse(data);
+    },
   });
 };
 
@@ -125,14 +133,16 @@ const startTrackSchema = z.object({
 
 const useStartActiveTrack = () => {
   const client = useClient();
-  return useMutation(async () => {
-    const upsertData = startTrackSchema.parse({});
-    const { data, error } = await client.rpc("track_start", upsertData);
+  return useMutation({
+    mutationFn: async () => {
+      const upsertData = startTrackSchema.parse({});
+      const { data, error } = await client.rpc("track_start", upsertData);
 
     if (error) {
       console.error(error);
     }
     return { data, error };
+    },
   });
 };
 
@@ -142,13 +152,15 @@ const stopTrackSchema = z.object({
 
 const useStopActiveTrack = () => {
   const client = useClient();
-  return useMutation(async (args: z.infer<typeof stopTrackSchema>) => {
-    const { data, error } = await client.rpc("track_stop", args);
+  return useMutation({
+    mutationFn: async (args: z.infer<typeof stopTrackSchema>) => {
+      const { data, error } = await client.rpc("track_stop", args);
 
     if (error) {
       console.error(error);
     }
     return { data, error };
+    },
   });
 };
 
@@ -202,12 +214,15 @@ const summarySchema = z.object({
 
 const useSummary = () => {
   const client = useClient();
-  return useQuery(["summary"], async () => {
-    const { data, error } = await client
-      .from("summary")
-      .select("title,period,target::json,tracked::json,diff::json");
-    if (error) throw error;
-    return z.array(summarySchema).parse(data);
+  return useQuery({
+    queryKey: ["summary"],
+    queryFn: async () => {
+      const { data, error } = await client
+        .from("summary")
+        .select("title,period,target::json,tracked::json,diff::json");
+      if (error) throw error;
+      return z.array(summarySchema).parse(data);
+    },
   });
 };
 

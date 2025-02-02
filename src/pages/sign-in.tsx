@@ -8,18 +8,19 @@ import { useClient } from "../supabase/use-client";
 const useSigninMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
-  const data = useMutation(async (user: UserCredentials) => {
-    console.log("Signing in...");
-    await client.auth.signIn(user);
-    navigate("/dashboard");
+  return useMutation({
+    mutationFn: async (user: UserCredentials) => {
+      console.log("Signing in...");
+      await client.auth.signIn(user);
+      navigate("/dashboard");
+    }
   });
-  return data;
 };
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data, isLoading, error, mutate } = useSigninMutation();
+  const { data, isPending, error, mutate } = useSigninMutation();
   const handleLogin = () => mutate({ email, password });
 
   return (
@@ -48,8 +49,8 @@ const SignIn = () => {
         </a>
         .
       </p>
-      {isLoading && "Logging in"}
-      {!error && !isLoading && (
+      {isPending && "Logging in"}
+      {!error && !isPending && (
         <form
           onSubmit={(e) => {
             e.preventDefault();

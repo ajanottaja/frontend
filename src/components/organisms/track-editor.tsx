@@ -21,9 +21,10 @@ const upsertTrackSchema = z.object({
 const useUpsertTrack = () => {
   const client = useClient();
   const queryClient = useQueryClient();
-  return useMutation(async (trackData: z.input<typeof upsertTrackSchema>) => {
-    const upsertData = upsertTrackSchema.parse(trackData);
-    const { data, error } = await client
+  return useMutation({
+    mutationFn: async (trackData: z.input<typeof upsertTrackSchema>) => {
+      const upsertData = upsertTrackSchema.parse(trackData);
+      const { data, error } = await client
       .from("tracks")
       .upsert([{ ...upsertData }]);
 
@@ -31,9 +32,10 @@ const useUpsertTrack = () => {
       console.error(error);
     }
 
-    queryClient.refetchQueries(["calendar"]);
+      queryClient.refetchQueries({ queryKey: ["calendar"] });
 
-    return { data, error };
+      return { data, error };
+    },
   });
 };
 
@@ -44,10 +46,11 @@ const deleteTrackSchema = z.object({
 const useDeleteTrack = () => {
   const client = useClient();
   const queryClient = useQueryClient();
-  return useMutation(async (params: z.input<typeof deleteTrackSchema>) => {
-    const deleteFilter = deleteTrackSchema.parse(params);
-    const { data, error } = await client
-      .from("tracks")
+  return useMutation({
+    mutationFn: async (params: z.input<typeof deleteTrackSchema>) => {
+      const deleteFilter = deleteTrackSchema.parse(params);
+      const { data, error } = await client
+        .from("tracks")
       .delete()
       .match(deleteFilter);
 
@@ -55,9 +58,10 @@ const useDeleteTrack = () => {
       console.error(error);
     }
 
-    queryClient.refetchQueries(["calendar"]);
+      queryClient.refetchQueries({ queryKey: ["calendar"] });
 
-    return { data, error };
+      return { data, error };
+    },
   });
 };
 

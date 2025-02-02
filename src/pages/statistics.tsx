@@ -55,13 +55,16 @@ const statsParamsSchema = z
 const useStatisticsCalendar = (params: z.input<typeof statsParamsSchema>) => {
   const client = useClient();
   // Call supabase rpc calendar function to get calendar rows
-  return useQuery(["statistics-calendar"], async () => {
-    const statsParams = statsParamsSchema.parse(params);
-    const { data, error } = await client
+  return useQuery({
+    queryKey: ["statistics-calendar"],
+    queryFn: async () => {
+      const statsParams = statsParamsSchema.parse(params);
+      const { data, error } = await client
       .rpc("stats", statsParams)
       .select("date,target::json,tracked::json,diff::json");
-    if (error) throw error;
-    return z.array(statisticsCalendarSchema).parse(data);
+      if (error) throw error;
+      return z.array(statisticsCalendarSchema).parse(data);
+    },
   });
 };
 
@@ -152,22 +155,25 @@ const useAccumulatedStatistics = (
 ) => {
   const client = useClient();
   // Call supabase rpc calendar function to get calendar rows
-  return useQuery(["accumulated-stats"], async () => {
-    const queryFilter = cumulativeStatsFilterSchema.parse(filter);
-    const { data, error } = await client
-      .from("accumulated_stats")
+  return useQuery({
+    queryKey: ["accumulated-stats"],
+    queryFn: async () => {
+      const queryFilter = cumulativeStatsFilterSchema.parse(filter);
+      const { data, error } = await client
+        .from("accumulated_stats")
       .select(
         "date,target::json,tracked::json,diff::json,cumulative_diff::json"
       )
       .filter("date", "lte", filter.date)
       .order("date", { ascending: true });
     if (error) throw error;
-    return z.array(cumulativeStatisticsSchema).parse(data);
+      return z.array(cumulativeStatisticsSchema).parse(data);
+    },
   });
 };
 
 const CumulativeStatistics = () => {
-  const { data, error } = useAccumulatedStatistics({ date: DateTime.local() });
+  const { data } = useAccumulatedStatistics({ date: DateTime.local().startOf("day") });
   let calendarData: Datum[] = [];
   let max = 0;
   let min = 0;

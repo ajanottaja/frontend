@@ -291,3 +291,75 @@ export const MonthCalendar = ({ dates, date }: CalendarInput) => {
     </div>
   );
 };
+
+export const DayCalendar = ({ dates, date }: CalendarInput) => {
+  const tracks = dates?.[0]?.tracks || [];
+  const target = dates?.[0]?.target;
+
+  return (
+    <div
+      display="flex"
+      flex="col"
+      justify="items-end"
+      w="full"
+      overflow="y-auto"
+    >
+      <div
+        p="b-4"
+        w="min-full full"
+        display="grid"
+        justify="items-stretch"
+        grid="gap-1 cols-[4rem_1fr]"
+        text="gray-400"
+      >
+        <div text="center" display="<md:hidden">
+          Target
+        </div>
+        <div text="center" display="md:hidden">
+          <FontAwesomeIcon icon={faBullseye} />
+        </div>
+        {target ? <MonthTarget target={target} tracks={tracks} /> : <div />}
+
+        <div display="grid" grid="rows-24 gap-1">
+          {[
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23,
+          ].map((hour) => (
+            <div
+              key={hour}
+              display="flex"
+              justify="center"
+              bg="dark-500"
+              text="gray-600"
+              h="full"
+              w="full"
+            >
+              <span>
+                {DateTime.fromObject({ hour, minute: 0, second: 0 }).toFormat(
+                  "HH"
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div
+          display="grid"
+          grid="rows-24 gap-1"
+          h="[1440px]"
+          pos="relative"
+        >
+          {tracks.map((track) => (
+            <WeekTrack key={track.id} track={track} />
+          ))}
+          {[
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+            19, 20, 21, 22, 23,
+          ].map((hour) => (
+            <div key={hour} bg="dark-500" h="full"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};

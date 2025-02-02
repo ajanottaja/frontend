@@ -21,19 +21,21 @@ const upsertTargetSchema = z.object({
 const useUpsertTarget = () => {
   const client = useClient();
   const queryClient = useQueryClient();
-  return useMutation(async (trackData: z.input<typeof upsertTargetSchema>) => {
-    const upsertData = upsertTargetSchema.parse(trackData);
-    const { data, error } = await client
-      .from("targets")
+  return useMutation({
+    mutationFn: async (trackData: z.input<typeof upsertTargetSchema>) => {
+      const upsertData = upsertTargetSchema.parse(trackData);
+      const { data, error } = await client
+        .from("targets")
       .upsert([{ ...upsertData }]);
 
     if (error) {
       console.error(error);
     }
 
-    queryClient.refetchQueries(["calendar"]);
+      queryClient.refetchQueries({ queryKey: ["calendar"] });
 
-    return { data, error };
+      return { data, error };
+    },
   });
 };
 
@@ -44,10 +46,11 @@ const deleteTargetSchema = z.object({
 const useDeleteTarget = () => {
   const client = useClient();
   const queryClient = useQueryClient();
-  return useMutation(async (params: z.input<typeof deleteTargetSchema>) => {
-    const deleteFilter = deleteTargetSchema.parse(params);
-    const { data, error } = await client
-      .from("targets")
+  return useMutation({
+    mutationFn: async (params: z.input<typeof deleteTargetSchema>) => {
+      const deleteFilter = deleteTargetSchema.parse(params);
+      const { data, error } = await client
+        .from("targets")
       .delete()
       .match(deleteFilter);
 
@@ -55,9 +58,10 @@ const useDeleteTarget = () => {
       console.error(error);
     }
 
-    queryClient.refetchQueries(["calendar"]);
+      queryClient.refetchQueries({ queryKey: ["calendar"] });
 
-    return { data, error };
+      return { data, error };
+    },
   });
 };
 

@@ -1,5 +1,5 @@
 import React, { FormEvent, useState } from "react";
-import { isError, useMutation } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "../components/atoms/button";
 import { useClient } from "../supabase/use-client";
 import { UserCredentials } from "@supabase/supabase-js";
@@ -8,12 +8,14 @@ import { useNavigate } from "react-router";
 const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
-  const data = useMutation(async (credentials: UserCredentials) => {
-    const { error, session, user } = await client.auth.signUp(credentials, {
-      redirectTo: window.location.host + "/signin",
-    });
-    if (error) return error;
-    navigate("/email-verification");
+  const data = useMutation({
+    mutationFn: async (credentials: UserCredentials) => {
+      const { error, session, user } = await client.auth.signUp(credentials, {
+        redirectTo: window.location.host + "/signin",
+      });
+      if (error) return error;
+      navigate("/email-verification");
+    },
   });
   return data;
 };
@@ -21,7 +23,7 @@ const useSignupMutation = () => {
 const SignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data, isLoading, error, mutate, isError } = useSignupMutation();
+  const { data, isPending, error, mutate, isError } = useSignupMutation();
 
   const handleSignup = (e: any) => {
     e.preventDefault();
@@ -63,9 +65,9 @@ const SignUp = () => {
         </a>
         .
       </p>
-      {isLoading && "Creating user"}
+      {isPending && "Creating user"}
 
-      {!error && !isLoading && (
+      {!error && !isPending && (
         <form onSubmit={handleSignup} display="flex" flex="col" gap="4">
           <label htmlFor="email" text="left gray-300" m="b-2">
             Email
