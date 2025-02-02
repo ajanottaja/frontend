@@ -24,11 +24,18 @@ const queryClient = new QueryClient({
 
 const container = document.getElementById("root");
 const root = createRoot(container!);
+
+const supabaseClient = createClient(supabaseConfig.url, supabaseConfig.anonKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
+
 root.render(
   <React.StrictMode>
-    <SupabaseProvider
-      value={createClient(supabaseConfig.url, supabaseConfig.anonKey)}
-    >
+    <SupabaseProvider value={supabaseClient}>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ReactQueryDevtools initialIsOpen={false} />

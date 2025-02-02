@@ -2,16 +2,20 @@ import React, { FormEvent, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "../components/atoms/button";
 import { useClient } from "../supabase/use-client";
-import { UserCredentials } from "@supabase/supabase-js";
+import { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
 import { useNavigate } from "react-router";
 
 const useSignupMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   const data = useMutation({
-    mutationFn: async (credentials: UserCredentials) => {
-      const { error, session, user } = await client.auth.signUp(credentials, {
-        redirectTo: window.location.host + "/signin",
+    mutationFn: async (credentials: SignUpWithPasswordCredentials) => {
+      const { error } = await client.auth.signUp({
+        ...credentials,
+        options: {
+          emailRedirectTo: window.location.origin + "/signin",
+          data: {},
+        }
       });
       if (error) return error;
       navigate("/email-verification");

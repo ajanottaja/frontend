@@ -23,10 +23,12 @@ const useUpsertTrack = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (trackData: z.input<typeof upsertTrackSchema>) => {
-      const upsertData = upsertTrackSchema.parse(trackData);
+      const { id, ...dataWithoutId } = upsertTrackSchema.parse(trackData);
       const { data, error } = await client
       .from("tracks")
-      .upsert([{ ...upsertData }]);
+      .upsert([{ ...dataWithoutId, id }]);
+
+      console.log("Upserted track", { ...dataWithoutId, id });
 
     if (error) {
       console.error(error);

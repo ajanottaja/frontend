@@ -23,17 +23,18 @@ const useUpsertTarget = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (trackData: z.input<typeof upsertTargetSchema>) => {
-      const upsertData = upsertTargetSchema.parse(trackData);
+      const { id, ...dataWithoutId } = upsertTargetSchema.parse(trackData);
+
       const { data, error } = await client
         .from("targets")
-      .upsert([{ ...upsertData }]);
+        .upsert([id ? { ...dataWithoutId, id } : dataWithoutId]);
 
-    if (error) {
-      console.error(error);
-    }
+      if (error) {
+        console.error(error);
+        throw error;
+      }
 
       queryClient.refetchQueries({ queryKey: ["calendar"] });
-
       return { data, error };
     },
   });

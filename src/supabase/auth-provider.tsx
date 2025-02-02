@@ -20,16 +20,19 @@ export const AuthProvider = ({ children }: AuthProvider) => {
   const [state, setState] = useState(initialState);
 
   useEffect(() => {
-    const session = client.auth.session();
-    setState({ session, user: session?.user ?? null, loading: false });
+    client.auth.getSession().then(({ data: { session } }) => {
+      setState({ session, user: session?.user ?? null, loading: false });
+    });
   }, []);
 
   useEffect(() => {
-    const { data } = client.auth.onAuthStateChange((event, session) => {
-      console.log("Supabase auth event", event);
+    const {
+      data: { subscription },
+    } = client.auth.onAuthStateChange((_event, session) => {
       setState({ session, user: session?.user ?? null, loading: false });
     });
-    return () => data?.unsubscribe();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;

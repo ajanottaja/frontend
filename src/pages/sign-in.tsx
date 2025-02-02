@@ -1,4 +1,4 @@
-import { UserCredentials } from "@supabase/supabase-js";
+import { SignInWithPasswordCredentials } from "@supabase/supabase-js";
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
@@ -9,9 +9,10 @@ const useSigninMutation = () => {
   const client = useClient();
   const navigate = useNavigate();
   return useMutation({
-    mutationFn: async (user: UserCredentials) => {
+    mutationFn: async (user: SignInWithPasswordCredentials) => {
       console.log("Signing in...");
-      await client.auth.signIn(user);
+      const { error } = await client.auth.signInWithPassword(user);
+      if (error) throw error;
       navigate("/dashboard");
     }
   });
@@ -20,7 +21,7 @@ const useSigninMutation = () => {
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { data, isPending, error, mutate } = useSigninMutation();
+  const { isPending, error, mutate } = useSigninMutation();
   const handleLogin = () => mutate({ email, password });
 
   return (

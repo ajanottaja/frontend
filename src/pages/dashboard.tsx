@@ -32,7 +32,7 @@ const useActiveTarget = () => {
     queryFn: async () => {
       const { data, error } = await client
         .from("targets")
-        .select("id,date,duration::json")
+        .select("id,date,duration")
         .eq("date", DateTime.now().toISODate())
         .limit(1);
     if (error) throw error;
@@ -52,16 +52,27 @@ const useUpsertActiveTarget = () => {
   const client = useClient();
   return useMutation({
     mutationFn: async (args: z.infer<typeof targetSchema>) => {
-      const upsertData = targetUpdateSchema.parse({
-        ...args,
-        account: client.auth.user()?.id,
-      });
-    const { data, error } = await client
-      .from("targets")
-      .upsert(upsertData, { onConflict: "date,account" })
-      .match({ date: upsertData.date });
+      // Get the user ID using the new async method
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) console.error("User not authenticated");
+      if (!user) throw new Error("User not authenticated");
 
-    if (error) {
+      const { id, ...dataWithoutId } = targetUpdateSchema.parse({
+        ...args,
+        account: user.id,
+      });
+
+      // Create explicit object with or without id to avoid undefined properties
+      const upsertData = id 
+        ? { ...dataWithoutId, id }
+        : dataWithoutId;
+
+      const { data, error } = await client
+        .from("targets")
+        .upsert(upsertData, { onConflict: "date,account" })
+        .match({ date: upsertData.date });
+
+      if (error) {
         console.error(error);
       }
       return { data, error };
