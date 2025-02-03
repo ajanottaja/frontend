@@ -31,39 +31,34 @@ const Timer = ({ beginning, title, startInterval, stopInterval }: Timer) => {
   }, [beginning]);
 
   return (
-    <div display="grid" grid="cols-1 gap-y-8 <lg:gap-y-4" justify="self-center">
-      {title && <h2 text="4xl <lg:3xl center dark:gray-300">{title}</h2>}
-      <span
-        className={`${beginning ? "text-gray-300" : "text-gray-700"} font-mono`}
-        text="6xl <lg:4xl"
-      >
-        <span>{formatDigits(duration.hours ?? 0)}</span>
-        <span animate="pulse duration-2s">:</span>
-        <span>{formatDigits(duration.minutes ?? 0)}</span>
-        <span animate="pulse duration-2s">:</span>
-        <span>{formatDigits(duration.seconds ?? 0)}</span>
-      </span>
-      {beginning ? (
-        <IconButton
-          icon={faStop}
-          ariaLabel="Start interval"
-          onClick={async () => {
+    <div className="flex flex-col items-center gap-6">
+      {title && <h2 className="text-gray-400 text-sm font-medium">{title}</h2>}
+      <div className="bg-stone-800/50 rounded-xl p-8 w-full">
+        <span className={`${beginning ? "text-gray-300" : "text-gray-700"} font-mono text-5xl flex justify-center`}>
+          <span>{formatDigits(duration.hours ?? 0)}</span>
+          <span className="text-gray-500 mx-2">:</span>
+          <span>{formatDigits(duration.minutes ?? 0)}</span>
+          <span className="text-gray-500 mx-2">:</span>
+          <span>{formatDigits(duration.seconds ?? 0)}</span>
+        </span>
+      </div>
+      <IconButton
+        icon={beginning ? faStop : faPlay}
+        ariaLabel={beginning ? "Stop interval" : "Start interval"}
+        onClick={async () => {
+          if (beginning) {
             await stopInterval();
-          }}
-        >
-          Stop interval
-        </IconButton>
-      ) : (
-        <IconButton
-          icon={faPlay}
-          ariaLabel="Start interval"
-          onClick={async () => {
+          } else {
             await startInterval();
-          }}
-        >
-          Start interval
-        </IconButton>
-      )}
+          }
+        }}
+        className={`w-full ${beginning 
+          ? 'text-red-400 hover:text-red-300' 
+          : 'text-green-400 hover:text-green-300'
+        }`}
+      >
+        {beginning ? "Stop" : "Start"}
+      </IconButton>
     </div>
   );
 };

@@ -11,6 +11,7 @@ import { useClient } from "../../supabase/use-client";
 import { Button } from "../atoms/button";
 import { DatePicker } from "../atoms/date-picker";
 import DurationPicker from "../atoms/duration-picker";
+import { Modal } from "../atoms/modal";
 
 const upsertTargetSchema = z.object({
   id: z.string().uuid().optional(),
@@ -107,114 +108,46 @@ export const TargetEditor = ({
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog
-        as="div"
-        className="fixed inset-0 z-100 overflow-auto"
-        open={isOpen}
-        onClose={close}
-      >
-        <Dialog.Panel
-          h="min-screen"
-          w="min-screen"
-          pos="relative"
-          display="flex"
-          flex="col"
-          justify="center"
-          align="items-center"
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-70"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-70"
-            leaveTo="opacity-0"
-          >
-            <div pos="fixed inset-0" bg="dark-400" opacity="70" />
-          </Transition.Child>
+    <Modal
+      isOpen={isOpen}
+      onClose={close}
+      title={targetRecord ? "Edit Target" : "New Target"}
+    >
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-300">
+            Target date
+          </h4>
+          <DatePicker currentDate={targetDate} pickDate={setTargetDate} />
+        </div>
 
-          <Transition.Child
-            as={Fragment}
-            enter="ease-out duration-300"
-            enterFrom="opacity-0 scale-95"
-            enterTo="opacity-100 scale-100"
-            leave="ease-in duration-200"
-            leaveFrom="opacity-100 scale-100"
-            leaveTo="opacity-0 scale-95"
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-300">
+            Duration
+          </h4>
+          <DurationPicker
+            duration={targetDuration}
+            setDuration={(d) => setTargetDuration(d)}
+          />
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <Button
+            className="flex-1 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-500 hover:to-teal-500 text-white"
+            onClick={updateTarget}
           >
-            <div
-              display="flex"
-              flex="col"
-              w="min-72"
-              p="4"
-              m="y-8"
-              bg="dark-800"
-              border="rounded-lg 1 dark-300"
-              overflow="visible"
-              shadow="xl"
-              transform="~"
-              transition="all"
-              opacity="100"
-              pos="relative"
+            {targetRecord ? "Save" : "Save new"}
+          </Button>
+          {targetRecord && (
+            <Button
+              className="flex-1"
+              onClick={removeTarget}
             >
-              <button
-                aria-label="Close editor"
-                pos="absolute right-4"
-                text="gray-500"
-                outline="focus:none"
-                p="1"
-                focus="animate-pulse"
-                onClick={close}
-              >
-                <FontAwesomeIcon icon={faTimes} />
-              </button>
-              <Dialog.Title as="h3" text="lg gray-300 center" m="0 b-4">
-                Target editor
-              </Dialog.Title>
-
-              <h4 text="sm gray-300" m="b-2">
-                Target date
-              </h4>
-
-              <div m="b-4">
-                <DatePicker currentDate={targetDate} pickDate={setTargetDate} />
-              </div>
-
-              <h4 text="sm gray-300" m="b-2">
-                Duration
-              </h4>
-
-              <DurationPicker
-                duration={targetDuration}
-                setDuration={(d) => setTargetDuration(d)}
-              />
-
-              <div display="flex" flex="row" gap="4" m="t-8">
-                <Button
-                  flex="1"
-                  text="green-300"
-                  border="1 dark-50 hover:green-300 focus:green-300 rounded"
-                  onClick={updateTarget}
-                >
-                  {targetRecord ? "Save" : "Save new"}
-                </Button>
-                {targetRecord && (
-                  <Button
-                    flex="1"
-                    text="red-300"
-                    border="1 dark-50 hover:red-300 focus:red-300 rounded"
-                    onClick={removeTarget}
-                  >
-                    Delete
-                  </Button>
-                )}
-              </div>
-            </div>
-          </Transition.Child>
-        </Dialog.Panel>
-      </Dialog>
-    </Transition.Root>
+              Delete
+            </Button>
+          )}
+        </div>
+      </div>
+    </Modal>
   );
 };

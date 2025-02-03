@@ -23,47 +23,40 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
   });
 
   return (
-    <div
-      display="flex"
-      flex="col"
-      w="full"
-      text="gray-300"
-      p="4"
-      {...swipeHandlers}
-    >
-      <div display="flex" flex="row" justify="between">
+    <div className="flex flex-col w-full text-gray-300 p-4" {...swipeHandlers}>
+      <div className="flex flex-row justify-between items-center mb-4">
         <button
           aria-label="Go to previous month"
-          text="hover:green-300 focus:green-300"
-          outline="focus:none"
-          focus="animate-pulse"
+          className="p-2 hover:text-green-400 focus:text-green-400 focus:outline-none transition-colors duration-200"
           onClick={() => setDate(previous("month", date))}
         >
           <FontAwesomeIcon icon={faArrowLeft} size="sm" />
         </button>
-        <h1 text="center">{date.toFormat("MMMM yyyy")}</h1>
+        <h1 className="text-lg font-medium">{date.toFormat("MMMM yyyy")}</h1>
         <button
           aria-label="Go to next month"
-          text="hover:green-300 focus:green-300"
-          outline="focus:none"
-          focus="animate-pulse"
+          className="p-2 hover:text-green-400 focus:text-green-400 focus:outline-none transition-colors duration-200"
           onClick={() => setDate(next("month", date))}
         >
           <FontAwesomeIcon icon={faArrowRight} size="sm" />
         </button>
       </div>
-      <div display="grid" grid="cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1">
         {days.map((wd) => (
-          <div text="gray-400 center">{wd}</div>
+          <div key={wd} className="text-gray-500 text-center text-sm py-2">{wd}</div>
         ))}
         {dates.map((d, i) => (
           <button
-            bg={d.equals(activeDate) ? "dark-600" : "dark-500"}
-            p="1"
-            className={i === 0 ? `col-start-${d.weekday}` : ""}
-            text={`${d.equals(activeDate) ? "green-300" : "gray-300"} right`}
-            border="1 transparent hover:green-300 focus:green-300"
-            focus="animate-pulse"
+            key={d.toISO()}
+            className={`
+              p-2 rounded-md text-right transition-all duration-200
+              ${i === 0 ? `col-start-${d.weekday}` : ""}
+              ${d.equals(activeDate) 
+                ? "bg-green-500/20 text-green-400 ring-1 ring-green-500/30" 
+                : "text-gray-300 hover:bg-stone-700/50"
+              }
+              focus:outline-none focus:ring-2 focus:ring-green-500/30
+            `}
             onClick={() => pickDate(d)}
           >
             {d.day}
@@ -85,29 +78,28 @@ type DatePicker = DetailedHTMLProps<
 export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
   const defaultDate = currentDate?.startOf("day");
   return (
-    <Popover pos="relative">
+    <Popover className="relative">
       {({ open, close }) => (
         <>
           <Popover.Button
             as="button"
-            display="flex"
-            flex="row"
-            align="items-center"
-            justify="between"
-            bg="dark-500"
-            border="1 rounded dark-50"
-            p="2"
-            w="full"
-            text="gray-300"
+            className={`
+              flex items-center justify-between w-full px-4 py-3
+              bg-stone-800/75 border border-stone-700/50 rounded-xl
+              text-gray-300 transition-all duration-200
+              hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-green-500/30
+            `}
           >
-            <FontAwesomeIcon icon={faCalendar} />
-            {defaultDate ? (
-              <span m="l-2">{defaultDate?.toFormat("DDDD") ?? ""}</span>
-            ) : (
-              <span m="l-2" text="gray-500">
-                {DateTime.now().toFormat("DDDD")}
-              </span>
-            )}
+            <div className="flex items-center gap-3">
+              <FontAwesomeIcon icon={faCalendar} className="text-green-400/75" />
+              {defaultDate ? (
+                <span>{defaultDate?.toFormat("DDDD") ?? ""}</span>
+              ) : (
+                <span className="text-gray-500">
+                  {DateTime.now().toFormat("DDDD")}
+                </span>
+              )}
+            </div>
           </Popover.Button>
           <Transition
             as={Fragment}
@@ -118,14 +110,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Popover.Panel
-              pos="absolute z-100"
-              m="t-2"
-              w="min-96 <sm:min-full"
-              bg="dark-800"
-              shadow="~"
-              border="rounded-lg 1 dark-300"
-            >
+            <Popover.Panel className="absolute z-50 w-full mt-2 bg-stone-900 backdrop-blur-sm border border-stone-700/30 rounded-xl shadow-xl">
               <DatePickerInner
                 pickDate={(d) => {
                   pickDate(d);

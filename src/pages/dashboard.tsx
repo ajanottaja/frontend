@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useRef, useEffect, useState, Fragment } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { DateTime, Duration } from "luxon";
 import { z } from "zod";
@@ -13,6 +13,10 @@ import {
   tsRangeToObject,
 } from "../schema/custom";
 import { useClient } from "../supabase/use-client";
+import { Dialog, Transition } from "@headlessui/react";
+import { faPencil } from "@fortawesome/free-solid-svg-icons";
+import { IconButton } from "../components/atoms/button";
+import StatCard from "../components/atoms/stat-card";
 
 /**
  * Target measures the time you want to work on a given day.
@@ -32,7 +36,7 @@ const useActiveTarget = () => {
     queryFn: async () => {
       const { data, error } = await client
         .from("targets")
-        .select("id,date,duration")
+        .select("id,date,duration::json")
         .eq("date", DateTime.now().toISODate())
         .limit(1);
     if (error) throw error;
@@ -83,11 +87,12 @@ const useUpsertActiveTarget = () => {
 const DashboardTarget = () => {
   const { data, error, refetch } = useActiveTarget();
   const { mutateAsync } = useUpsertActiveTarget();
+  const [isOpen, setIsOpen] = useState(false);
 
   if (error) {
     console.error(error);
     return (
-      <div display="grid" grid="cols-1" align="self-center">
+      <div className="flex flex-col items-center justify-center">
         <span className="text-red-300 text-2xl font-mono pb-8">
           Could not get target time.
         </span>
@@ -101,6 +106,8 @@ const DashboardTarget = () => {
     <DurationPickerDashboard
       title="Todays target"
       duration={target?.duration}
+      isOpen={isOpen}
+      close={() => setIsOpen(false)}
       setDuration={async (duration: Duration) => {
         const res = await mutateAsync({
           id: target?.id,
@@ -175,39 +182,155 @@ const useStopActiveTrack = () => {
   });
 };
 
+/**
+ * Default target duration of 8 hours
+ */
+const DEFAULT_TARGET = Duration.fromObject({ hours: 8 });
+
+/**
+ * Simplified dashboard timer that handles both display and controls
+ */
+const ProgressBar = ({ progress }: { progress: number }) => {
+  const progressRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (progressRef.current) {
+      progressRef.current.style.transform = 'scaleX(0)';
+      // Force a reflow before applying the new transform
+      void progressRef.current.offsetWidth;
+      progressRef.current.style.transform = `scaleX(${Math.min(1, progress)})`;
+    }
+  }, [progress]);
+
+  return (
+    <div className="relative w-full bg-stone-800 rounded-full h-2 overflow-hidden">
+      <div 
+        ref={progressRef}
+        className="absolute top-0 left-0 w-full bg-green-600 h-full rounded-full transition-transform duration-1000 ease-out origin-left"
+      />
+    </div>
+  );
+};
+
+const TargetEditDialog = ({
+  isOpen,
+  onClose,
+  target,
+  onUpdate,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  target?: Duration;
+  onUpdate: (duration: Duration) => Promise<void>;
+}) => {
+  return (
+    <DurationPickerDashboard
+      title="Edit Daily Target"
+      duration={target}
+      isOpen={isOpen}
+      close={onClose}
+      setDuration={onUpdate}
+    />
+  );
+};
+
 const DashboardTimer = () => {
-  const { data, error, refetch } = useActiveTrack();
+  const { data: targetData, refetch: refetchTarget } = useActiveTarget();
+  const { data: trackData, error, refetch: refetchTrack } = useActiveTrack();
+  const { data: summaryData, refetch: refetchSummary } = useSummary();
   const { mutateAsync: startTrack } = useStartActiveTrack();
   const { mutateAsync: stopTrack } = useStopActiveTrack();
-
-  console.log("Data", data);
+  const { mutateAsync: upsertTarget } = useUpsertActiveTarget();
+  const [isEditingTarget, setIsEditingTarget] = useState(false);
 
   if (error) {
-    console.error(error);
     return (
-      <div display="grid" grid="cols-1" align="self-center">
+      <div className="flex flex-col items-center justify-center">
         <span className="text-red-300 text-2xl font-mono pb-8">
-          Could not get target time.
+          Could not connect to server
         </span>
       </div>
     );
   }
 
-  const track = data?.[0];
+  const track = trackData?.[0];
+  const target = targetData?.[0];
+  const todaySummary = summaryData?.find(d => d.title === "day");
+
+  // Get total tracked time from summary, plus current active session if any
+  const activeSessionDuration = track?.tracked.lower 
+    ? DateTime.now().diff(track.tracked.lower, ['hours', 'minutes'])
+    : Duration.fromMillis(0);
+  
+  const totalTrackedDuration = todaySummary?.tracked.plus(activeSessionDuration) ?? Duration.fromMillis(0);
+
+  const progress = totalTrackedDuration.as('hours') / (target?.duration.as('hours') ?? 0);
 
   return (
-    <Timer
-      title="Timer"
-      beginning={track?.tracked.lower}
-      startInterval={async () => {
-        await startTrack();
-        refetch();
-      }}
-      stopInterval={async () => {
-        if (track) await stopTrack({ id: track.id });
-        refetch();
-      }}
-    />
+    <div className="flex flex-col items-center justify-center gap-6 w-full max-w-xl mx-auto">
+      <Timer
+        title="TIME TRACKED TODAY"
+        beginning={track?.tracked.lower}
+        startInterval={async () => {
+          // Create default target if none exists
+          if (!targetData?.[0]) {
+            await upsertTarget({
+              duration: DEFAULT_TARGET,
+              date: DateTime.now(),
+            });
+            await refetchTarget();
+          }
+          await startTrack();
+          await Promise.all([
+            refetchTrack(),
+            refetchSummary()
+          ]);
+        }}
+        stopInterval={async () => {
+          if (track) await stopTrack({ id: track.id });
+          await Promise.all([
+            refetchTrack(),
+            refetchSummary()
+          ]);
+        }}
+      />
+      
+      {/* Show progress towards target */}
+      {target && (
+        <div className="w-full space-y-2">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-gray-300">{totalTrackedDuration.toFormat("h'h' m'm'")}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-gray-300">of {target.duration.toFormat("h'h'")}</span>
+              <IconButton
+                icon={faPencil}
+                ariaLabel="Edit target"
+                className="!p-1 !px-2 text-xs"
+                onClick={() => setIsEditingTarget(true)}
+              />
+            </div>
+          </div>
+          <ProgressBar progress={progress} />
+        </div>
+      )}
+
+      <TargetEditDialog
+        isOpen={isEditingTarget}
+        onClose={() => setIsEditingTarget(false)}
+        target={target?.duration}
+        onUpdate={async (duration) => {
+          await upsertTarget({
+            id: target?.id,
+            duration,
+            date: target?.date ?? DateTime.now(),
+          });
+          await Promise.all([
+            refetchTarget(),
+            refetchSummary()
+          ]);
+        }}
+      />
+    </div>
   );
 };
 
@@ -238,17 +361,12 @@ const useSummary = () => {
 };
 
 const DashboardStats = () => {
-  // Get statistics summary and refresh every minute
-  const { data, isLoading, error } = useSummary();
-
-  if (error) console.error(error);
+  const { data, error } = useSummary();
 
   if (error) {
     return (
-      <div display="grid" grid="cols-1" align="self-center">
-        <span className="text-red-300 text-2xl font-mono pb-8">
-          Could not get summary of tracked time.
-        </span>
+      <div className="text-red-300 text-center">
+        Could not get summary of tracked time.
       </div>
     );
   }
@@ -259,100 +377,72 @@ const DashboardStats = () => {
       week: data.find((d) => d.title === "week"),
       month: data.find((d) => d.title === "month"),
       year: data.find((d) => d.title === "year"),
-      all: data.find((d) => d.title === "all"),
+      allTime: data.find((d) => d.title === "all"),
     };
 
-    const formatDuration = (
-      d: Duration | undefined = Duration.fromMillis(0),
-      format: string
-    ) =>
-      `${isNegativeDuration(d) ? "- " : ""}${absDuration(d).toFormat(format)}`;
-
     return (
-      <div
-        h="full"
-        display="grid"
-        grid="cols-1 gap-y-1"
-        justify="self-center items-stretch"
-        text="center xl <lg:base"
-      >
-        <h2 text="4xl <lg:3xl center dark:gray-300" m="b-4" align="self-start">
-          Time summary
-        </h2>
-        <span text="gray-300" m="0">
-          Day: {formatDuration(summary.day?.diff, "h 'hours' m 'minutes'")}
-        </span>
-        <span text="gray-300" m="0">
-          Week: {formatDuration(summary.week?.diff, "h 'hours' m 'minutes'")}
-        </span>
-        <span text="gray-300" m="0">
-          Month:{" "}
-          {formatDuration(
-            summary.month?.diff,
-            "d 'days' h 'hours' m 'minutes'"
-          )}
-        </span>
-        <span text="green-300" m="0">
-          Year:{" "}
-          {formatDuration(summary.year?.diff, "d 'days' h 'hours' m 'minutes'")}
-        </span>
-        <span text="green-300" m="0">
-          All:{" "}
-          {formatDuration(summary.all?.diff, "d 'days' h 'hours' m 'minutes'")}
-        </span>
+      <div className="flex flex-wrap justify-center gap-6 w-full">
+        <div className="flex flex-1 min-w-fit">
+          <StatCard
+            title="Today"
+            tracked={summary.day?.tracked ?? Duration.fromMillis(0)}
+            target={summary.day?.target ?? Duration.fromMillis(0)}
+          />
+        </div>
+        <div className="flex flex-1 min-w-fit">
+          <StatCard
+            title="This Week"
+            tracked={summary.week?.tracked ?? Duration.fromMillis(0)}
+            target={summary.week?.target ?? Duration.fromMillis(0)}
+          />
+        </div>
+        <div className="flex flex-1 min-w-fit">
+          <StatCard
+            title="This Month"
+            tracked={summary.month?.tracked ?? Duration.fromMillis(0)}
+            target={summary.month?.target ?? Duration.fromMillis(0)}
+          />
+        </div>
+        <div className="flex flex-1 min-w-fit">
+          <StatCard
+            title="This Year"
+            tracked={summary.year?.tracked ?? Duration.fromMillis(0)}
+            target={summary.year?.target ?? Duration.fromMillis(0)}
+          />
+        </div>
+        <div className="flex flex-1 min-w-fit">
+          <StatCard
+            title="All Time"
+            tracked={summary.allTime?.tracked ?? Duration.fromMillis(0)}
+            target={summary.allTime?.target ?? Duration.fromMillis(0)}
+          />
+        </div>
       </div>
     );
   }
 
-  return <div>Fetching</div>;
+  return <div className="text-gray-300">Loading statistics...</div>;
 };
 
+/**
+ * Simplified dashboard that focuses on the timer
+ */
 const Dashboard = () => {
   return (
-    <div
-      w="full"
-      display="flex"
-      flex="col"
-      justify="center"
-      align="items-center"
-      h="full"
-      m="<sm:t-8"
-    >
-      <div
-        justify="self-center items-center"
-        align="self-center items-center"
-        display="grid"
-        grid="cols-3 <lg:cols-1 lg:gap-x-32 <lg:gap-y-8"
-        p="<lg:x-4"
+    <div className="w-full max-w-8xl mx-auto py-4 space-y-12">
+      <Suspense
+        fallback={
+          <div className="flex flex-col items-center text-green-300 text-4xl">
+            <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
+            <div>Loading</div>
+          </div>
+        }
       >
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center text-green-300 text-4xl">
-              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-              <div>Loading</div>
-            </div>
-          }
-        >
-          <DashboardTarget />
-        </Suspense>
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center text-green-300 text-4xl">
-              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-              <div>Loading</div>
-            </div>
-          }
-        >
-          <DashboardTimer />
-        </Suspense>
-        <Suspense
-          fallback={
-            <div className="flex flex-col items-center text-green-300 text-4xl">
-              <div className="icon-alarm icon-lg mb-4 animate-spin animate-duration-3000"></div>
-              <div>Loading</div>
-            </div>
-          }
-        >
+        <DashboardTimer />
+      </Suspense>
+
+      <div className="mt-12 pt-12 border-t border-stone-800">
+        <Suspense fallback={<div className="text-gray-300">Loading stats...</div>}>
           <DashboardStats />
         </Suspense>
       </div>

@@ -2,8 +2,9 @@ import React, {
   ButtonHTMLAttributes,
   DetailedHTMLProps,
   useState,
+  Fragment,
 } from "react";
-import { Link, LinkProps, useMatch } from "react-router-dom";
+import { Link, LinkProps, useMatch, NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faArrowRight,
@@ -14,9 +15,11 @@ import {
   faTachometerAlt,
   faTimes,
   IconDefinition,
+  faBars,
 } from "@fortawesome/free-solid-svg-icons";
-import { Disclosure } from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { useClient } from "../../supabase/use-client";
+import { useAuth } from "../../supabase/auth-provider";
 
 type MenuLink = Omit<LinkProps, "icon"> & {
   icon: IconDefinition;
@@ -41,26 +44,16 @@ const MenuLink = ({
   return (
     <Link
       to={to}
-      display="flex"
-      flex="row"
-      w="full"
-      h="10"
-      justify="items-start"
-      align="items-center"
-      p="x-4 y-2"
-      m="b-2"
-      animate="hover:pulse focus:pulse"
-      outline="focus:none"
-      text="gray-300 no-underline focus:green-300"
-      bg={match ? "dark-400" : ""}
-      border={`l-2 ${match ? "green-300" : "transparent"}`}
+      className={`flex flex-row w-full h-10 justify-start items-center px-4 py-2 mb-2 hover:animate-pulse focus:animate-pulse focus:outline-none text-gray-300 no-underline focus:text-green-300 ${
+        match ? 'bg-stone-400' : ''
+      } border-l-2 ${match ? 'border-green-300' : 'border-transparent'}`}
       {...props}
     >
-      <div display="flex" w="4" justify="center">
+      <div className="flex w-4 justify-center">
         <FontAwesomeIcon icon={icon} size="lg" />
       </div>
       {expanded && (
-        <div w="full" display="flex" flex="row" justify="start" m="l-4">
+        <div className="w-full flex flex-row justify-start ml-4">
           {children}
         </div>
       )}
@@ -88,24 +81,14 @@ const MenuButton = ({
   return (
     <button
       onClick={onClick}
-      display="flex"
-      flex="row"
-      w="full"
-      h="10"
-      justify="items-start"
-      align="items-center"
-      p="x-4 y-2"
-      animate="hover:pulse focus:pulse"
-      outline="focus:none"
-      text="gray-300 no-underline focus:green-300"
-      border="l-2 transparent"
+      className="flex flex-row w-full h-10 justify-start items-center px-4 py-2 hover:animate-pulse focus:animate-pulse focus:outline-none text-gray-300 no-underline focus:text-green-300 border-l-2 border-transparent"
       {...props}
     >
-      <div display="flex" w="4" justify="center">
+      <div className="flex w-4 justify-center">
         <FontAwesomeIcon icon={expanded ? expandedIcon : icon} size="lg" />
       </div>
       {expanded && (
-        <div w="full" display="flex" flex="row" justify="start" m="l-4">
+        <div className="w-full flex flex-row justify-start ml-4">
           {children}
         </div>
       )}
@@ -117,25 +100,11 @@ export const MainMenu = () => {
   const [expanded, setExpanded] = useState(false);
   const client = useClient();
   return (
-    <nav
-      h="screen"
-      display="flex <sm:hidden"
-      flex="col"
-      justify="items-start"
-      align="items-start"
-      text="gray-300"
-      w={expanded ? "max-full" : "min-12"}
-      bg="dark-600"
-      border="r-2 dark-400"
-      p=""
-    >
+    <nav className={`h-screen sm:flex hidden flex-col justify-start items-start text-gray-300 ${
+      expanded ? 'max-w-full' : 'min-w-12'
+    } bg-stone-600 border-r-2 border-dark-400`}>
       <button
-        h="4"
-        m="b-4"
-        p="x-2"
-        w="full"
-        text="right"
-        animate="wobble duration-1000"
+        className="h-4 mb-4 px-2 w-full text-right animate-wobble duration-1000"
         onClick={() => setExpanded(!expanded)}
       >
         <FontAwesomeIcon icon={expanded ? faTimes : faArrowRight} size="xs" />
@@ -180,158 +149,114 @@ export const MainMenu = () => {
   );
 };
 
-const MobileMenuLink = ({
-  children,
-  icon,
-  to,
-  activeOnlyWhenExact = false,
-  ...props
-}: Omit<MenuLink, "expanded">) => {
-  const match = useMatch({
-    path: to,
-    end: activeOnlyWhenExact,
-  });
-
-  return (
-    <Disclosure.Button
-      as={Link}
-      to={to}
-      display="flex"
-      flex="row"
-      w="full"
-      justify="items-start"
-      align="items-center"
-      p="y-2"
-      border="rounded"
-      animate="hover:pulse focus:pulse"
-      outline="focus:none"
-      text="gray-300 no-underline focus:green-300"
-      bg={match ? "dark-300" : ""}
-      {...props}
-    >
-      <div w="full" display="flex" flex="row" justify="start" m="l-4">
-        <span m="r-4">
-          <FontAwesomeIcon icon={icon} size="lg" />
-        </span>
-        {children}
-      </div>
-    </Disclosure.Button>
-  );
-};
-
-const MobileMenuButton = ({
-  children,
-  icon,
-  onClick,
-  ...props
-}: Omit<MenuButton, "expanded">) => {
-  return (
-    <li>
-      <button
-        display="flex"
-        flex="row"
-        w="full"
-        justify="items-start"
-        align="items-center"
-        p="y-2"
-        border="rounded"
-        animate="hover:pulse focus:pulse"
-        outline="focus:none"
-        text="gray-300 no-underline focus:green-300"
-        onClick={onClick}
-        {...props}
-      >
-        <div w="full" display="flex" flex="row" justify="start" m="l-4">
-          <span m="r-4">
-            <FontAwesomeIcon icon={icon} size="lg" />
-          </span>
-          {children}
-        </div>
-      </button>
-    </li>
-  );
-};
-
-const MobileMenuInner = () => {
-  const client = useClient();
-  return (
-    <nav display="flex" flex="col" justify="items-center" p="4">
-      <ul>
-        <li display="flex" flex="row" w="full" justify="content-end" m="b-4">
-          <Disclosure.Button
-            text="gray-300 focus:green-300"
-            focus="outline-transparent animate-pulse"
-            justify="self-end"
-          >
-            <FontAwesomeIcon icon={faTimes} size="lg" aria-label="Close menu" />
-          </Disclosure.Button>
-        </li>
-
-        <MobileMenuLink
-          to="/dashboard"
-          title="Dashboard"
-          icon={faTachometerAlt}
-        >
-          Dashboard
-        </MobileMenuLink>
-
-        <MobileMenuLink to="/calendar" title="Calendar" icon={faCalendar}>
-          Calendar
-        </MobileMenuLink>
-
-        <MobileMenuLink to="/statistics" title="Statistics" icon={faChartLine}>
-          Statistics
-        </MobileMenuLink>
-
-        <MobileMenuButton
-          title="Statistics"
-          icon={faSignOutAlt}
-          onClick={() => client.auth.signOut()}
-        >
-          Sign out
-        </MobileMenuButton>
-      </ul>
-    </nav>
-  );
-};
-
 export const MobileMenu = () => {
-  const [expanded, setExpanded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const client = useClient();
+  const { user } = useAuth();
+
   return (
-    <Disclosure
-      as="div"
-      pos="relative"
-      w="full"
-      display="hidden <sm:flex"
-      justify="center"
-      align="items-center"
-      h="12"
-      p="x-4"
-      text="gray-300"
-      bg="dark-500"
-    >
-      <Disclosure.Button
-        pos="absolute inset-0 left-4"
-        text="gray-300 focus:green-300"
-        focus="outline-transparent animate-pulse"
-        grid="col-span-0"
+    <>
+      <button
+        onClick={() => setIsOpen(true)}
+        className="inline-flex items-center justify-center p-2 rounded-lg text-gray-300 hover:text-green-400 hover:bg-stone-800/50 focus:outline-none"
       >
-        <FontAwesomeIcon icon={faHamburger} size="lg" />
-      </Disclosure.Button>
+        <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+      </button>
 
-      <h1 font="italic" className="tracking-widest" justify="self-center">
-        Ajanottaja
-      </h1>
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={setIsOpen}>
+          {/* Background overlay */}
+          <div className="fixed inset-0 bg-stone-900/80 backdrop-blur-sm" />
 
-      <Disclosure.Panel
-        as="div"
-        pos="absolute inset-0"
-        z="50"
-        h="screen"
-        bg="dark-500"
-      >
-        <MobileMenuInner />
-      </Disclosure.Panel>
-    </Disclosure>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-start justify-end">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-x-full"
+                enterTo="opacity-100 translate-x-0"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-x-0"
+                leaveTo="opacity-0 translate-x-full"
+              >
+                <DialogPanel className="w-full max-w-sm transform overflow-hidden bg-stone-900/75 p-6 text-left align-middle shadow-xl transition-all h-screen">
+                  <div className="flex items-center justify-between mb-4 border-b border-stone-700 pb-4">
+                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-green-400 to-teal-400 bg-clip-text text-transparent">
+                      Menu
+                    </DialogTitle>
+                    <button
+                      onClick={() => setIsOpen(false)}
+                      className="p-2 text-gray-300 hover:text-green-400 focus:outline-none"
+                    >
+                      <FontAwesomeIcon icon={faTimes} className="h-6 w-6" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-1">
+                    <NavLink
+                      to="/dashboard"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors ${
+                          isActive
+                            ? 'bg-stone-700 text-green-400'
+                            : 'text-gray-300 hover:bg-stone-700 hover:text-green-400'
+                        }`
+                      }
+                    >
+                      <FontAwesomeIcon icon={faTachometerAlt} className="mr-3" />
+                      Dashboard
+                    </NavLink>
+                    <NavLink
+                      to="/calendar"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors ${
+                          isActive
+                            ? 'bg-stone-700 text-green-400'
+                            : 'text-gray-300 hover:bg-stone-700 hover:text-green-400'
+                        }`
+                      }
+                    >
+                      <FontAwesomeIcon icon={faCalendar} className="mr-3" />
+                      Calendar
+                    </NavLink>
+                    <NavLink
+                      to="/statistics"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center px-3 py-2 rounded-lg text-base font-medium transition-colors ${
+                          isActive
+                            ? 'bg-stone-700 text-green-400'
+                            : 'text-gray-300 hover:bg-stone-700 hover:text-green-400'
+                        }`
+                      }
+                    >
+                      <FontAwesomeIcon icon={faChartLine} className="mr-3" />
+                      Statistics
+                    </NavLink>
+                  </div>
+
+                  <div className="mt-8 border-t border-stone-700 pt-4">
+                    <div className="px-3 py-2 text-sm text-gray-400 mb-2">
+                      {user?.email}
+                    </div>
+                    <button
+                      onClick={() => {
+                        client.auth.signOut();
+                        setIsOpen(false);
+                      }}
+                      className="block w-full px-3 py-2 rounded-lg text-base font-medium text-gray-300 hover:bg-stone-700 hover:text-green-400 transition-colors"
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </>
   );
 };

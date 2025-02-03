@@ -1,5 +1,4 @@
-import "virtual:windi.css";
-import "virtual:windi-devtools";
+
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router } from "react-router-dom";
@@ -40,9 +39,7 @@ root.render(
         <AuthProvider>
           <ReactQueryDevtools initialIsOpen={false} />
           <Router>
-            <div className="dark" h="min-full" w="max-full">
-              <App />
-            </div>
+            <App />
           </Router>
         </AuthProvider>
       </QueryClientProvider>

@@ -7,14 +7,24 @@ import React, {
   useRef,
 } from "react";
 
+type ButtonSize = "xsmall" | "small" | "default";
+
 type Button = DetailedHTMLProps<
   ButtonHTMLAttributes<HTMLButtonElement>,
   HTMLButtonElement
 > & {
   hasFocus?: boolean;
+  size?: ButtonSize;
+  className?: string;
 };
 
-export const Button = ({ hasFocus = false, ...props }: Button) => {
+const buttonSizeClasses: Record<ButtonSize, string> = {
+  xsmall: "h-7 min-w-7 px-2 py-1 text-xs",
+  small: "h-9 min-w-9 px-3 py-1.5 text-sm",
+  default: "h-12 min-w-12 px-6 py-3",
+};
+
+export const Button = ({ hasFocus = false, size = "default", className, ...props }: Button) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -25,24 +35,31 @@ export const Button = ({ hasFocus = false, ...props }: Button) => {
 
   return (
     <button
-      ref={buttonRef}
-      display="flex"
-      flex="row"
-      justify="center"
-      align="items-center"
-      p="2 <sm:1"
-      animate="hover:pulse focus:pulse"
-      border="1 dark-50 hover:green-300 focus:green-300 rounded"
-      outline="focus:none"
-      text="gray-200 <sm:sm"
       {...props}
+      ref={buttonRef}
+      className={`
+        flex items-center justify-center gap-2
+        ${buttonSizeClasses[size]}
+        rounded-lg
+        bg-stone-800/50 
+        text-gray-300 font-medium
+        transition-all duration-200
+        hover:bg-stone-700/50
+        focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 focus:ring-offset-stone-900
+        disabled:opacity-50 disabled:cursor-not-allowed
+        cursor-pointer
+        ${className || ''}
+      `}
     />
   );
 };
 
+type IconPosition = "left" | "right";
+
 type IconButton = Omit<Button, "icon"> & {
   icon: IconDefinition;
   ariaLabel: string;
+  iconPosition?: IconPosition;
 };
 
 export const IconButton = ({
@@ -50,6 +67,9 @@ export const IconButton = ({
   icon,
   ariaLabel,
   children,
+  size = "default",
+  iconPosition = "left",
+  className,
   ...props
 }: IconButton) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -60,24 +80,39 @@ export const IconButton = ({
     }
   }, [hasFocus]);
 
+  const iconElement = <FontAwesomeIcon icon={icon} />;
+
   return (
     <button
       {...props}
       ref={buttonRef}
-      display="flex"
-      flex={`row ${props.flex ?? ""}`}
-      justify="content-center"
-      align="items-center"
-      p="2"
-      animate="hover:pulse focus:pulse"
-      border="dark-50 1 hover:green-300 focus:green-300 rounded"
-      outline="focus:none"
-      text={`gray-200 ${props.text ?? ""}`}
+      aria-label={ariaLabel}
+      className={`
+        flex items-center justify-center gap-2
+        ${buttonSizeClasses[size]}
+        rounded-lg
+        bg-stone-800/50 
+        text-gray-300 font-medium
+        transition-all duration-200
+        hover:bg-stone-700/50
+        focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 focus:ring-offset-stone-900
+        disabled:opacity-50 disabled:cursor-not-allowed
+        cursor-pointer
+        ${className || ''}
+      `}
     >
-      <span m="r-2">
-        <FontAwesomeIcon icon={icon} />
-      </span>
-      {children}
+      {iconPosition === "left" && (
+        <>
+          {iconElement}
+          {children && <span>{children}</span>}
+        </>
+      )}
+      {iconPosition === "right" && (
+        <>
+          {children && <span>{children}</span>}
+          {iconElement}
+        </>
+      )}
     </button>
   );
 };

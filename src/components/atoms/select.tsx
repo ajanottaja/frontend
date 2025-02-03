@@ -6,6 +6,8 @@ import React, {
   useRef,
 } from "react";
 import { Listbox, Transition } from "@headlessui/react";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface SelectValue {
   id: string | number;
@@ -20,6 +22,8 @@ type Select<T extends SelectValue> = DetailedHTMLProps<
   selected: T;
   values: T[];
   setSelected: (selected: T) => void;
+  className?: string;
+  size?: "small" | "default";
 };
 
 // interface Select<T extends SelectValue> {
@@ -28,85 +32,79 @@ type Select<T extends SelectValue> = DetailedHTMLProps<
 //   setSelected: (selected: T) => void;
 // }
 
+const selectSizeClasses: Record<"small" | "default", string> = {
+  small: "h-9 min-w-9 px-3 py-1.5 text-sm",
+  default: "h-12 min-w-12 px-6 py-3",
+};
+
 export function Select<T extends SelectValue>({
   selected,
   values,
   setSelected,
-  ...props
+  className = "",
+  size = "default",
 }: Select<T>) {
   return (
-    <div text="gray-200" {...props}>
+    <div className="text-gray-200">
       <Listbox value={selected} onChange={setSelected}>
-        <div pos="relative">
+        <div className="relative">
           <Listbox.Button
-            w="full"
-            pos="relative"
-            display="flex"
-            flex="row"
-            justify="content-center"
-            align="items-center"
-            p="2 <sm:1"
-            animate="hover:pulse focus:pulse"
-            border="dark-50 1 hover:green-300 focus:green-300 rounded"
-            outline="focus:none"
-            text="gray-200 <sm:sm"
+            className={`
+              flex items-center justify-between gap-2 w-full
+              ${selectSizeClasses[size]}
+              rounded-lg
+              bg-stone-800/50 
+              text-gray-300 font-medium
+              transition-all duration-200
+              hover:bg-stone-700/50
+              focus:outline-none focus:ring-2 focus:ring-green-500/50 focus:ring-offset-2 focus:ring-offset-stone-900
+              disabled:opacity-50 disabled:cursor-not-allowed
+              cursor-pointer
+              ${className}
+            `}
           >
-            <div pos="absolute left-1 top-auto bottom-auto">
-              <span className="icon-sm icon-select text-gray-300"></span>
-            </div>
-            <span text="truncate" m="l-6">
-              {selected.label}
-            </span>
+            <span className="block truncate">{selected.label}</span>
+            <FontAwesomeIcon
+              icon={faChevronDown}
+              className="text-gray-400"
+              aria-hidden="true"
+            />
           </Listbox.Button>
           <Transition
-            enter="transition duration-100 ease-out"
-            enterFrom="transform scale-95 opacity-0"
-            enterTo="transform scale-100 opacity-100"
-            leave="transition duration-75 ease-out"
-            leaveFrom="transform scale-100 opacity-100"
-            leaveTo="transform scale-95 opacity-0"
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
             <Listbox.Options
-              pos="absolute"
-              z="50"
-              m="y-1"
-              p="0"
-              w="min-full"
-              bg="dark-800"
-              shadow="~ light-100"
-              border="1 dark-50 rounded"
-              display="flex"
-              flex="col"
-              align="items-center"
+              className={`
+                absolute z-50 w-full mt-1 overflow-auto
+                rounded-lg
+                bg-stone-800/95 backdrop-blur-sm
+                text-gray-300
+                border border-stone-700
+                focus:outline-none
+                ${size === "small" ? "text-sm" : "text-base"}
+                max-h-60
+              `}
             >
               {values.map((value) => (
                 <Listbox.Option
                   key={value.id}
                   value={value}
                   disabled={value.disabled}
-                  pos="relative"
-                  display="flex"
-                  flex="row"
-                  justify="center"
-                  list="none"
-                  className={({ active }) => `${active ? "bg-dark-400" : ""}`}
-                  w="full"
+                  className={({ active, selected }) => `
+                    relative cursor-pointer select-none
+                    ${selectSizeClasses[size]}
+                    ${active || selected ? "bg-stone-700/50 text-gray-200" : "text-gray-300"}
+                    ${selected ? "font-medium" : "font-normal"}
+                    first:rounded-t-lg last:rounded-b-lg
+                  `}
                 >
-                  {({ active, selected }) => (
-                    <>
-                      {selected && (
-                        <div pos="absolute left-1">
-                          <span className="icon-check"></span>
-                        </div>
-                      )}
-                      <span
-                        display="block"
-                        text={`center ${active ? "green-300" : ""}`}
-                        m="x-6"
-                      >
-                        {value.label}
-                      </span>
-                    </>
+                  {({ selected }) => (
+                    <span className={`block truncate ${selected ? "font-medium" : "font-normal"}`}>
+                      {value.label}
+                    </span>
                   )}
                 </Listbox.Option>
               ))}

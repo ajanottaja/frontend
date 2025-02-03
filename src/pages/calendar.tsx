@@ -92,6 +92,7 @@ const CalendarInner = ({ query }: CalendarInner) => {
 const Calendar = () => {
   const navigate = useNavigate();
   const query = useQueryParams(calendarQuerySchema);
+  const { data } = useCalendar(query);
 
   const navigateCalendar = (query: CalendarQuery) => {
     navigate(
@@ -103,45 +104,23 @@ const Calendar = () => {
   };
 
   return (
-    <div
-      display="flex"
-      flex="col"
-      align="content-center items-center"
-      justify="start"
-      h="min-content"
-      w="full"
-      p="x-6"
-    >
-      <div
-        display="flex"
-        flex="col grow"
-        align="items-center"
-        w="full max-screen-7xl"
-        h="min-content"
-      >
-        <div
-          pos="sticky top-0"
-          bg="dark-800"
-          z="10"
-          display="flex"
-          flex="col"
-          justify="items-stretch"
-          w="full"
-          text="gray-300"
-          p="t-4"
-        >
+    <div className="w-full">
+      <div className="sticky top-4 bg-stone-900/95 backdrop-blur-sm z-10 border-b border-stone-800">
+        <div className="w-full max-w-6xl mx-auto px-4">
           <CalendarNav query={query} navigate={navigateCalendar} />
-          {query.duration === "week" && <WeekHeader />}
+          {query.duration === "week" && <WeekHeader dates={data} />}
           {query.duration === "month" && <MonthHeader />}
         </div>
+      </div>
 
+      <div className="w-full max-w-6xl mx-auto p-4">
         <Suspense
           fallback={
-            <>
+            <div className="animate-pulse">
               {query.duration === "month" && (
                 <MonthCalendar date={query.startDate} />
               )}
-            </>
+            </div>
           }
         >
           <CalendarInner query={query} />
