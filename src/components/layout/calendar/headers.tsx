@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { daysOfWeek, getDurationFromTracks, isNegativeDuration, absDuration } from "../../../utils/date";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBullseye } from "@fortawesome/free-solid-svg-icons";
-import { Target, Track } from "../../../schema/calendar";
+import { CalendarDate, Target, Track } from "../../../schema/calendar";
 import { TargetEditor } from "../../organisms/target-editor";
 
 const WeekDayHeader = ({ 
@@ -76,7 +76,7 @@ export const WeekHeader = ({ dates }: { dates?: CalendarDate[] }) => {
         <WeekDayHeader 
           key={date.toISODate()} 
           date={date} 
-          target={target} 
+          target={target ?? undefined} 
           tracks={tracks} 
         />
       ))}
