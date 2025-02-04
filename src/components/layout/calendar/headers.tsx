@@ -68,38 +68,42 @@ const WeekDayHeader = ({
 
 export const WeekHeader = ({ dates }: { dates?: CalendarDate[] }) => {
   return (
-    <div className="grid grid-cols-[4rem_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 mt-4">
-      <div className="text-center">
-        <FontAwesomeIcon icon={faBullseye} className="text-gray-400" />
+    <div className="max-w-7xl w-full mx-auto px-6 md:px-0">
+      <div className="grid grid-cols-[4rem_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2 mt-4">
+        <div className="text-center">
+          <FontAwesomeIcon icon={faBullseye} className="text-gray-400" />
+        </div>
+        {dates?.map(({ date, target, tracks }, i) => (
+          <WeekDayHeader 
+            key={date.toISODate()} 
+            date={date} 
+            target={target ?? undefined} 
+            tracks={tracks} 
+          />
+        ))}
       </div>
-      {dates?.map(({ date, target, tracks }, i) => (
-        <WeekDayHeader 
-          key={date.toISODate()} 
-          date={date} 
-          target={target ?? undefined} 
-          tracks={tracks} 
-        />
-      ))}
     </div>
   );
 };
 
 export const MonthHeader = () => {
   return (
-    <div className="hidden md:grid grid-cols-7 gap-1 mt-4 pb-4 text-gray-300 text-sm">
-      {[
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ].map((day) => (
-        <div key={day} className="text-center">
-          <span>{day}</span>
-        </div>
-      ))}
+    <div className="max-w-7xl w-full mx-auto px-6 md:px-0">
+      <div className="hidden md:grid grid-cols-7 gap-1 mt-4 pb-4 text-gray-300 text-sm">
+        {[
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ].map((day) => (
+          <div key={day} className="text-center">
+            <span>{day}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

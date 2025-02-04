@@ -106,14 +106,14 @@ const Calendar = () => {
   return (
     <div className="w-full">
       <div className="sticky top-4 bg-stone-900/95 backdrop-blur-sm z-10 border-b border-stone-800">
-        <div className="w-full max-w-6xl mx-auto px-4">
+        <div className="w-full max-w-7xl mx-auto">
           <CalendarNav query={query} navigate={navigateCalendar} />
           {query.duration === "week" && <WeekHeader dates={data} />}
           {query.duration === "month" && <MonthHeader />}
         </div>
       </div>
 
-      <div className="w-full max-w-6xl mx-auto p-4">
+      <div className="w-full max-w-7xl mx-auto py-4">
         <Suspense
           fallback={
             <div className="animate-pulse">

@@ -128,7 +128,7 @@ const AuthorizedLayout = ({ redirectPath = "/signin" }) => {
 
       {/* Update main content area to center vertically */}
       <main className="pt-16 min-h-[calc(100vh-4rem)] flex">
-        <div className="max-w-7xl w-full mx-auto px-6 md:px-0 py-8">
+        <div className="max-w-7xl w-full mx-auto px-6 md:px-6 py-8">
           <Outlet />
         </div>
       </main>

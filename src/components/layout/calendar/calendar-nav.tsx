@@ -26,7 +26,7 @@ interface CalendarNav {
 
 const CalendarNav = ({ query, navigate }: CalendarNav) => {
   return (
-    <div className="flex flex-col space-y-4 w-full max-w-6xl mx-auto">
+    <div className="flex flex-col space-y-4 w-full max-w-7xl mx-auto">
       {/* Navigation Controls - Single line on mobile */}
       <div className="flex items-center justify-between gap-4">
         {/* Left Controls */}
