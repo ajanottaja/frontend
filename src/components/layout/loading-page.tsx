@@ -2,15 +2,8 @@ import React from "react";
 
 const Loading = () => {
   return (
-    <div
-      w="full"
-      h="full"
-      text="green-300"
-      display="flex"
-      justify="center"
-      align="items-center"
-    >
-      <div text="center 8xl <sm:4xl">Loading</div>
+    <div className="w-full h-full flex justify-center items-center text-green-300">
+      <div className="text-center text-8xl sm:text-4xl">Loading</div>
     </div>
   );
 };

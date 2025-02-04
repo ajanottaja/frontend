@@ -1,3 +1,4 @@
+import { describe, test, expect } from "@jest/globals";
 import { DateTime, Duration } from "luxon";
 import {
   daysOfMonth,
@@ -14,7 +15,7 @@ describe("daysOfMonth", () => {
     const dates = daysOfMonth(DateTime.fromISO("2021-08-23"));
     expect(dates.length).toBe(31);
     expect(dates[0].day).toBe(1);
-    expect(dates).toSatisfyAll((d: DateTime) => d.month === 8);
+    expect(dates.every((d: DateTime) => d.month === 8)).toBe(true);
     expect(dates[30].day).toBe(31);
   });
 });
@@ -25,7 +26,7 @@ describe("daysOfWeek", () => {
     expect(dates.length).toBe(7);
     expect(dates[0].day).toBe(23);
     expect(dates[6].day).toBe(29);
-    expect(dates).toSatisfyAll((d: DateTime) => d.weekNumber === 34);
+    expect(dates.every((d: DateTime) => d.weekNumber === 34)).toBe(true);
   });
 });
 
@@ -37,7 +38,7 @@ describe("daysOfYear", () => {
     expect(dates[0].month).toBe(1);
     expect(dates[364].day).toBe(31);
     expect(dates[364].month).toBe(12);
-    expect(dates).toSatisfyAll((d: DateTime) => d.year === 2021);
+    expect(dates.every((d: DateTime) => d.year === 2021)).toBe(true);
   });
 });
 

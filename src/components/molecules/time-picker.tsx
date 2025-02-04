@@ -1,18 +1,16 @@
 import { faClock } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Duration } from "luxon";
+import { DateTime } from "luxon";
 import React, { useState } from "react";
 
-interface DurationPicker {
-  duration?: Duration;
-  setDuration: (duration: Duration) => void;
+interface TimePicker {
+  dateTime?: DateTime;
+  setDateTime: (time: DateTime) => void;
 }
 
-const DurationPicker = ({ duration, setDuration }: DurationPicker) => {
+const TimePicker = ({ dateTime, setDateTime }: TimePicker) => {
   const [timeValue, setTimeValue] = useState(() => {
-    const hours = duration?.hours ?? 0;
-    const minutes = duration?.minutes ?? 0;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+    return dateTime?.toFormat('HH:mm') ?? DateTime.now().toFormat('HH:mm');
   });
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,8 +19,11 @@ const DurationPicker = ({ duration, setDuration }: DurationPicker) => {
 
   const handleBlur = () => {
     const [hours, minutes] = timeValue.split(':').map(Number);
-    const newDuration = Duration.fromObject({ hours, minutes });
-    setDuration(newDuration);
+    const newDateTime = (dateTime ?? DateTime.now()).set({ 
+      hour: hours, 
+      minute: minutes 
+    });
+    setDateTime(newDateTime);
   };
 
   return (
@@ -54,4 +55,4 @@ const DurationPicker = ({ duration, setDuration }: DurationPicker) => {
   );
 };
 
-export default DurationPicker;
+export default TimePicker;

@@ -6,35 +6,54 @@ import { CalendarDate, Target, Track } from "../../schema/calendar";
 import { absDuration, daysOfMonth, daysOfWeek, getDurationFromTracks, isNegativeDuration } from "../../utils/date";
 import { TrackEditor } from "./track-editor";
 import { TargetEditor } from "./target-editor";
+import { Button, IconButton } from "../atoms/button";
+import { CombinedEditor } from "./combined-editor";
 
 interface CalendarInput {
   date: DateTime;
   dates?: CalendarDate[];
 }
 
-const WeekTarget = ({ target }: { target: Target }) => {
+const WeekTarget = ({ target, tracks }: { target: Target, tracks: Track[] }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const duration = getDurationFromTracks(tracks);
+  const diff = duration.minus(target.duration);
+  const isOverTarget = !isNegativeDuration(diff);
+  
+  const formatDiff = (d: Duration) => {
+    const absDur = absDuration(d);
+    const hours = absDur.as('hours');
+    
+    let format = '';
+    if (hours < 1) {
+      format = "m'm'";
+    } else if (hours < 10) {
+      format = "h'h' m'm'";
+    } else {
+      format = "h'h'";
+    }
+    
+    return `${isNegativeDuration(d) ? "-" : "+"}${absDur.toFormat(format)}`;
+  };
+
   return (
-    <button
-      key={target.id}
+    <div
       role="button"
-      border="rounded"
-      text="xs gray-300 center"
-      outline="focus:none"
-      focus="animate-pulse"
-      w="full"
-      p="1"
-      m="b-1"
+      className="flex flex-col items-center gap-1 px-2 py-1 cursor-pointer"
       onClick={() => setIsEditing(true)}
     >
-      <span display="<md:hidden">{target.duration.toFormat("hh:mm")}</span>
-      <span display="md:hidden">{target.duration.toFormat("hh")}</span>
+      <span className="text-xs text-gray-500">
+        {target.duration.toFormat("h'h'")}
+      </span>
+      <span className={`text-sm font-medium ${isOverTarget ? 'text-green-400' : 'text-red-400'}`}>
+        {formatDiff(diff)}
+      </span>
       <TargetEditor
         target={target}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
       />
-    </button>
+    </div>
   );
 };
 
@@ -48,11 +67,10 @@ const WeekTrack = ({ track }: { track: Track }) => {
   )
     .diff(track.tracked.lower)
     .as("minutes");
+
   return (
     <div
-      pos="absolute"
-      w="full"
-      p="x-2"
+      className="absolute w-full px-1"
       style={{
         top: minutesPastMidnight,
       }}
@@ -60,26 +78,22 @@ const WeekTrack = ({ track }: { track: Track }) => {
     >
       <button
         key={track.tracked.lower.toISODate()}
-        display="flex"
-        align="items-start"
-        bg="green-900 focus:green-800"
-        focus="outline-transparent"
-        ring="1 transparent :focus:green-400"
-        border="rounded"
-        text="xs gray-300 focus:gray-200"
-        p="1"
-        m="b-1"
-        w="full min-full"
-        h="min-6"
+        className="group flex items-start w-full min-h-6 px-3 py-1.5 rounded
+                   bg-stone-800 hover:bg-stone-700
+                   border-l-2 border-green-600/50
+                   transition-all duration-200"
         style={{
           height: `${length}px`,
         }}
       >
-        <span display="<md:hidden">
-          {track.tracked.lower.toFormat("HH:mm")} -{" "}
-          {track.tracked.upper?.isValid
-            ? track.tracked.upper.toFormat("HH:mm")
-            : "now"}
+        <span className="text-xs text-gray-300 group-hover:text-gray-200 transition-colors">
+          {track.tracked.lower.toFormat("HH:mm")}
+          {track.tracked.upper?.isValid && (
+            <span className="text-gray-400">
+              {" - "}
+              {track.tracked.upper.toFormat("HH:mm")}
+            </span>
+          )}
         </span>
         <TrackEditor
           track={track}
@@ -93,74 +107,44 @@ const WeekTrack = ({ track }: { track: Track }) => {
 
 export const WeekCalendar = ({ dates, date }: CalendarInput) => {
   const fallbackDates = daysOfWeek(date);
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const today = DateTime.now().startOf('day');
+  
   return (
-    <div
-      display="flex"
-      flex="col"
-      justify="items-end"
-      w="full"
-      overflow="y-auto"
-    >
-      <div
-        p="b-4"
-        w="min-full full"
-        display="grid"
-        justify="items-stretch"
-        grid="gap-1 cols-[4rem_1fr_1fr_1fr_1fr_1fr_1fr_1fr]"
-        text="gray-400"
-      >
-        <div text="center" display="<md:hidden">
-          Target
-        </div>
-        <div text="center" display="md:hidden">
-          <FontAwesomeIcon icon={faBullseye} />
-        </div>
-        {dates &&
-          dates.map(({ target }) =>
-            target ? <WeekTarget target={target} /> : <div />
-          )}
-        <div display="grid" grid="rows-24 gap-1">
-          {[
-            0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
-            19, 20, 21, 22, 23,
-          ].map((hour) => {
-            return (
-              <div
-                display="flex"
-                justify="center"
-                bg="dark-500"
-                text="gray-600"
-                h="full"
-                w="full"
-              >
-                <span>
-                  {DateTime.fromObject({ hour, minute: 0, second: 0 }).toFormat(
-                    "HH"
-                  )}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-        {dates &&
-          dates.map(({ date, target, tracks }, i) => (
-            <div
-              display="grid"
-              grid="rows-24 gap-1"
-              h="[1440px]"
-              pos="relative"
-            >
-              {tracks.map((track) => (
-                <WeekTrack track={track} />
-              ))}
-              {[
-                0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
-                18, 19, 20, 21, 22, 23,
-              ].map((hour) => {
-                return <div bg="dark-500" h="full"></div>;
-              })}
+    <div className="flex flex-col w-full overflow-y-auto pt-2">
+      <div className="w-full min-w-full grid grid-cols-[4rem_1fr_1fr_1fr_1fr_1fr_1fr_1fr] gap-2">
+        {/* Time column */}
+        <div className="grid grid-rows-24 gap-0">
+          {hours.map((hour) => (
+            <div key={hour} className="flex justify-end pr-4 items-center h-full">
+              <span className="text-xs text-gray-400">
+                {DateTime.fromObject({ hour }).toFormat("HH")}
+              </span>
             </div>
           ))}
+        </div>
+
+        {/* Day columns with tracks */}
+        {dates?.map(({ date: cellDate, tracks }, i) => {
+          const isToday = cellDate.hasSame(today, 'day');
+          return (
+            <div key={i} className="relative">
+              <div className={`grid grid-rows-24 gap-0 h-[1440px] rounded-lg ${
+                isToday ? 'bg-stone-800/20' : 'bg-stone-800/5'
+              }`}>
+                {tracks.map((track) => (
+                  <WeekTrack key={track.id} track={track} />
+                ))}
+                {hours.map((hour) => (
+                  <div 
+                    key={hour} 
+                    className="border-b border-stone-700/5"
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -168,126 +152,189 @@ export const WeekCalendar = ({ dates, date }: CalendarInput) => {
 
 const MonthTarget = ({ target, tracks }: { target: Target, tracks: Track[] }) => {
   const [isEditing, setIsEditing] = useState(false);
-
   const duration = getDurationFromTracks(tracks);
+  const diff = duration.minus(target.duration);
+  const isOverTarget = !isNegativeDuration(diff);
+  
+  const formatDiff = (d: Duration) => {
+    const absDur = absDuration(d);
+    const hours = absDur.as('hours');
+    
+    let format = '';
+    if (hours < 1) {
+      format = "m'm'";
+    } else if (hours < 10) {
+      format = "h'h' m'm'";
+    } else {
+      format = "h'h'";
+    }
+    
+    return `${isNegativeDuration(d) ? "-" : "+"}${absDur.toFormat(format)}`;
+  };
 
-  const formatDuration = (
-    d: Duration | undefined = Duration.fromMillis(0),
-    format: string
-  ) => absDuration(d).toFormat(format);
-
-  const isOverTarget = target.duration < duration;
   return (
-    <button
-      key={target.id}
-      role="button"
-      border="rounded"
-      text="xs gray-300 right"
-      outline="focus:none"
-      focus="animate-pulse"
-      w="full"
-      p="1"
-      m="b-1"
-      onClick={() => setIsEditing(true)}
-    >
-      <span text={isOverTarget ? "green-300" : "red-300"}>{formatDuration(duration, "hh:mm")} </span>
-      <span>/ {target.duration.toFormat("hh:mm")}</span>
+    <>
+      <button 
+        className={`text-xs ${isOverTarget ? 'text-green-300' : 'text-red-300'}
+        cursor-pointer
+                   hover:underline focus:underline`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsEditing(true);
+        }}
+      >
+        {formatDiff(diff)}
+      </button>
       <TargetEditor
         target={target}
         isOpen={isEditing}
         close={() => setIsEditing(false)}
       />
-    </button>
+    </>
   );
 };
 
-const MonthTrack = ({ track }: { track: Track }) => {
-  const [isEditing, setIsEditing] = useState(false);
+const MonthTrack = ({ track, onEdit }: { track: Track; onEdit: () => void }) => {
+  const timeText = track.tracked.upper?.isValid
+    ? `${track.tracked.lower.toFormat("HH:mm")} - ${track.tracked.upper.toFormat("HH:mm")}`
+    : track.tracked.lower.toFormat("HH:mm");
+
   return (
-    <button
-      key={track.id}
-      role="button"
-      bg="green-900 focus:green-800"
-      border="rounded"
-      text="xs gray-300 center"
-      outline="focus:none"
-      focus="animate-pulse"
-      w="full"
-      p="1"
-      m="b-1"
-      onClick={() => setIsEditing(true)}
-    >
-      {track.tracked.lower.toFormat("HH:mm")} -{" "}
-      {track.tracked.upper?.isValid
-        ? track.tracked.upper.toFormat("HH:mm")
-        : "now"}
-      <TrackEditor
-        track={track}
-        isOpen={isEditing}
-        close={() => setIsEditing(false)}
-      />
-    </button>
+    <span className="block text-xs text-gray-300">
+      {timeText}
+    </span>
   );
 };
 
 export const MonthCalendar = ({ dates, date }: CalendarInput) => {
-  // While loading, display skeleton for number of dates
+  const [editingDate, setEditingDate] = useState<DateTime>();
+  const [editingTrack, setEditingTrack] = useState<Track>();
+  const [editingTarget, setEditingTarget] = useState<Target>();
+
   const fallbackDates = daysOfMonth(date);
 
   return (
-    <div
-      w="full"
-      h="min-content"
-      flex="grow"
-      display="grid"
-      grid="gap-1 md:cols-7"
-      text="gray-400"
-      className="grid-auto-fit"
-    >
+    <div className="w-full h-min-content flex-grow grid gap-3 md:grid-cols-7 text-gray-400">
       {dates &&
-        dates.map(({ date, target, tracks }, i) => (
-          <div
-            key={date.toISODate()}
-            display="flex"
-            bg="dark-500"
-            flex="col"
-            h="min-28"
-            w="min-24"
-            p="1"
-            className={
-              i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
-            }
-          >
-            <div display="flex" flex="row" justify="between" p="b-2">
-              <span text="gray-500">{date.day}</span>
-              {target && <MonthTarget target={target} tracks={tracks} />}
+        dates.map(({ date, target, tracks }, i) => {
+          const isToday = date.toISODate() === DateTime.now().toISODate();
+          return (
+            <div
+              key={date.toISODate()}
+              className={`flex flex-col min-h-28 min-w-24 ${
+                i !== 0 ? "" : `col-start-1 md:col-start-${date.weekday}`
+              }`}
+            >
+              <div className="flex-1 rounded-xl bg-stone-800/30 backdrop-blur-sm p-3 
+                            hover:bg-stone-800/40 focus-within:bg-stone-800/40 
+                            transition-colors group flex flex-col">
+                {/* Header with date and target */}
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-sm font-medium ${
+                      isToday ? 'text-green-400' : 'text-gray-400'
+                    }`}>
+                      {date.day}
+                    </span>
+                    <span className="text-xs text-gray-400 md:hidden">
+                      {date.toFormat('ccc')}
+                    </span>
+                  </div>
+                  {target && <MonthTarget target={target} tracks={tracks} />}
+                </div>
+
+                {/* Tracks list */}
+                <div className="flex-1">
+                  {tracks.length > 0 && (
+                    <div className="space-y-0.5 pt-2 border-t border-stone-700/20">
+                      {tracks.map((track) => (
+                        <Button
+                          key={track.id}
+                          size="xsmall"
+                          tabIndex={0}
+                          className="w-full px-3 py-1.5 rounded text-left hover:bg-stone-700/50 transition-colors cursor-pointer"
+                          onClick={() => setEditingTrack(track)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              setEditingTrack(track);
+                            }
+                          }}
+                        >
+                          <MonthTrack track={track} onEdit={() => setEditingTrack(track)} />
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  size="xsmall"
+                  className="w-full mt-2 px-3 py-1.5 rounded-lg text-left text-xs 
+                            text-gray-400/0 group-hover:text-gray-400 group-focus-within:text-gray-400
+                            hover:bg-stone-700/50 transition-all
+                            opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+                  onClick={() => setEditingDate(date)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setEditingDate(date);
+                    }
+                  }}
+                >
+                  + Add entry
+                </Button>
+              </div>
             </div>
+          );
+        })}
 
-            {tracks.map((track) => (
-              <MonthTrack key={track.id} track={track} />
-            ))}
-          </div>
-        ))}
-
+      {/* Fallback skeleton loading state */}
       {!dates &&
         fallbackDates.map((date, i) => (
           <div
             key={date.toISODate()}
-            display="flex"
-            bg="dark-500"
-            flex="col"
-            h="min-28"
-            w="min-24"
-            p="1"
-            className={
-              i !== 0 ? "" : `<md:col-start-1 col-start-${date.weekday}`
-            }
+            className={`flex flex-col min-h-28 min-w-24 ${
+              i !== 0 ? "" : `md:col-start-${date.weekday} col-start-1`
+            }`}
           >
-            <div display="flex" flex="row" justify="between" p="b-2">
-              <span text="gray-500">{date.day}</span>
+            <div className="flex-1 rounded-xl bg-stone-800/20 p-3">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-gray-500">{date.day}</span>
+                  <span className="text-xs text-gray-400 md:hidden">
+                    {date.toFormat('ccc')}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         ))}
+
+      {/* Editors */}
+      {editingDate && (
+        <CombinedEditor
+          isOpen={!!editingDate}
+          close={() => setEditingDate(undefined)}
+          initialDate={editingDate}
+          target={editingTarget}
+          track={editingTrack}
+        />
+      )}
+      {editingTrack && (
+        <TrackEditor
+          track={editingTrack}
+          isOpen={!!editingTrack}
+          close={() => setEditingTrack(undefined)}
+        />
+      )}
+      {editingTarget && (
+        <TargetEditor
+          target={editingTarget}
+          isOpen={!!editingTarget}
+          close={() => setEditingTarget(undefined)}
+        />
+      )}
     </div>
   );
 };
@@ -297,42 +344,24 @@ export const DayCalendar = ({ dates, date }: CalendarInput) => {
   const target = dates?.[0]?.target;
 
   return (
-    <div
-      display="flex"
-      flex="col"
-      justify="items-end"
-      w="full"
-      overflow="y-auto"
-    >
-      <div
-        p="b-4"
-        w="min-full full"
-        display="grid"
-        justify="items-stretch"
-        grid="gap-1 cols-[4rem_1fr]"
-        text="gray-400"
-      >
-        <div text="center" display="<md:hidden">
+    <div className="flex flex-col justify-items-end w-full overflow-y-auto">
+      <div className="pb-4 w-full min-w-full grid justify-items-stretch gap-1 grid-cols-[4rem_1fr] text-gray-400">
+        <div className="text-center md:hidden">
           Target
         </div>
-        <div text="center" display="md:hidden">
+        <div className="text-center hidden md:block">
           <FontAwesomeIcon icon={faBullseye} />
         </div>
         {target ? <MonthTarget target={target} tracks={tracks} /> : <div />}
 
-        <div display="grid" grid="rows-24 gap-1">
+        <div className="grid grid-rows-24 gap-1">
           {[
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
             19, 20, 21, 22, 23,
           ].map((hour) => (
             <div
               key={hour}
-              display="flex"
-              justify="center"
-              bg="dark-500"
-              text="gray-600"
-              h="full"
-              w="full"
+              className="flex justify-center bg-stone-800/50 text-gray-600 h-full w-full"
             >
               <span>
                 {DateTime.fromObject({ hour, minute: 0, second: 0 }).toFormat(
@@ -343,12 +372,7 @@ export const DayCalendar = ({ dates, date }: CalendarInput) => {
           ))}
         </div>
 
-        <div
-          display="grid"
-          grid="rows-24 gap-1"
-          h="[1440px]"
-          pos="relative"
-        >
+        <div className="grid grid-rows-24 gap-1 h-[1440px] relative">
           {tracks.map((track) => (
             <WeekTrack key={track.id} track={track} />
           ))}
@@ -356,7 +380,7 @@ export const DayCalendar = ({ dates, date }: CalendarInput) => {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
             19, 20, 21, 22, 23,
           ].map((hour) => (
-            <div key={hour} bg="dark-500" h="full"></div>
+            <div key={hour} className="bg-stone-800/50 h-full"></div>
           ))}
         </div>
       </div>

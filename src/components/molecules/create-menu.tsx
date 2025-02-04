@@ -28,21 +28,12 @@ const CreateMenu = () => {
         close={() => setIsEditingTarget(false)}
       />
 
-      <Menu as="div" pos="relative" m="4">
+      <Menu as="div" className="relative m-4">
         {({ open }) => (
           <>
             <Menu.Button
               as="button"
-              display="flex"
-              bg="green-900 focus:green-600 hover:green-600"
-              border="1 rounded-full dark-50"
-              outline="focus:transparent"
-              shadow="~"
-              p="6"
-              w="full"
-              text="gray-300"
-              transition="colors"
-              animate="focus:pulse"
+              className="flex bg-green-900 focus:bg-green-600 hover:bg-green-600 border border-dark-50 rounded-full focus:outline-transparent shadow p-6 w-full text-gray-300 transition-colors focus:animate-pulse"
             >
               <FontAwesomeIcon icon={faPlus} />
             </Menu.Button>
@@ -57,21 +48,14 @@ const CreateMenu = () => {
             >
               <Menu.Items
                 as="ul"
-                display="grid"
-                gap="y-4"
-                w="32"
-                pos="absolute bottom-20 right-0 z-100"
-                shadow="~"
-                text="gray-300"
+                className="grid gap-y-4 w-32 absolute bottom-20 right-0 z-100 shadow text-gray-300"
               >
                 <Menu.Item as="li">
                   {({ active }) => (
                     <button
-                      p="4"
-                      border={`rounded 1 ${
-                        active ? "green-300" : "transparent"
-                      }`}
-                      bg="dark-400"
+                      className={`p-4 border rounded ${
+                        active ? 'border-green-300' : 'border-transparent'
+                      } bg-stone-400`}
                       onClick={() => setIsEditingTarget(true)}
                     >
                       Add target
@@ -81,11 +65,9 @@ const CreateMenu = () => {
                 <Menu.Item as="li">
                   {({ active }) => (
                     <button
-                      p="4"
-                      border={`rounded 1 ${
-                        active ? "green-300" : "transparent"
-                      }`}
-                      bg="dark-400"
+                      className={`p-4 border rounded ${
+                        active ? 'border-green-300' : 'border-transparent'
+                      } bg-stone-400`}
                       onClick={() => setIsEditingInterval(true)}
                     >
                       Add interval
