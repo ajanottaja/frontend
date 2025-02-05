@@ -213,6 +213,16 @@ export const MonthCalendar = ({ dates, date }: CalendarInput) => {
 
   const fallbackDates = daysOfMonth(date);
 
+  const colStarts = [
+    'md:col-start-1',
+    'md:col-start-2',
+    'md:col-start-3',
+    'md:col-start-4',
+    'md:col-start-5',
+    'md:col-start-6',
+    'md:col-start-7',
+  ];
+
   return (
     <div className="w-full h-min-content flex-grow grid gap-3 md:grid-cols-7 text-gray-400">
       {dates &&
@@ -222,7 +232,7 @@ export const MonthCalendar = ({ dates, date }: CalendarInput) => {
             <div
               key={date.toISODate()}
               className={`flex flex-col min-h-28 min-w-24 ${
-                i !== 0 ? "" : `col-start-1 md:col-start-${date.weekday}`
+                i !== 0 ? "" : `col-start-1 ${colStarts[date.weekday - 1]}`
               }`}
             >
               <div className="flex-1 rounded-xl bg-stone-800/30 backdrop-blur-sm p-3 
