@@ -1,9 +1,9 @@
 import { Duration } from "luxon";
 import React, { useState } from "react";
 import { IconButton } from "./button";
-import { faCheck, faClock, faTimes } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 import { Modal } from "./modal";
+import DurationPickerBase, { validateTimeInput } from "./duration-picker-base";
 
 interface DurationPicker {
   duration?: Duration;
@@ -20,49 +20,48 @@ const DurationPickerDashboard = ({
   isOpen,
   close,
 }: DurationPicker) => {
-  // Convert duration to HH:mm format for the time input
-  const [timeValue, setTimeValue] = useState(() => {
-    const hours = duration?.hours ?? 0;
-    const minutes = duration?.minutes ?? 0;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-  });
+  const [hours, setHours] = useState(() => (duration?.hours ?? 0).toString());
+  const [minutes, setMinutes] = useState(() => (duration?.minutes ?? 0).toString());
+  const [hasError, setHasError] = useState(false);
 
   const handleSubmit = () => {
-    const [hours, minutes] = timeValue.split(':').map(Number);
-    const newDuration = Duration.fromObject({ hours, minutes });
+    const h = Math.min(parseInt(hours) || 0, 24);
+    const m = Math.min(parseInt(minutes) || 0, 59);
+    const newDuration = Duration.fromObject({ hours: h, minutes: m });
     setDuration(newDuration);
     close();
+  };
+
+  const handleHoursChange = (value: string) => {
+    const { error } = validateTimeInput(value, true);
+    setHours(value);
+    setHasError(!!error);
+  };
+
+  const handleMinutesChange = (value: string) => {
+    const { error } = validateTimeInput(value, false);
+    setMinutes(value);
+    setHasError(!!error);
   };
 
   return (
     <Modal isOpen={isOpen} onClose={close} title={title ?? "Duration"}>
       <div className="space-y-6">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <FontAwesomeIcon 
-              icon={faClock} 
-              className="text-green-400/75 text-xl"
-            />
-          </div>
-          <input
-            type="time"
-            value={timeValue}
-            onChange={(e) => setTimeValue(e.target.value)}
-            className="w-full pl-12 pr-4 py-3 bg-stone-900/75 border border-stone-700/50 rounded-xl text-2xl text-center text-gray-200 
-              focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500/30 transition-all duration-200
-              placeholder:text-gray-500
-              [&::-webkit-calendar-picker-indicator]:bg-none
-              [&::-webkit-calendar-picker-indicator]:hidden
-              [&::-webkit-inner-spin-button]:appearance-none
-              [&::-webkit-clear-button]:hidden"
-          />
-        </div>
+        <DurationPickerBase
+          hours={hours}
+          minutes={minutes}
+          onHoursChange={handleHoursChange}
+          onMinutesChange={handleMinutesChange}
+          className="bg-stone-900/75 text-gray-200"
+          textSize="text-2xl"
+        />
 
         <div className="flex gap-3">
           <IconButton
             icon={faCheck}
             ariaLabel="Save target"
             onClick={handleSubmit}
+            disabled={hasError}
             className="flex-1 hover:from-green-500 hover:to-teal-500 
               text-white border-none transition-all duration-200"
           >
