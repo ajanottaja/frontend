@@ -9,6 +9,9 @@ import App from "./App";
 import { createClient } from "@supabase/supabase-js";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { Settings } from "luxon";
+
+Settings.throwOnInvalid = true;
 
 export const history = createBrowserHistory();
 
