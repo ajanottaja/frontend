@@ -2,23 +2,22 @@
 
 This is the frontend of the [Ajanottaja time keeping tool](https://ajanottaja.app).
 It is implemented in [React.js](https://reactjs.org/) using [Vite](https://vitejs.dev/) as a build tool.
+The frontend runs on top of the [Supabase backend](https://github.com/ajanottaja/backend).
 
 ## Development
 
 First clone the repository and create a local configuration file `.env.local` with the following content:
 
 ```
-VITE_API_URL=<your-ajanottaja-api-url>
-VITE_AUTH0_DOMAIN=<your-auth0-subdomain>.eu.auth0.com
-VITE_AUTH0_CLIENT_ID=<your-auth0-client-id>
-VITE_AUTH0_AUDIENCE=<your-auth0-audience-identifier>
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
 ```
 
 Then install dependencies and run the development script:
 
 ```
-npm install
-npm run dev
+bun install
+bun run dev
 ```
 
 ## Testing
@@ -27,8 +26,8 @@ Tests are run using [Jest](https://jestjs.io/).
 To run tests once off or in watch mode:
 
 ```
-npm test
-npm test -- --watch
+bun run test
+bun run test -- --watch
 ```
 
 ## Building
@@ -36,11 +35,9 @@ npm test -- --watch
 To build production build and bake in the configuration in the static output first set the configuration values and then run build command:
 
 ```
-VITE_API_URL=<your-ajanottaja-api-url>
-VITE_AUTH0_DOMAIN=<your-auth0-subdomain>.eu.auth0.com
-VITE_AUTH0_CLIENT_ID=<your-auth0-client-id>
-VITE_AUTH0_AUDIENCE=<your-auth0-audience-identifier>
-npm run build
+VITE_SUPABASE_URL=<your-supabase-url>
+VITE_SUPABASE_ANON_KEY=<your-supabase-anon-key>
+bun run build
 ```
 
 ### Docker (WIP)
