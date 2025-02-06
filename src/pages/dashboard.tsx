@@ -262,7 +262,10 @@ const DashboardTimer = () => {
     ? DateTime.now().diff(track.tracked.lower, ['hours', 'minutes'])
     : Duration.fromMillis(0);
   
-  const totalTrackedDuration = todaySummary?.tracked.plus(activeSessionDuration) ?? Duration.fromMillis(0);
+  // Only add active session if we don't have summary data yet
+  const totalTrackedDuration = todaySummary 
+    ? todaySummary.tracked 
+    : activeSessionDuration;
 
   const progress = totalTrackedDuration.as('hours') / (target?.duration.as('hours') ?? 0);
 
