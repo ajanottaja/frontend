@@ -5,9 +5,59 @@
     <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ajanottaja - Timekeeper</title>
+    <style>
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: rgb(28, 25, 23);
+      }
+      #initial-loader .logo {
+        font-size: 1.875rem;
+        line-height: 2.25rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(to right, rgb(74, 222, 128), rgb(45, 212, 191));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      #initial-loader .bar {
+        width: 6rem;
+        height: 0.25rem;
+        background-color: rgb(41, 37, 36);
+        border-radius: 9999px;
+        overflow: hidden;
+      }
+      #initial-loader .progress {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to right, rgb(74, 222, 128), rgb(45, 212, 191));
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+      /* Hide loader once React mounts */
+      #root:not(:empty) + #initial-loader {
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <!-- Initial loading screen -->
+    <div id="initial-loader">
+      <div class="logo">Ajanottaja</div>
+      <div class="bar">
+        <div class="progress"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

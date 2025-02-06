@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite --port 3000",
     "build": "tsc && vite build",
-    "serve": "vite preview",
+    "serve": "vite preview --port 3000",
     "test": "jest",
     "openapi": "openapi-typescript https://api.ajanottaja.app/swagger.json --output ./src/schema.ts"
   },
