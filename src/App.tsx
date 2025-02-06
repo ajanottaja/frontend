@@ -136,14 +136,19 @@ const AuthorizedLayout = ({ redirectPath = "/signin" }) => {
   );
 };
 
-const PublicLayout = () => (
-  <div className="flex flex-col w-full justify-items-center items-center">
+const PublicLayout = () => {
+  const { session, loading } = useAuth();
+
+  if(!loading && session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <div className="flex flex-col w-full justify-items-center items-center">
     <Outlet />
   </div>
-);
+}
 
 function App() {
-  console.log("Render app");
   return (
     <React.Suspense fallback={<Loading />}>
       <Routes>
