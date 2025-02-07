@@ -36,7 +36,7 @@ export const Modal = ({ isOpen, onClose, title, children }: ModalProps) => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <DialogPanel className="flex flex-col w-full max-w-md bg-stone-900/50 backdrop-blur-sm border border-stone-700/30 rounded-xl shadow-xl transform transition-all overflow-hidden">
+            <DialogPanel className="flex flex-col w-full max-w-md relative bg-stone-900/50 backdrop-blur-sm border border-stone-700/30 rounded-xl shadow-xl transform transition-all">
               <div className="flex-1 p-4 sm:p-6">
                 <button
                   aria-label="Close editor"
