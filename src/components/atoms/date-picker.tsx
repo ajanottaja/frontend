@@ -1,9 +1,9 @@
 import { faCalendar } from "@fortawesome/free-regular-svg-icons";
 import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Popover, Transition } from "@headlessui/react";
+import { Popover, Transition, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { DateTime } from "luxon";
-import React, { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
+import { DetailedHTMLProps, Fragment, HTMLAttributes } from "react";
 import { useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import { daysOfMonth, daysOfWeek, next, previous } from "../../utils/date";
@@ -21,6 +21,16 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
     onSwipedLeft: () => setDate(previous("month", date)),
     onSwipedRight: () => setDate(next("month", date)),
   });
+
+  const colStarts = [
+    'col-start-1',
+    'col-start-2',
+    'col-start-3',
+    'col-start-4',
+    'col-start-5',
+    'col-start-6',
+    'col-start-7',
+  ];
 
   return (
     <div className="flex flex-col w-full text-gray-300 p-4" {...swipeHandlers}>
@@ -50,7 +60,7 @@ export const DatePickerInner = ({ activeDate, pickDate }: DatePickerInner) => {
             key={d.toISO()}
             className={`
               p-2 rounded-md text-right transition-all duration-200
-              ${i === 0 ? `col-start-${d.weekday}` : ""}
+              ${i === 0 ? colStarts[d.weekday - 1] : ""}
               ${d.equals(activeDate) 
                 ? "bg-green-500/20 text-green-400 ring-1 ring-green-500/30" 
                 : "text-gray-300 hover:bg-stone-700/50"
@@ -81,13 +91,14 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
     <Popover className="relative">
       {({ open, close }) => (
         <>
-          <Popover.Button
+          <PopoverButton
             as="button"
             className={`
               flex items-center justify-between w-full px-4 py-3
               bg-stone-800/75 border border-stone-700/50 rounded-xl
               text-gray-300 transition-all duration-200
               hover:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-green-500/30
+              cursor-pointer
             `}
           >
             <div className="flex items-center gap-3">
@@ -100,7 +111,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
                 </span>
               )}
             </div>
-          </Popover.Button>
+          </PopoverButton>
           <Transition
             as={Fragment}
             enter="ease-out duration-300"
@@ -110,7 +121,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Popover.Panel className="absolute z-50 w-full mt-2 bg-stone-900 backdrop-blur-sm border border-stone-700/30 rounded-xl shadow-xl">
+            <PopoverPanel className="absolute z-50 w-full mt-2 bg-stone-900 backdrop-blur-sm border border-stone-700/30 rounded-xl shadow-xl">
               <DatePickerInner
                 pickDate={(d) => {
                   pickDate(d);
@@ -118,7 +129,7 @@ export const DatePicker = ({ currentDate, pickDate }: DatePicker) => {
                 }}
                 activeDate={defaultDate ?? DateTime.now()}
               />
-            </Popover.Panel>
+            </PopoverPanel>
           </Transition>
         </>
       )}
