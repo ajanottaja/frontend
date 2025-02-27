@@ -11,6 +11,8 @@ import { z } from "zod";
 import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import { Button, IconButton } from "../components/atoms/button";
 import { interpolateRgb } from "d3-interpolate";
+import { PunchCardChart } from "../components/organisms/punch-card-chart";
+import { tooltipTheme } from "../components/atoms/tooltip";
 
 import {
   dateTimeToIso8601,
@@ -143,15 +145,7 @@ const StatisticsCalendar = () => {
               fill: isLoading ? colors.gray[600] : colors.gray[300],
               fontSize: 14,
             },
-            tooltip: {
-              container: {
-                background: colors.stone[800],
-                color: colors.gray[300],
-                fontSize: 12,
-                borderRadius: '8px',
-                padding: '8px 12px',
-              },
-            },
+            ...tooltipTheme,
           }}
           colors={colorScale}
           margin={{ top: 30, right: 40, bottom: 100, left: 40 }}
@@ -340,15 +334,7 @@ const CumulativeStatistics = () => {
               fill: isLoading ? colors.gray[600] : colors.gray[300],
               fontSize: 14,
             },
-            tooltip: {
-              container: {
-                background: colors.stone[800],
-                color: colors.gray[300],
-                fontSize: 12,
-                borderRadius: '8px',
-                padding: '8px 12px',
-              },
-            },
+            ...tooltipTheme,
             axis: {
               domain: {
                 line: {
@@ -454,6 +440,9 @@ const Statistics = () => {
         </Suspense>
         <Suspense>
           <CumulativeStatistics />
+        </Suspense>
+        <Suspense>
+          <PunchCardChart />
         </Suspense>
       </div>
     </div>

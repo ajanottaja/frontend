@@ -85,6 +85,11 @@ export const IconButton = ({
   return (
     <button
       {...props}
+      onClick={e => {
+        e.preventDefault();
+        e.stopPropagation();
+        props.onClick?.(e);
+      }}
       ref={buttonRef}
       aria-label={ariaLabel}
       className={`
