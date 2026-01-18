@@ -167,12 +167,25 @@ const FeatureSection = ({
   </div>
 );
 
+const SunsetBanner = () => (
+  <div className="bg-amber-900/50 border-b border-amber-700/50">
+    <div className="max-w-7xl mx-auto px-4 py-3 text-center">
+      <p className="text-amber-200 text-sm sm:text-base">
+        <span className="font-semibold">Notice:</span> Ajanottaja is no longer actively developed and the service has been shut down. 
+        This page will remain up until May 2026. Source code is still available on{" "}
+        <a href="https://git.snorre.io/snorre/ajanottaja-frontend" className="underline hover:text-amber-100" target="_blank" rel="noopener noreferrer">Forgejo</a>.
+      </p>
+    </div>
+  </div>
+);
+
 const Home = () => {
   const [target, setTarget] = useState<Duration>();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SunsetBanner />
       {/* Hero Section */}
       <div className="relative overflow-hidden flex flex-col">
         <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-12 sm:pb-16 text-center flex flex-col items-center">
